@@ -6,6 +6,7 @@ class Organism
 	# Options
 	@NUM_FACTORS: 5
 	@DEFAULT_NUM_NODES: 40
+	@DISTRIBUTE_FACTOR_VALUES: false
 
 	# Stress thresholds - the thresholds for when the organism enters
 	# and leaves stress mode
@@ -27,8 +28,7 @@ class Organism
 
 		# Create nodes
 		numNodes = Organism.DEFAULT_NUM_NODES if numNodes <= 0
-		@_nodes = (new Node() for i in [1..numNodes])
-		console.log "Created nodes:", numNodes, @_nodes
+		@_createNodes numNodes
 
 		# Disharmony calculator
 		@disharmonyCalculator = new DisharmonyCalculator @
@@ -38,6 +38,18 @@ class Organism
 
 		# GUI
 		@_gui = new GUI
+
+	#
+	# Returns the node with the given id.
+	#
+	getNode: (nodeId) ->
+		if @_nodes[nodeId]? then @_nodes[nodeId] else null
+
+	#
+	# Returns all nodes that have a cell with the given factor type.
+	#
+	getNodesWithCellsOfFactorType: (factorType) ->
+		@_nodeCellIndex[factorType]
 
 	#
 	# Returns the organism's nodes
@@ -95,9 +107,38 @@ class Organism
 		else if @_inStressMode and @_actualDisharmony > Organism.STRESS_THRESHOLD_LEAVE
 			@_inStressMode = false
 
+	# Returns the disharmony history data, reduced to the
+	# given number of data entries.
 	getDisharmonyHistoryData: (numEntries = 300) ->
 		#console.log "#getDisharmonyHistoryData", @disharmonyHistory
 		if numEntries > 0 then @disharmonyHistory.slice -numEntries else @disharmonyHistory.slice -@disharmonyHistory.length
+
+	# Creates the organism's nodes
+	_createNodes: (numNodes) ->
+
+		# Create indexes
+		@_nodeCellIndex = []
+		@_nodeCellIndex[factor.factorType] = [] for factor in @_factors
+
+		# Create nodes array with node IDs as key
+		nodes = (new Node() for i in [1..numNodes])
+		@_nodes = []
+		@_nodes[node.nodeId] = node for node in nodes
+		
+		# Add nodes to indexes
+		for node in nodes
+			for cell in node.getCells()
+				@_nodeCellIndex[cell.factorType].push node
+
+		# Distribute the factor values amongst the nodes
+		if Organism.DISTRIBUTE_FACTOR_VALUES
+			for factor in @_factors
+				nodesWithFactorCells = @getNodesWithCellsOfFactorType factor.factorType
+				getRandomElements(nodesWithFactorCells, 1)[0].addCellValue(factor.factorType, 1) for i in [1..factor.factorValue]
+		else
+			for node in nodes
+				for cell in node.getCells()
+					cell.factorValue = Math.randomRange 0, 100
 
 	#
 	# Returns a given number of randomly selected nodes
@@ -109,6 +150,14 @@ class Organism
 
 		#console.log "#_getRandomNodes", allNodeIndexes, nodeIndexes
 		(@_nodes[i] for i in nodeIndexes)
+
+	#
+	# Returns the given number of nodes that has a cell with
+	# the given factor type.
+	#
+	_getRandomNodesOfFactorType: (factorType, numNodes) ->
+		getRandomElements(@_nodeCellIndex[factorType], numNodes)
+
 
 
 window.Organism = Organism

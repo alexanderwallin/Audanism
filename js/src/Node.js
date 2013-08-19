@@ -46,7 +46,7 @@
         var _j, _ref1, _results1;
         _results1 = [];
         for (i = _j = 1, _ref1 = Node.NUM_CELLS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-          _results1.push(new NodeCell(factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], Math.round(Math.random() * 100)));
+          _results1.push(new NodeCell(factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0));
         }
         return _results1;
       })();

@@ -23,7 +23,7 @@ class Node
 		@nodeId = Node._idCounter++
 
 		factorIndexes = [1..Organism.NUM_FACTORS]
-		@_cells = (new NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], Math.round(Math.random() * 100) for i in [1..Node.NUM_CELLS])
+		@_cells = (new NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0 for i in [1..Node.NUM_CELLS]) # Math.round(Math.random() * 100) for i in [1..Node.NUM_CELLS])
 		@_cells.sort (a, b) ->
 			a.factorType > b.factorType
 

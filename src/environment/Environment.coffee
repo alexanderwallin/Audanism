@@ -124,7 +124,6 @@ class Environment
 					for factor in factors
 
 						# The value to alter
-						console.log(argVal, typeof argVal)
 						valType = typeof argVal
 						
 						if valType is 'integer' 	then valueMod = argVal
@@ -137,6 +136,29 @@ class Environment
 						console.log "        ... before: #{ factor }"
 						organism.getFactorOfType(factor.factorType).addValue valueMod
 						console.log "        ... after: #{ factor }"
+
+			else if type is 'node'
+				for organism in @_organisms
+					
+					# Get factors
+					nodes = getRandomElements organism.getNodes(), num
+					for node in nodes
+
+						# The value to alter
+						valType = typeof argVal
+						
+						if valType is 'integer' 	then valueMod = argVal
+						else if valType is 'array'	then valueMod = Math.randomRange argVal[1], argVal[0]
+						else if valType is 'string' and argVal is 'rand' 
+							console.log "        getting values using 'rand'"
+							valueMod = Math.randomRange 20, -20
+
+						cell = getRandomElements(node.getCells(), 1)[0]
+
+						console.log "    --> influence: node #{ node.nodeId }->#{ cell.factorType } by #{ valueMod }"
+						console.log "        ... before: #{ node }"
+						organism.getFactorOfType(factor.factorType).addValue valueMod
+						console.log "        ... after: #{ node }"
 
 		console.log "---"
 

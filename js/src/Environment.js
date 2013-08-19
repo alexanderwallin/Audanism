@@ -110,7 +110,7 @@
     };
 
     Environment.prototype.influence = function(influenceData) {
-      var argNum, argVal, factor, factors, num, numType, organism, type, valType, valueMod, _i, _j, _len, _len1, _ref;
+      var argNum, argVal, cell, factor, factors, node, nodes, num, numType, organism, type, valType, valueMod, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1;
       if (!this._isRunning) {
         return;
       }
@@ -137,7 +137,6 @@
             factors = getRandomElements(organism.getFactors(), num);
             for (_j = 0, _len1 = factors.length; _j < _len1; _j++) {
               factor = factors[_j];
-              console.log(argVal, typeof argVal);
               valType = typeof argVal;
               if (valType === 'integer') {
                 valueMod = argVal;
@@ -151,6 +150,29 @@
               console.log("        ... before: " + factor);
               organism.getFactorOfType(factor.factorType).addValue(valueMod);
               console.log("        ... after: " + factor);
+            }
+          }
+        } else if (type === 'node') {
+          _ref1 = this._organisms;
+          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+            organism = _ref1[_k];
+            nodes = getRandomElements(organism.getNodes(), num);
+            for (_l = 0, _len3 = nodes.length; _l < _len3; _l++) {
+              node = nodes[_l];
+              valType = typeof argVal;
+              if (valType === 'integer') {
+                valueMod = argVal;
+              } else if (valType === 'array') {
+                valueMod = Math.randomRange(argVal[1], argVal[0]);
+              } else if (valType === 'string' && argVal === 'rand') {
+                console.log("        getting values using 'rand'");
+                valueMod = Math.randomRange(20, -20);
+              }
+              cell = getRandomElements(node.getCells(), 1)[0];
+              console.log("    --> influence: node " + node.nodeId + "->" + cell.factorType + " by " + valueMod);
+              console.log("        ... before: " + node);
+              organism.getFactorOfType(factor.factorType).addValue(valueMod);
+              console.log("        ... after: " + node);
             }
           }
         }
