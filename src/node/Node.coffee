@@ -69,5 +69,8 @@ class Node
 	getString: () ->
 		"##{ @nodeId } {#{ @getCellValues(true) }}"
 
+	toString: () ->
+		@getString()
+
 
 window.Node = Node

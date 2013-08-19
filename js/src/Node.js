@@ -137,6 +137,10 @@
       return "#" + this.nodeId + " {" + (this.getCellValues(true)) + "}";
     };
 
+    Node.prototype.toString = function() {
+      return this.getString();
+    };
+
     return Node;
 
   })();

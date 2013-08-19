@@ -65,7 +65,7 @@
         _results = [];
         for (_i = 0, _len = factors.length; _i < _len; _i++) {
           factor = factors[_i];
-          _results.push($(".factor[data-factor-type='" + factor.factorType + "']").attr('data-factor-disharmony', factor.disharmony).html(factor.factorValue));
+          _results.push($(".factor[data-factor-type='" + factor.factorType + "']").attr('data-factor-disharmony', factor.disharmony).attr('data-factor-name', factor.name).find('.factor-value').html(factor.factorValue));
         }
         return _results;
       }
@@ -78,7 +78,7 @@
         _results = [];
         for (_i = 0, _len = factors.length; _i < _len; _i++) {
           factor = factors[_i];
-          _results.push("<div class=\"factor\" data-factor-type=\"" + factor.factorType + "\">" + factor.factorValue + "</div>");
+          _results.push("<div class=\"factor\" data-factor-type=\"" + factor.factorType + "\"><span class=\"factor-name\">" + factor.name + "</span> <span class=\"factor-value\">" + factor.factorValue + "</span></div>");
         }
         return _results;
       })()).join("");

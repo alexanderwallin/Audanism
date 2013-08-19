@@ -45,6 +45,7 @@
     function Factor(factorType, factorValue) {
       this.factorType = factorType;
       this.factorValue = factorValue != null ? factorValue : 0;
+      this.name = this.constructor.name.replace(/^(\w+)Factor$/, "$1");
       this.disharmony = 0;
       this.relativeDisharmony = [];
     }
@@ -60,7 +61,7 @@
     };
 
     Factor.prototype.toString = function() {
-      return "Factor #" + this.factorType + "; factorValue = " + this.factorValue;
+      return "<Factor #" + this.factorType + " (" + this.name + "); factorValue = " + this.factorValue + ">";
     };
 
     return Factor;

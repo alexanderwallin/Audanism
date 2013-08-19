@@ -55,12 +55,15 @@ class GUI
 			@_buildFactors factors
 		else
 			for factor in factors
-				$(".factor[data-factor-type='#{ factor.factorType }']").attr('data-factor-disharmony', factor.disharmony).html(factor.factorValue)
+				$(".factor[data-factor-type='#{ factor.factorType }']")
+					.attr('data-factor-disharmony', factor.disharmony)
+					.attr('data-factor-name', factor.name)
+					.find('.factor-value').html(factor.factorValue)
 
 	_buildFactors: (factors) ->
 		# for factor in factors
 
-		factorsHtml = ("<div class=\"factor\" data-factor-type=\"#{ factor.factorType }\">#{ factor.factorValue }</div>" for factor in factors).join ""
+		factorsHtml = ("<div class=\"factor\" data-factor-type=\"#{ factor.factorType }\"><span class=\"factor-name\">#{ factor.name }</span> <span class=\"factor-value\">#{ factor.factorValue }</span></div>" for factor in factors).join ""
 		@$factorsWrap.html factorsHtml
 		@_renderedFactors = true
 

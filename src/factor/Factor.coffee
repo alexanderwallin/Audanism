@@ -23,6 +23,9 @@ class Factor
 	# Constructor
 	constructor: (@factorType, @factorValue = 0) ->
 
+		# Meta
+		@name = @constructor.name.replace /^(\w+)Factor$/, "$1"
+
 		# Disharmony states
 		@disharmony = 0
 		@relativeDisharmony = []
@@ -33,6 +36,6 @@ class Factor
 		@factorValue = 100 if @factorValue > 100
 
 	toString: () ->
-		"Factor ##{ @factorType }; factorValue = #{ @factorValue }"
+		"<Factor ##{ @factorType } (#{ @name }); factorValue = #{ @factorValue }>"
 
 window.Factor = Factor;

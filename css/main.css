@@ -112,9 +112,10 @@ h3 									{ font-size: 1em; margin-top: 0; margin-bottom: 10px; }
 
 .node, .factor 						{ position: relative; float: left; background: #fcfcfc; border-radius: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.2); margin-right: 10px; }
 
-.factor 							{ padding: 0 40px 0 55px; font-size: 1.2em; line-height: 30px; }
+.factor 							{ margin-top: 20px; padding: 0 40px 0 55px; font-size: 1.2em; line-height: 30px; }
 .factor::before						{ content: attr(data-factor-type); position: absolute; left: 0; top: 0; bottom: 0; width: 15px; line-height: 30px; background: #ddd; border-right: 1px solid #ccc; font-size: 12px; text-align: center; }
 .factor::after 						{ content: attr(data-factor-disharmony); position: absolute; right: 0; top: 100%; left: 15px; padding: 0 10px 0 10px; border-radius: 0 0 3px 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.2); background: darkred; color: #eee; font-size: 10px; line-height: 12px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.factor-name 						{ position: absolute; bottom: 100%; left: 18px; font-size: 11px; line-height: 20px; color: #666; font-style: italic; }
 
 .node 								{  }
 .node.comparing						{ background: #efefdd; }

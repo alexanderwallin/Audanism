@@ -77,7 +77,7 @@ class Organism
 	# Compares and alters children nodes
 	#
 	performNodeComparison: (numComparisons = 1) ->
-
+		
 		console.log "#performNodeComparison, #{ DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY }"
 		
 		@disharmonyCalculator.debug = true
