@@ -19,6 +19,16 @@
       this.factorValue = factorValue;
     }
 
+    NodeCell.prototype.addFactorValue = function(value) {
+      this.factorValue += value;
+      if (this.factorValue < 0) {
+        this.factorValue = 0;
+      }
+      if (this.factorValue > 100) {
+        return this.factorValue = 100;
+      }
+    };
+
     return NodeCell;
 
   })();

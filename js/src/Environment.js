@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 50;
+    Environment.TIME_INTERVAL = 25;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -143,7 +143,6 @@
               } else if (valType === 'array') {
                 valueMod = Math.randomRange(argVal[1], argVal[0]);
               } else if (valType === 'string' && argVal === 'rand') {
-                console.log("        getting values using 'rand'");
                 valueMod = Math.randomRange(5, -5);
               }
               console.log("    --> influence: factor " + factor.factorType + " by " + valueMod);
@@ -165,13 +164,12 @@
               } else if (valType === 'array') {
                 valueMod = Math.randomRange(argVal[1], argVal[0]);
               } else if (valType === 'string' && argVal === 'rand') {
-                console.log("        getting values using 'rand'");
-                valueMod = Math.randomRange(20, -20);
+                valueMod = Math.randomRange(50, -50);
               }
               cell = getRandomElements(node.getCells(), 1)[0];
               console.log("    --> influence: node " + node.nodeId + "->" + cell.factorType + " by " + valueMod);
               console.log("        ... before: " + node);
-              organism.getFactorOfType(factor.factorType).addValue(valueMod);
+              cell.addFactorValue(valueMod);
               console.log("        ... after: " + node);
             }
           }
