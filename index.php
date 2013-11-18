@@ -14,12 +14,15 @@ $runLocal = @$_GET['local'] == 'yes';
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-
+        <link rel="shortcut icon" href="img/favicon.png">
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
 
-        <?php if (!$runLocal) : ?>
+        <?php if ($runLocal) : ?>
+        <script type="text/javascript" src="js/vendor/google.jsapi.js"></script>
+        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js"></script> -->
+        <script type="text/javascript" src="js/vendor/google.charts.js"></script>
+    	<?php else : ?>
         <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 		<script type="text/javascript">
 		google.load("visualization", "1", {packages:["corechart"]});
@@ -56,6 +59,9 @@ $runLocal = @$_GET['local'] == 'yes';
         		<!-- <a class="btn" href="#stop">Stop</a> -->
         		<span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span>
         		<a class="btn" href="#step">Step ></a>
+        		<span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span>
+        		<input id="stressmode" type="checkbox" name="stressmode" />
+        		<label for="stressmode">Stress mode</label>
         	</menu>
         </div>
 

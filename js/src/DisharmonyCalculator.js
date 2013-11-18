@@ -40,6 +40,7 @@
 
     DisharmonyCalculator.prototype.getSummedOrganismDisharmony = function() {
       var avgDisharmony, factor, sumDisharmony, _i, _len, _ref;
+      console.log("#getSummedOrganismDisharmony");
       sumDisharmony = 0;
       _ref = this._organism.getFactors();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -50,7 +51,34 @@
       return sumDisharmony;
     };
 
-    DisharmonyCalculator.prototype.getActualOrganismDisharmony = function() {};
+    DisharmonyCalculator.prototype.getActualOrganismDisharmony = function() {
+      var actualDisharmony, correlatingFactorType, correlationValue, correlations, disharmonies, disharmonyDiff, factor, factorType, _i, _j, _k, _len, _ref, _ref1, _ref2;
+      disharmonies = [];
+      _ref = this._organism.getFactors();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        factor = _ref[_i];
+        disharmonies[factor.factorType] = this.getFactorDisharmonyForNodes(factor, this._organism.getNodes());
+      }
+      console.log("#getActualOrganismDisharmony");
+      console.log("      ... before:", disharmonies);
+      correlations = Factor.FACTOR_CORRELATIONS;
+      for (factorType = _j = 1, _ref1 = Organism.NUM_FACTORS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; factorType = 1 <= _ref1 ? ++_j : --_j) {
+        for (correlatingFactorType = _k = 1, _ref2 = Organism.NUM_FACTORS; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; correlatingFactorType = 1 <= _ref2 ? ++_k : --_k) {
+          if ((correlations[factorType] != null) && (correlations[factorType][correlatingFactorType] != null)) {
+            correlationValue = correlations[factorType][correlatingFactorType];
+            console.log("--- adjust for correlation " + factorType + " <---> " + correlatingFactorType + " (" + correlationValue + ")");
+            disharmonyDiff = Math.abs(disharmonies[factorType] - disharmonies[correlatingFactorType]);
+            disharmonies[factorType] += Math.pow(disharmonyDiff, 2.2) * (100 - correlationValue) / (100 * disharmonyDiff);
+          }
+        }
+      }
+      console.log("      ... after:", disharmonies);
+      actualDisharmony = disharmonies.reduce(function(a, b) {
+        return a + b;
+      });
+      console.log("  actualDisharmony =", actualDisharmony);
+      return actualDisharmony;
+    };
 
     /*
     		Factor-node disharmony
@@ -59,15 +87,9 @@
 
     DisharmonyCalculator.prototype.getFactorDisharmonyForNodes = function(factor, nodes) {
       var disharmony, node, _i, _len;
-      if (this.debug) {
-        console.log("#getFactorDisharmonyForNodes", factor.factorType, nodes);
-      }
       disharmony = 0;
       for (_i = 0, _len = nodes.length; _i < _len; _i++) {
         node = nodes[_i];
-        if (this.debug) {
-          console.log("  -- check against node " + node.nodeId);
-        }
         if (node.hasCellOfFactorType(factor.factorType)) {
           disharmony += this.getFactorDisharmonyForNode(factor, node);
         }
@@ -77,9 +99,6 @@
 
     DisharmonyCalculator.prototype.getFactorDisharmonyForNode = function(factor, node) {
       var cell, disharmony, _ref;
-      if (this.debug) {
-        console.log("            #getFactorDisharmonyForNode (" + factor.factorType + ", " + node.nodeId + ")");
-      }
       disharmony = 0;
       cell = node.getCell(factor.factorType);
       if (!cell) {
@@ -89,9 +108,6 @@
         disharmony = this._calcFactorDisharmonyForNode_lteF(cell.factorValue, factor.factorValue);
       } else {
         disharmony = this._calcFactorDisharmonyForNode_gtF(cell.factorValue, factor.factorValue);
-      }
-      if (this.debug) {
-        console.log("           disharmony for " + node.nodeId + " in [" + factor.factorType + "]:", disharmony);
       }
       return disharmony;
     };
@@ -104,17 +120,10 @@
 
 
     DisharmonyCalculator.prototype.alterNodesInComparisonMode = function(nodes, comparisonMode) {
+      var aCell, bCell, cell, cellsToCompare, comparisonFn, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, smallestNewDisharmony, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1;
       console.log("DisharmonyCalculator.alterNodesInComparisonMode --- mode: " + comparisonMode + ", nodes:", nodes);
-      if (comparisonMode === DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY) {
-        return this._alterNodesUsingFactorHarmonyComparison(nodes);
-      } else if (comparisonMode === DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY) {
-        return this._alterNodesUsingOrganismHarmonyComparison(nodes);
-      }
-    };
-
-    DisharmonyCalculator.prototype._alterNodesUsingFactorHarmonyComparison = function(nodes) {
-      var aCell, bCell, cell, cellsToCompare, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1;
-      console.log("   #_alterNodesUsingFactorHarmonyComparison");
+      comparisonFn = comparisonMode === DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY ? 'getFactorDisharmonyForNodes' : 'getActualOrganismDisharmony';
+      console.log("   comparisonFn = " + comparisonFn);
       $(".node.comparing").removeClass('comparing');
       for (_i = 0, _len = nodes.length; _i < _len; _i++) {
         node = nodes[_i];
@@ -132,19 +141,9 @@
           }
         }
       }
-      console.log("   ...cells to compare: ", cellsToCompare);
       for (_l = 0, _len3 = cellsToCompare.length; _l < _len3; _l++) {
         factorType = cellsToCompare[_l];
-        console.log("      alter factor " + factorType + " for cells in " + nodes[0].nodeId + " and " + nodes[1].nodeId + " --- " + this.debug);
-        testNodes = (function() {
-          var _len4, _m, _results;
-          _results = [];
-          for (_m = 0, _len4 = nodes.length; _m < _len4; _m++) {
-            node = nodes[_m];
-            _results.push(node.clone());
-          }
-          return _results;
-        })();
+        testNodes = nodes;
         for (_m = 0, _len4 = nodes.length; _m < _len4; _m++) {
           node = nodes[_m];
           Node._idCounter--;
@@ -170,38 +169,31 @@
           }
         }
         factor = this._organism.getFactorOfType(factorType);
-        currentDisharmony = this.getFactorDisharmonyForNodes(factor, testNodes);
+        currentDisharmony = this[comparisonFn](factor, testNodes);
         testNodes[0].addCellValue(factorType, -1);
         testNodes[1].addCellValue(factorType, 1);
-        newDisharmony1 = this.getFactorDisharmonyForNodes(factor, testNodes);
+        newDisharmony1 = this[comparisonFn](factor, testNodes);
         testNodes[0].addCellValue(factorType, 2);
         testNodes[1].addCellValue(factorType, -2);
-        newDisharmony2 = this.getFactorDisharmonyForNodes(factor, testNodes);
+        newDisharmony2 = this[comparisonFn](factor, testNodes);
+        testNodes[0].addCellValue(factorType, -1);
+        testNodes[1].addCellValue(factorType, 1);
+        smallestNewDisharmony = newDisharmony1 < newDisharmony2 ? newDisharmony1 : newDisharmony2;
         nodeAction = newDisharmony1 < newDisharmony2 ? DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 : DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2;
-        console.log("         disharmony for step // 0:" + currentDisharmony + ", 1:" + newDisharmony1 + ", 2:" + newDisharmony2);
-        console.log("             node action: " + nodeAction);
         this._performAction(nodes, factorType, nodeAction);
       }
       return true;
     };
 
     DisharmonyCalculator.prototype._performAction = function(nodes, factorType, action) {
-      console.log("#_performAction " + action + " on factor " + factorType, nodes);
-      console.log("   before: " + (nodes[0].getString()) + "   " + (nodes[1].getString()));
       switch (action) {
         case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1:
           nodes[0].addCellValue(factorType, -1);
-          nodes[1].addCellValue(factorType, 1);
-          break;
+          return nodes[1].addCellValue(factorType, 1);
         case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2:
           nodes[0].addCellValue(factorType, 1);
-          nodes[1].addCellValue(factorType, -1);
+          return nodes[1].addCellValue(factorType, -1);
       }
-      return console.log("   after: " + (nodes[0].getString()) + "   " + (nodes[1].getString()));
-    };
-
-    DisharmonyCalculator.prototype._alterNodesUsingOrganismHarmonyComparison = function(nodes) {
-      return console.log("   #_alterNodesUsingOrganismHarmonyComparison");
     };
 
     DisharmonyCalculator.prototype._calcFactorDisharmonyForNode_lteF = function(c, F) {
@@ -209,9 +201,6 @@
       result = -(Math.pow(c, 2)) / (Math.pow(F, 2)) + 1;
       result = Math.pow(result, 6);
       result = Math.pow(result + 1, 10);
-      if (this.debug) {
-        console.log("     _lteF (" + c + ", " + F + ") = " + result);
-      }
       return result;
     };
 
@@ -220,9 +209,6 @@
       result = -((c - F) * (c - 200 + F)) / Math.pow(100 - F, 2);
       result = Math.pow(result, 6);
       result = Math.pow(result + 1, 10);
-      if (this.debug) {
-        console.log("     _gtF (" + c + ", " + F + ") = " + result);
-      }
       return result;
     };
 

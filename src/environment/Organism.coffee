@@ -22,6 +22,8 @@ class Organism
 
 		# Stress mode
 		@_inStressMode = true
+		$('#stressmode').change (e) =>
+			@_inStressMode = $(e.currentTarget).attr('checked') is 'checked'
 
 		# Create factors
 		@_factors = (Factor.createFactor i, 0 for i in [1..Organism.NUM_FACTORS])
@@ -77,7 +79,7 @@ class Organism
 	# Compares and alters children nodes
 	#
 	performNodeComparison: (numComparisons = 1) ->
-		
+
 		console.log "#performNodeComparison, #{ DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY }"
 		
 		@disharmonyCalculator.debug = true
@@ -89,7 +91,7 @@ class Organism
 			nodes = @_getRandomNodes 2
 
 			# Trigger alteration of nodes
-			comparisonMode = if @_inStressMode then DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
+			comparisonMode = if @_inStressMode and false then DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
 			@disharmonyCalculator.alterNodesInComparisonMode nodes, comparisonMode
 
 		@disharmonyCalculator.debug = false
@@ -97,7 +99,7 @@ class Organism
 		# Then, update disharmony state
 		@_sumDisharmony 	= @disharmonyCalculator.getSummedOrganismDisharmony @
 		@_actualDisharmony 	= @disharmonyCalculator.getActualOrganismDisharmony @
-		@disharmonyHistory.push [@disharmonyHistory.length, @_sumDisharmony]
+		@disharmonyHistory.push [@disharmonyHistory.length, @_sumDisharmony, @_actualDisharmony]
 
 		factor.disharmony = @disharmonyCalculator.getFactorDisharmonyForNodes factor, @_nodes for factor in @_factors
 

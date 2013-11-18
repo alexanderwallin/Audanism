@@ -31,7 +31,9 @@ class GUI
 	_drawCharts: (tableData) ->
 		return if not @disharmonyChart?
 		
-		tableData.unshift ['Iteration', 'Disharmony']
+		tableData.unshift ['Iteration', 'Sum dish.', 'Actual dish.']
+
+		#console.log "(GUI) #_drawCharts:", tableData
 
 		data = google.visualization.arrayToDataTable tableData
 

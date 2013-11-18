@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 25;
+    Environment.TIME_INTERVAL = 100;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -32,7 +32,7 @@
       _ref = this._organisms;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         organism = _ref[_i];
-        this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(-1));
+        this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
       }
       this.listenToControls();
       this.createInfluenceSources();
@@ -89,7 +89,7 @@
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           organism = _ref[_i];
           organism.performNodeComparison();
-          this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(-1));
+          this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
           _results.push(this._isSingleStep = false);
         }
         return _results;

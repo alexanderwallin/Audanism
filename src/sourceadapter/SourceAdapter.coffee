@@ -7,7 +7,7 @@
 class SourceAdapter
 
 	constructor: (@listener) ->
-		console.log "(SourceAdapter) #constructor", @listener
+		#console.log "(SourceAdapter) #constructor", @listener
 
 	# Activates the source adapter. 
 	activate: () ->
@@ -37,7 +37,7 @@ class SourceAdapter
 	# Notifies the listener about the outer influence brought on by
 	# the source.
 	triggerInfluence: (influenceData) ->
-		console.log "!!!  Trigger influence:", influenceData, "on", @listener
+		#console.log "!!!  Trigger influence:", influenceData, "on", @listener
 		@listener.influence influenceData if @listener.influence?
 
 window.SourceAdapter = SourceAdapter

@@ -21,13 +21,17 @@
     Organism.STRESS_THRESHOLD_LEAVE = 2;
 
     function Organism(numNodes) {
-      var i;
+      var i,
+        _this = this;
       if (numNodes == null) {
         numNodes = -1;
       }
       this._sumDisharmony = 0;
       this._actualDisharmony = 0;
       this._inStressMode = true;
+      $('#stressmode').change(function(e) {
+        return _this._inStressMode = $(e.currentTarget).attr('checked') === 'checked';
+      });
       this._factors = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -87,13 +91,13 @@
       this.disharmonyCalculator.debug = true;
       for (i = _i = 1; 1 <= numComparisons ? _i <= numComparisons : _i >= numComparisons; i = 1 <= numComparisons ? ++_i : --_i) {
         nodes = this._getRandomNodes(2);
-        comparisonMode = this._inStressMode ? DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY : DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY;
+        comparisonMode = this._inStressMode && false ? DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY : DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY;
         this.disharmonyCalculator.alterNodesInComparisonMode(nodes, comparisonMode);
       }
       this.disharmonyCalculator.debug = false;
       this._sumDisharmony = this.disharmonyCalculator.getSummedOrganismDisharmony(this);
       this._actualDisharmony = this.disharmonyCalculator.getActualOrganismDisharmony(this);
-      this.disharmonyHistory.push([this.disharmonyHistory.length, this._sumDisharmony]);
+      this.disharmonyHistory.push([this.disharmonyHistory.length, this._sumDisharmony, this._actualDisharmony]);
       _ref = this._factors;
       for (_j = 0, _len = _ref.length; _j < _len; _j++) {
         factor = _ref[_j];

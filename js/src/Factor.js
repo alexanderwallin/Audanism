@@ -22,6 +22,22 @@
 
     Factor.TYPE_NEUROTICISM = 5;
 
+    Factor.FACTOR_CORRELATIONS = {
+      '1': {
+        '2': -15,
+        '3': 25
+      },
+      '2': {
+        '3': 30
+      },
+      '3': {
+        '4': 50
+      },
+      '4': {
+        '5': -20
+      }
+    };
+
     Factor.createFactor = function(factorType, factorValue) {
       if (factorValue == null) {
         factorValue = 0;

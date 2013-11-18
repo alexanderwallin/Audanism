@@ -11,6 +11,25 @@ class Factor
 	@TYPE_AGREEABLENESS: 4
 	@TYPE_NEUROTICISM: 5
 
+	# Factor correlations. Duplicate matrix entries are commented out.
+	@FACTOR_CORRELATIONS:
+		'1': # Openness
+			'2': -15
+			'3': 25
+		'2': # Conscientiousness
+			#1: -15
+			'3': 30
+		'3': # Extraversion
+			#1: 25
+			#2: 30
+			'4': 50
+		'4': # Agreeableness
+			#3: 50
+			'5': -20
+		#5: # Neuroticism
+			#4: -20
+
+
 	@createFactor: (factorType, factorValue = 0) ->
 		switch factorType
 			when Factor.TYPE_OPENNESS then new OpennessFactor()

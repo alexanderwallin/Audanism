@@ -14,23 +14,21 @@
 
     __extends(RandomSourceAdapter, _super);
 
-    RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS = 1000;
+    RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS = 500;
 
-    RandomSourceAdapter.PROBABILITY_ALTER_FACTORS = 0.05;
+    RandomSourceAdapter.PROBABILITY_ALTER_FACTORS = 0.1;
 
     RandomSourceAdapter.TIME_INTERVAL_ALTER_NODES = 500;
 
-    RandomSourceAdapter.PROBABILITY_ALTER_NODES = 0.5;
+    RandomSourceAdapter.PROBABILITY_ALTER_NODES = 0.2;
 
     function RandomSourceAdapter(listener) {
       this.listener = listener;
-      console.log("(RandomSourceAdapter) #constructor", this.listener);
       RandomSourceAdapter.__super__.constructor.call(this, this.listener);
     }
 
     RandomSourceAdapter.prototype.activate = function() {
       var _this = this;
-      console.log("(RandomSourceAdapter) #activate");
       setInterval(function() {
         return _this.tryAlterFactors();
       }, RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS);
@@ -57,7 +55,6 @@
 
     RandomSourceAdapter.prototype.tryAlterNodes = function() {
       if (Math.randomRange(Math.round(1 / RandomSourceAdapter.PROBABILITY_ALTER_NODES)) === 1) {
-        console.log("  (RandomSourceAdapter) perform node alteration");
         return this.triggerInfluence({
           'random': {
             'object': 'node',

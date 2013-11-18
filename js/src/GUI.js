@@ -43,7 +43,7 @@
       if (!(this.disharmonyChart != null)) {
         return;
       }
-      tableData.unshift(['Iteration', 'Disharmony']);
+      tableData.unshift(['Iteration', 'Sum dish.', 'Actual dish.']);
       data = google.visualization.arrayToDataTable(tableData);
       options = {
         title: 'Disharmony chart',

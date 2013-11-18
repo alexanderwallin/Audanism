@@ -14,3 +14,22 @@
 	1. Move a value of 1 from one NODE to the other. The affected slots must affect the same FACTOR.
 	2. Merge the two nodes using a merge algorithm. This is automatically followed by a new node being spawned.
 	3. Destroy both nodes if neither 1. or 2. improves the overall state. This is automatically followed by two new nodes being spawned.
+
+
+=== Factor correlations ===
+
+
+		OPEN	CONS 	EXTR 	AGRE 	NEUR
+OPEN 	 		 ! 		 + 		  		 		
+CONS 	 ! 		 		 + 		 		 
+EXTR 	 + 		 + 		  		 +		 
+AGRE 	 				 +				 !
+NEUR 							 !
+
+
+		OPEN	CONS 	EXTR 	AGRE 	NEUR
+OPEN 	 		-15		+25 		  		 		
+CONS 	-15		 		+30 		 		 
+EXTR 	+25		+30		  		+50		 
+AGRE 	 				+50				-20
+NEUR 							-20

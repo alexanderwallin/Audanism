@@ -3,21 +3,21 @@
 ###
 class RandomSourceAdapter extends SourceAdapter
 
-	@TIME_INTERVAL_ALTER_FACTORS: 1000
-	@PROBABILITY_ALTER_FACTORS: 0.05
+	@TIME_INTERVAL_ALTER_FACTORS: 500
+	@PROBABILITY_ALTER_FACTORS: 0.1
 
 	@TIME_INTERVAL_ALTER_NODES: 500
-	@PROBABILITY_ALTER_NODES: 0.5
+	@PROBABILITY_ALTER_NODES: 0.2
 
 	constructor: (@listener) ->
-		console.log "(RandomSourceAdapter) #constructor", @listener
+		#console.log "(RandomSourceAdapter) #constructor", @listener
 		super(@listener)
 
 
 
 	# Activates the source adapter. 
 	activate: () ->
-		console.log "(RandomSourceAdapter) #activate"
+		#console.log "(RandomSourceAdapter) #activate"
 		setInterval () =>
 			@tryAlterFactors()
 		, RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS
@@ -54,7 +54,7 @@ class RandomSourceAdapter extends SourceAdapter
 
 		# Probability check
 		if Math.randomRange(Math.round(1 / RandomSourceAdapter.PROBABILITY_ALTER_NODES)) is 1
-			console.log "  (RandomSourceAdapter) perform node alteration"
+			#console.log "  (RandomSourceAdapter) perform node alteration"
 
 			# Let the listener take care of which objects should me modified
 			# and by how much

@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 25
+	@TIME_INTERVAL: 100
 
 	# Constructor
 	#
@@ -24,7 +24,7 @@ class Environment
 		@_gui = new GUI
 
 		for organism in @_organisms
-			@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData -1
+			@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 		@listenToControls()
 
@@ -77,7 +77,7 @@ class Environment
 			for organism in @_organisms
 				organism.performNodeComparison() 
 
-				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData -1
+				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 				@_isSingleStep = false
 

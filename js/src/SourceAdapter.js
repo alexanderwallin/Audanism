@@ -15,7 +15,6 @@
 
     function SourceAdapter(listener) {
       this.listener = listener;
-      console.log("(SourceAdapter) #constructor", this.listener);
     }
 
     SourceAdapter.prototype.activate = function() {};
@@ -47,7 +46,6 @@
     };
 
     SourceAdapter.prototype.triggerInfluence = function(influenceData) {
-      console.log("!!!  Trigger influence:", influenceData, "on", this.listener);
       if (this.listener.influence != null) {
         return this.listener.influence(influenceData);
       }
