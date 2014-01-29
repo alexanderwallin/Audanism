@@ -30,6 +30,8 @@ class Environment
 
 		@createInfluenceSources()
 
+		@initConductor()
+
 		@run()
 
 	# Initializes the loop
@@ -74,15 +76,24 @@ class Environment
 
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
+
+			@conductor.unmute()
+
 			for organism in @_organisms
 				
 				# Do comparison!
 				organism.performNodeComparison() 
 
+				# Update sound
+				@updateConductor()
+
 				# Update GUI
 				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 				@_isSingleStep = false
+		else
+
+			@conductor.mute()
 
 	#
 	createInfluenceSources: () ->
@@ -110,17 +121,18 @@ class Environment
 			# Iterate organisms
 			for organism in @_organisms
 
-				console.log '-- organism factors', organism.getFactors()
+				#console.log '-- organism factors', organism.getFactors()
 
 				# Get matching node
 				factor = if influenceData.node.factor is 'rand' then getRandomElements organism.getFactors() else organism.getFactorOfType influenceData.node.factor
 				node = if influenceData.node.node is 'rand' then organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] else organism.getNode influenceData.node.node
 
-				console.log '-- factor', factor
-				console.log '-- node', node
+				#console.log '-- factor', factor
+				#console.log '-- node', node
 
 				# Affect node
 				console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
+				$(document).trigger 'audanism/influence/node', { 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
 				
 				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')
@@ -190,6 +202,16 @@ class Environment
 						console.log "        ... after: #{ node }"
 
 		console.log "---"
+
+
+	initConductor: () ->
+		@conductor = new Audanism.Sound.Conductor()
+
+		@conductor.setOrganism @_organisms[0]
+
+	updateConductor: () ->
+		@conductor.updateSounds()
+
 
 
 window.Environment = Environment

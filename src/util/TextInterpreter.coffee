@@ -34,9 +34,9 @@ class TextInterpreter
 			(sum += i for i in counts)
 			countRatios = (i / sum for i in counts)
 
-			console.log '...counts', counts
-			console.log '...sum', sum
-			console.log '...ratios', countRatios
+			#console.log '...counts', counts
+			#console.log '...sum', sum
+			#console.log '...ratios', countRatios
 
 			# Get biggest value
 			largestVal = -1
@@ -44,15 +44,15 @@ class TextInterpreter
 				if (val > largestVal)
 					largestVal = val
 
-			console.log '...largest val', largestVal
+			#console.log '...largest val', largestVal
 
 			# Do the normalization
 			for i in [0..countRatios.length-1]
 				val = countRatios[i]
-				console.log '   ...normalize', val, 'to', (val / largestVal)
+				#console.log '   ...normalize', val, 'to', (val / largestVal)
 				countRatios[i] = val / largestVal
 
-			console.log '...ratios', countRatios
+			#console.log '...ratios', countRatios
 
 		return if normalized then countRatios else counts
 

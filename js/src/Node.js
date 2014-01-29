@@ -108,9 +108,7 @@
     };
 
     Node.prototype.addCellValue = function(factorType, addValue) {
-      console.log('     #addCellValue', factorType, addValue);
-      this.setCellValue(factorType, this.getCellValue(factorType) + addValue);
-      return console.log('     ... new value', this.getCellValue(factorType));
+      return this.setCellValue(factorType, this.getCellValue(factorType) + addValue);
     };
 
     Node.prototype.getCellValues = function(asString) {

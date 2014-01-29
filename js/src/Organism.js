@@ -12,7 +12,7 @@
 
     Organism.NUM_FACTORS = 5;
 
-    Organism.DEFAULT_NUM_NODES = 40;
+    Organism.DEFAULT_NUM_NODES = 10;
 
     Organism.DISTRIBUTE_FACTOR_VALUES = false;
 
@@ -87,7 +87,6 @@
       if (numComparisons == null) {
         numComparisons = 1;
       }
-      console.log("#performNodeComparison, " + DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY);
       this.disharmonyCalculator.debug = true;
       for (i = _i = 1; 1 <= numComparisons ? _i <= numComparisons : _i >= numComparisons; i = 1 <= numComparisons ? ++_i : --_i) {
         nodes = this._getRandomNodes(2);

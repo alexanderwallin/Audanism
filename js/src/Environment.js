@@ -36,6 +36,7 @@
       }
       this.listenToControls();
       this.createInfluenceSources();
+      this.initConductor();
       this.run();
     }
 
@@ -84,15 +85,19 @@
       var organism, _i, _len, _ref, _results;
       this._iterationCount++;
       if (this._isRunning || this._isSingleStep) {
+        this.conductor.unmute();
         _ref = this._organisms;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           organism = _ref[_i];
           organism.performNodeComparison();
+          this.updateConductor();
           this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
           _results.push(this._isSingleStep = false);
         }
         return _results;
+      } else {
+        return this.conductor.mute();
       }
     };
 
@@ -121,12 +126,14 @@
         _ref = this._organisms;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           organism = _ref[_i];
-          console.log('-- organism factors', organism.getFactors());
           factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
           node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
-          console.log('-- factor', factor);
-          console.log('-- node', node);
           console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier);
+          $(document).trigger('audanism/influence/node', {
+            'node': node,
+            'factor': factor,
+            'value': influenceData.node.valueModifier
+          });
           node.addCellValue(factor.factorType, influenceData.node.valueModifier);
           $node = $("[data-node-id='" + node.nodeId + "']").addClass('altered');
           setTimeout(function() {
@@ -194,6 +201,15 @@
         }
       }
       return console.log("---");
+    };
+
+    Environment.prototype.initConductor = function() {
+      this.conductor = new Audanism.Sound.Conductor();
+      return this.conductor.setOrganism(this._organisms[0]);
+    };
+
+    Environment.prototype.updateConductor = function() {
+      return this.conductor.updateSounds();
     };
 
     return Environment;

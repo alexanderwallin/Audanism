@@ -65,10 +65,14 @@ $runLocal = @$_GET['local'] == 'yes';
         	</menu>
         </div>
 
-        <!-- Scripts -->
+        <!-- Vendor scripts -->
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script> -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script>
         <script defer src="js/vendor/instagram.js"></script>
+        <script defer src="js/vendor/Audiolet.min.js"></script>
+
+        <!-- Audanism object initializer -->
+        <script defer src="js/src/Audanism.js"></script>
 
         <!-- Global extensions -->
         <script defer src="js/src/Object.js"></script>
@@ -106,6 +110,11 @@ $runLocal = @$_GET['local'] == 'yes';
 		<script defer src="js/src/RandomSourceAdapter.js"></script>
 		<!-- <script defer src="js/src/TwitterSourceAdapter.js"></script> -->
 		<script defer src="js/src/InstagramSourceAdapter.js"></script>
+
+		<!-- Sound -->
+		<script defer src="js/src/Conductor.js"></script>
+		<script defer src="js/src/Noise.js"></script>
+		<script defer src="js/src/Synth.js"></script>
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js"></script>

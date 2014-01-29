@@ -140,7 +140,7 @@ class DisharmonyCalculator
 			# Make a copy of the nodes
 			testNodes = nodes #(node.clone() for node in nodes)
 			Node._idCounter-- for node in nodes
-			console.log testNodes
+			#console.log testNodes
 			#continue
 
 			nodeAction

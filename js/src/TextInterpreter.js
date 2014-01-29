@@ -50,9 +50,6 @@
           }
           return _results;
         })();
-        console.log('...counts', counts);
-        console.log('...sum', sum);
-        console.log('...ratios', countRatios);
         largestVal = -1;
         for (_k = 0, _len2 = countRatios.length; _k < _len2; _k++) {
           val = countRatios[_k];
@@ -60,13 +57,10 @@
             largestVal = val;
           }
         }
-        console.log('...largest val', largestVal);
         for (i = _l = 0, _ref = countRatios.length - 1; 0 <= _ref ? _l <= _ref : _l >= _ref; i = 0 <= _ref ? ++_l : --_l) {
           val = countRatios[i];
-          console.log('   ...normalize', val, 'to', val / largestVal);
           countRatios[i] = val / largestVal;
         }
-        console.log('...ratios', countRatios);
       }
       if (normalized) {
         return countRatios;

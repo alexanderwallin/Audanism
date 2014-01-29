@@ -140,7 +140,6 @@
           node = nodes[_m];
           Node._idCounter--;
         }
-        console.log(testNodes);
         nodeAction;
 
         neededSaveNode = false;
