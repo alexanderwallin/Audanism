@@ -88,10 +88,12 @@ class InstagramSourceAdapter extends SourceAdapter
 			caption = photo.caption.text
 
 			# Update IG GUI
-			console.log '* old image source:', @igGui.find('.ig-photo').attr('src')
 			@igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url)
 			@igGui.find('.ig-caption').html(caption)
-			console.log '* new image source:', @igGui.find('.ig-photo').attr('src')
+			@igGui.fadeTo(50, 1)
+			setTimeout () =>
+				@igGui.fadeTo(1000, 0)
+			, 2000
 
 			# Get values
 			captionVals = interpreter.getNumCharsInGroups caption, 5

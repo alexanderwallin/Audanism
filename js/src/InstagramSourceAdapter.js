@@ -63,7 +63,8 @@
     };
 
     InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
-      var caption, captionVals, i, interpreter, modVal, photo, _i, _j, _len, _ref;
+      var caption, captionVals, i, interpreter, modVal, photo, _i, _j, _len, _ref,
+        _this = this;
       console.log('••• parse instagram photos •••');
       interpreter = new TextInterpreter;
       for (_i = 0, _len = photos.length; _i < _len; _i++) {
@@ -78,10 +79,12 @@
           continue;
         }
         caption = photo.caption.text;
-        console.log('* old image source:', this.igGui.find('.ig-photo').attr('src'));
         this.igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url);
         this.igGui.find('.ig-caption').html(caption);
-        console.log('* new image source:', this.igGui.find('.ig-photo').attr('src'));
+        this.igGui.fadeTo(50, 1);
+        setTimeout(function() {
+          return _this.igGui.fadeTo(1000, 0);
+        }, 2000);
         captionVals = interpreter.getNumCharsInGroups(caption, 5);
         console.log('vals for text', caption, captionVals);
         for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
