@@ -3,11 +3,11 @@
 ###
 class RandomSourceAdapter extends SourceAdapter
 
-	@TIME_INTERVAL_ALTER_FACTORS: 500
-	@PROBABILITY_ALTER_FACTORS: 0.1
+	@TIME_INTERVAL_ALTER_FACTORS: 2000
+	@PROBABILITY_ALTER_FACTORS: 1
 
 	@TIME_INTERVAL_ALTER_NODES: 500
-	@PROBABILITY_ALTER_NODES: 0.2
+	@PROBABILITY_ALTER_NODES: 1
 
 	constructor: (@listener) ->
 		#console.log "(RandomSourceAdapter) #constructor", @listener

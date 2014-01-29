@@ -14,13 +14,13 @@
 
     __extends(RandomSourceAdapter, _super);
 
-    RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS = 500;
+    RandomSourceAdapter.TIME_INTERVAL_ALTER_FACTORS = 2000;
 
-    RandomSourceAdapter.PROBABILITY_ALTER_FACTORS = 0.1;
+    RandomSourceAdapter.PROBABILITY_ALTER_FACTORS = 1;
 
     RandomSourceAdapter.TIME_INTERVAL_ALTER_NODES = 500;
 
-    RandomSourceAdapter.PROBABILITY_ALTER_NODES = 0.2;
+    RandomSourceAdapter.PROBABILITY_ALTER_NODES = 1;
 
     function RandomSourceAdapter(listener) {
       this.listener = listener;

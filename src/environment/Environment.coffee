@@ -75,8 +75,11 @@ class Environment
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
 			for organism in @_organisms
+				
+				# Do comparison!
 				organism.performNodeComparison() 
 
+				# Update GUI
 				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 				@_isSingleStep = false
@@ -86,8 +89,8 @@ class Environment
 		@_influenceSources = []
 
 		# Add sources
-		# @_influenceSources.push new RandomSourceAdapter(@)
-		# @_influenceSources.push new TwitterSourceAdapter(@)
+		#@_influenceSources.push new RandomSourceAdapter(@)
+		#@_influenceSources.push new TwitterSourceAdapter(@)
 		@_influenceSources.push new InstagramSourceAdapter(@)
 
 		# Activate sources
@@ -99,6 +102,32 @@ class Environment
 
 		console.log "---"
 		console.log "#influence", influenceData
+
+
+		# Node alteration
+		if influenceData.node?
+
+			# Iterate organisms
+			for organism in @_organisms
+
+				console.log '-- organism factors', organism.getFactors()
+
+				# Get matching node
+				factor = if influenceData.node.factor is 'rand' then getRandomElements organism.getFactors() else organism.getFactorOfType influenceData.node.factor
+				node = if influenceData.node.node is 'rand' then organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] else organism.getNode influenceData.node.node
+
+				console.log '-- factor', factor
+				console.log '-- node', node
+
+				# Affect node
+				console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
+				node.addCellValue factor.factorType, influenceData.node.valueModifier
+				
+				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')
+				setTimeout () =>
+					$node.removeClass('altered')
+				, 2000
+
 
 		# Random alteration
 		if influenceData.random?

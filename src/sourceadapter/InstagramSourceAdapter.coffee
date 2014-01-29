@@ -11,7 +11,10 @@ class InstagramSourceAdapter extends SourceAdapter
 		@photoSinceId = 0
 
 		@tag = "belieber"
-		@queryUrl = "http://api.instagram.com/v1/tags/belieber/media/recent?client_id=#{ @clientId }"
+		@queryUrl = "https://api.instagram.com/v1/tags/#{ @tag }/media/recent"
+
+		# Instagram GUI
+		@igGui = $('<div />', { 'id':'ig-photo' }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'))
 
 	# Sets up mouse event listeners
 	activate: () ->
@@ -24,16 +27,79 @@ class InstagramSourceAdapter extends SourceAdapter
 			@queryPhotos.call _this
 		, 10000
 
+		setTimeout () =>
+			@queryPhotos.call _this
+		, 100
+
 	# Performs a query for photos
 	queryPhotos: () ->
 		console.log('query instagram photots', @queryUrl)
 
-		$.get @queryUrl, (data) =>
-			console.log 'instagram data', data
+		$.ajax {
+			dataType: 'jsonp',
+			url: @queryUrl, 
+			data: {
+				client_id: @clientId,
+				count: 1,
+				max_id: @photoSinceId
+			},
+			success: (response) =>
+				console.log('did fetch data', response)
+				@parsePhotos response.data
+		}
+
+		#	console.log 'instagram data', data
+
+		#$(document).on 'didLoadInstagram', (event, response) =>
+		#	console.log('didLoadInstagram', response)
+
+		#$(document).instagram {
+		#	'hash': 'belieber'
+		#	'clientId': @clientId
+		#}
+	
+
+	# Parse photos
+	parsePhotos: (photos) ->
+		interpreter = new TextInterpreter
+
+		for photo in photos
+
+			# Store since id
+			@photoSinceId = photo.id
+
+			# Get caption
+			caption = photo.caption.text
+			if (!caption)
+				@queryPhotos()
+
+			# Update IG GUI
+			@igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url)
+			@igGui.find('.ig-caption').html(caption)
+
+			# Get values
+			captionVals = interpreter.getNumCharsInGroups caption, 5
+			console.log('vals for text', caption, captionVals)
+
+			# Trigger alteration
+			for i in [0..captionVals.length-1]
+
+				modVal = Math.round captionVals[i] * 10
+				modVal = if Math.random() >= 0.5 then modVal * -1 else modVal
+
+				@triggerInfluence {
+					'node': {
+						'node': 'rand'
+						'factor': i+1
+						'valueModifier': modVal
+					}
+				}
 
 
-	# Adapts the mouse data into environment interpretable data
+
+	# Adapts data into environment interpretable data
 	adaptSourceData: () ->
+
 
 
 window.InstagramSourceAdapter = InstagramSourceAdapter 

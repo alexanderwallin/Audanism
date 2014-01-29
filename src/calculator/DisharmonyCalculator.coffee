@@ -25,7 +25,7 @@ class DisharmonyCalculator
 
 	# Returns the sum of factor disharmony within the organism
 	getSummedOrganismDisharmony: () ->
-		console.log "#getSummedOrganismDisharmony"
+		#console.log "#getSummedOrganismDisharmony"
 		sumDisharmony = 0
 		sumDisharmony += @getFactorDisharmonyForNodes factor, @_organism.getNodes() for factor in @_organism.getFactors()
 		avgDisharmony = sumDisharmony / @_organism.getNodes().length
@@ -37,8 +37,8 @@ class DisharmonyCalculator
 	getActualOrganismDisharmony: () ->
 		disharmonies = []
 		disharmonies[factor.factorType] = @getFactorDisharmonyForNodes factor, @_organism.getNodes() for factor in @_organism.getFactors()
-		console.log "#getActualOrganismDisharmony"
-		console.log "      ... before:", disharmonies
+		#console.log "#getActualOrganismDisharmony"
+		#console.log "      ... before:", disharmonies
 
 		# Adjust disharmonies according to correlations
 		correlations = Factor.FACTOR_CORRELATIONS
@@ -53,16 +53,16 @@ class DisharmonyCalculator
 				if correlations[factorType]? and correlations[factorType][correlatingFactorType]?
 					correlationValue = correlations[factorType][correlatingFactorType]
 
-					console.log "--- adjust for correlation #{ factorType } <---> #{ correlatingFactorType } (#{ correlationValue })"
+					#console.log "--- adjust for correlation #{ factorType } <---> #{ correlatingFactorType } (#{ correlationValue })"
 
 					# We use subtractions, since a positive correlation means less disharmony
 					disharmonyDiff = Math.abs(disharmonies[factorType] - disharmonies[correlatingFactorType])
 					disharmonies[factorType] += Math.pow(disharmonyDiff, 2.2) * (100 - correlationValue) / (100 * disharmonyDiff)
 
-		console.log "      ... after:", disharmonies
+		#console.log "      ... after:", disharmonies
 
 		actualDisharmony = disharmonies.reduce (a, b) -> a + b
-		console.log "  actualDisharmony =", actualDisharmony
+		#console.log "  actualDisharmony =", actualDisharmony
 		actualDisharmony
 
 	###
@@ -110,10 +110,10 @@ class DisharmonyCalculator
 	# Compares the given nodes using the given comparison mode,
 	# and then alters them striving for reduced disharmony.
 	alterNodesInComparisonMode: (nodes, comparisonMode) ->
-		console.log "DisharmonyCalculator.alterNodesInComparisonMode --- mode: #{ comparisonMode }, nodes:", nodes
+		#console.log "DisharmonyCalculator.alterNodesInComparisonMode --- mode: #{ comparisonMode }, nodes:", nodes
 
 		comparisonFn = if comparisonMode is DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY then 'getFactorDisharmonyForNodes' else 'getActualOrganismDisharmony'
-		console.log "   comparisonFn = #{ comparisonFn }"
+		#console.log "   comparisonFn = #{ comparisonFn }"
 
 		#if comparisonMode is DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY
 		#	 @_alterNodesUsingFactorHarmonyComparison nodes 

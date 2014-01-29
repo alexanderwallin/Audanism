@@ -99,16 +99,18 @@
       var cell;
       cell = this.getCell(factorType);
       cell.factorValue = value;
-      if (this.factorValue < 0) {
+      if (cell.factorValue < 0) {
         cell.factorValue = 0;
       }
-      if (this.factorValue > 100) {
+      if (cell.factorValue > 100) {
         return cell.factorValue = 100;
       }
     };
 
     Node.prototype.addCellValue = function(factorType, addValue) {
-      return this.setCellValue(factorType, this.getCellValue(factorType) + addValue);
+      console.log('     #addCellValue', factorType, addValue);
+      this.setCellValue(factorType, this.getCellValue(factorType) + addValue);
+      return console.log('     ... new value', this.getCellValue(factorType));
     };
 
     Node.prototype.getCellValues = function(asString) {

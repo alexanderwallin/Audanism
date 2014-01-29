@@ -110,12 +110,30 @@
     };
 
     Environment.prototype.influence = function(influenceData) {
-      var argNum, argVal, cell, factor, factors, node, nodes, num, numType, organism, type, valType, valueMod, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1;
+      var $node, argNum, argVal, cell, factor, factors, node, nodes, num, numType, organism, type, valType, valueMod, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2,
+        _this = this;
       if (!this._isRunning) {
         return;
       }
       console.log("---");
       console.log("#influence", influenceData);
+      if (influenceData.node != null) {
+        _ref = this._organisms;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          organism = _ref[_i];
+          console.log('-- organism factors', organism.getFactors());
+          factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
+          node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
+          console.log('-- factor', factor);
+          console.log('-- node', node);
+          console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier);
+          node.addCellValue(factor.factorType, influenceData.node.valueModifier);
+          $node = $("[data-node-id='" + node.nodeId + "']").addClass('altered');
+          setTimeout(function() {
+            return $node.removeClass('altered');
+          }, 2000);
+        }
+      }
       if (influenceData.random != null) {
         type = influenceData.random['object'];
         argNum = influenceData.random.num;
@@ -131,12 +149,12 @@
           num = Math.randomRange(type === 'factor' ? 1 : 5);
         }
         if (type === 'factor') {
-          _ref = this._organisms;
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            organism = _ref[_i];
+          _ref1 = this._organisms;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            organism = _ref1[_j];
             factors = getRandomElements(organism.getFactors(), num);
-            for (_j = 0, _len1 = factors.length; _j < _len1; _j++) {
-              factor = factors[_j];
+            for (_k = 0, _len2 = factors.length; _k < _len2; _k++) {
+              factor = factors[_k];
               valType = typeof argVal;
               if (valType === 'integer') {
                 valueMod = argVal;
@@ -152,12 +170,12 @@
             }
           }
         } else if (type === 'node') {
-          _ref1 = this._organisms;
-          for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-            organism = _ref1[_k];
+          _ref2 = this._organisms;
+          for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
+            organism = _ref2[_l];
             nodes = getRandomElements(organism.getNodes(), num);
-            for (_l = 0, _len3 = nodes.length; _l < _len3; _l++) {
-              node = nodes[_l];
+            for (_m = 0, _len4 = nodes.length; _m < _len4; _m++) {
+              node = nodes[_m];
               valType = typeof argVal;
               if (valType === 'integer') {
                 valueMod = argVal;

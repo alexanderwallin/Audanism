@@ -17,19 +17,19 @@ class SourceAdapter
 	getAdaptedSourceData: (sourceData) ->
 		influenceData =
 			'factors': [{
-				'factor': null
+				'factor':        null
 				'valueModifier': null
 				# 'factorExtension': {}
 			}]
-			'nodes': [{
-				'node': null
-				'factorType': null
+			'node': [{
+				'node':          null
+				'factorType':    null
 				'valueModifier': 0
 				# 'nodeModifier': {}
 			}]
 			'random': [{
-				'object': 'node' # 'factor'
-				'num': [0, 1] # 123, 'rand'
+				'object':        'node' # 'factor'
+				'num':           [0, 1] # 123, 'rand'
 				'valueModifier': [0, 1] # 123, 'rand'
 			}]
 		

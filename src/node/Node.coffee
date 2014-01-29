@@ -53,11 +53,13 @@ class Node
 	setCellValue: (factorType, value) ->
 		cell = @getCell factorType
 		cell.factorValue = value
-		cell.factorValue = 0 if @factorValue < 0
-		cell.factorValue = 100 if @factorValue > 100
+		cell.factorValue = 0 if cell.factorValue < 0
+		cell.factorValue = 100 if cell.factorValue > 100
 
 	addCellValue: (factorType, addValue) ->
+		console.log('     #addCellValue', factorType, addValue)
 		@setCellValue factorType, @getCellValue(factorType) + addValue
+		console.log('     ... new value', @getCellValue factorType)
 
 	getCellValues: (asString = false) ->
 		cellValues = (cell.factorValue for cell in @_cells)

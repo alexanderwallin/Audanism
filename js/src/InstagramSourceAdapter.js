@@ -20,7 +20,10 @@
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
       this.tag = "belieber";
-      this.queryUrl = "http://api.instagram.com/v1/tags/belieber/media/recent?client_id=" + this.clientId;
+      this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
+      this.igGui = $('<div />', {
+        'id': 'ig-photo'
+      }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'));
     }
 
     InstagramSourceAdapter.prototype.activate = function() {
@@ -29,17 +32,65 @@
       console.log('ISA activate');
       _this = this;
       _queryPhotos = this.queryPhotos;
-      return setInterval(function() {
+      setInterval(function() {
         return _this.queryPhotos.call(_this);
       }, 10000);
+      return setTimeout(function() {
+        return _this.queryPhotos.call(_this);
+      }, 100);
     };
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
       var _this = this;
       console.log('query instagram photots', this.queryUrl);
-      return $.get(this.queryUrl, function(data) {
-        return console.log('instagram data', data);
+      return $.ajax({
+        dataType: 'jsonp',
+        url: this.queryUrl,
+        data: {
+          client_id: this.clientId,
+          count: 1,
+          max_id: this.photoSinceId
+        },
+        success: function(response) {
+          console.log('did fetch data', response);
+          return _this.parsePhotos(response.data);
+        }
       });
+    };
+
+    InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
+      var caption, captionVals, i, interpreter, modVal, photo, _i, _len, _results;
+      interpreter = new TextInterpreter;
+      _results = [];
+      for (_i = 0, _len = photos.length; _i < _len; _i++) {
+        photo = photos[_i];
+        this.photoSinceId = photo.id;
+        caption = photo.caption.text;
+        if (!caption) {
+          this.queryPhotos();
+        }
+        this.igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url);
+        this.igGui.find('.ig-caption').html(caption);
+        captionVals = interpreter.getNumCharsInGroups(caption, 5);
+        console.log('vals for text', caption, captionVals);
+        _results.push((function() {
+          var _j, _ref, _results1;
+          _results1 = [];
+          for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
+            modVal = Math.round(captionVals[i] * 10);
+            modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
+            _results1.push(this.triggerInfluence({
+              'node': {
+                'node': 'rand',
+                'factor': i + 1,
+                'valueModifier': modVal
+              }
+            }));
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
     };
 
     InstagramSourceAdapter.prototype.adaptSourceData = function() {};

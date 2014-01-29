@@ -28,7 +28,7 @@
             'valueModifier': null
           }
         ],
-        'nodes': [
+        'node': [
           {
             'node': null,
             'factorType': null,

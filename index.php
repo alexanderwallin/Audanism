@@ -10,7 +10,7 @@ $runLocal = @$_GET['local'] == 'yes';
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Decision Making - Prototype 2 - Test 1</title>
+        <title>Audanism - Prototype 2 - Test 3</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
@@ -19,14 +19,14 @@ $runLocal = @$_GET['local'] == 'yes';
         <link rel="stylesheet" href="css/main.css">
 
         <?php if ($runLocal) : ?>
-        <script type="text/javascript" src="js/vendor/google.jsapi.js"></script>
-        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js"></script> -->
-        <script type="text/javascript" src="js/vendor/google.charts.js"></script>
+	        <script type="text/javascript" src="js/vendor/google.jsapi.js"></script>
+	        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js"></script> -->
+	        <script type="text/javascript" src="js/vendor/google.charts.js"></script>
     	<?php else : ?>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-		<script type="text/javascript">
-		google.load("visualization", "1", {packages:["corechart"]});
-		</script>
+	        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+			<script type="text/javascript">
+			google.load("visualization", "1", {packages:["corechart"]});
+			</script>
 		<?php endif; ?>
     </head>
     <body>
@@ -36,7 +36,7 @@ $runLocal = @$_GET['local'] == 'yes';
 
         <div id="container">
         	<header id="header">
-        		<h1>Decision Making</h1>
+        		<h1>Audanism</h1>
         	</header>
 
         	<div id="main">
@@ -68,11 +68,15 @@ $runLocal = @$_GET['local'] == 'yes';
         <!-- Scripts -->
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script> -->
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script>
+        <script defer src="js/vendor/instagram.js"></script>
 
         <!-- Global extensions -->
         <script defer src="js/src/Object.js"></script>
         <script defer src="js/src/Math.js"></script>
         <script defer src="js/src/Array.js"></script>
+
+        <!-- Util -->
+        <script defer src="js/src/TextInterpreter.js"></script>
 
 		<!-- Node -->
 		<script defer src="js/src/Node.js"></script>
@@ -100,7 +104,7 @@ $runLocal = @$_GET['local'] == 'yes';
 		<!-- Source adapters -->
 		<script defer src="js/src/SourceAdapter.js"></script>
 		<script defer src="js/src/RandomSourceAdapter.js"></script>
-		<script defer src="js/src/TwitterSourceAdapter.js"></script>
+		<!-- <script defer src="js/src/TwitterSourceAdapter.js"></script> -->
 		<script defer src="js/src/InstagramSourceAdapter.js"></script>
 
 		<!-- GUI -->

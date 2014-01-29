@@ -158,6 +158,7 @@ class Organism
 	# the given factor type.
 	#
 	_getRandomNodesOfFactorType: (factorType, numNodes) ->
+		console.log '#_getRandomNodesOfFactorType', factorType, numNodes, @_nodeCellIndex
 		getRandomElements(@_nodeCellIndex[factorType], numNodes)
 
 

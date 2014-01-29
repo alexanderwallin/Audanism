@@ -209,6 +209,7 @@
     };
 
     Organism.prototype._getRandomNodesOfFactorType = function(factorType, numNodes) {
+      console.log('#_getRandomNodesOfFactorType', factorType, numNodes, this._nodeCellIndex);
       return getRandomElements(this._nodeCellIndex[factorType], numNodes);
     };
 

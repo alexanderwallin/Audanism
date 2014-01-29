@@ -40,7 +40,6 @@
 
     DisharmonyCalculator.prototype.getSummedOrganismDisharmony = function() {
       var avgDisharmony, factor, sumDisharmony, _i, _len, _ref;
-      console.log("#getSummedOrganismDisharmony");
       sumDisharmony = 0;
       _ref = this._organism.getFactors();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -59,24 +58,19 @@
         factor = _ref[_i];
         disharmonies[factor.factorType] = this.getFactorDisharmonyForNodes(factor, this._organism.getNodes());
       }
-      console.log("#getActualOrganismDisharmony");
-      console.log("      ... before:", disharmonies);
       correlations = Factor.FACTOR_CORRELATIONS;
       for (factorType = _j = 1, _ref1 = Organism.NUM_FACTORS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; factorType = 1 <= _ref1 ? ++_j : --_j) {
         for (correlatingFactorType = _k = 1, _ref2 = Organism.NUM_FACTORS; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; correlatingFactorType = 1 <= _ref2 ? ++_k : --_k) {
           if ((correlations[factorType] != null) && (correlations[factorType][correlatingFactorType] != null)) {
             correlationValue = correlations[factorType][correlatingFactorType];
-            console.log("--- adjust for correlation " + factorType + " <---> " + correlatingFactorType + " (" + correlationValue + ")");
             disharmonyDiff = Math.abs(disharmonies[factorType] - disharmonies[correlatingFactorType]);
             disharmonies[factorType] += Math.pow(disharmonyDiff, 2.2) * (100 - correlationValue) / (100 * disharmonyDiff);
           }
         }
       }
-      console.log("      ... after:", disharmonies);
       actualDisharmony = disharmonies.reduce(function(a, b) {
         return a + b;
       });
-      console.log("  actualDisharmony =", actualDisharmony);
       return actualDisharmony;
     };
 
@@ -121,9 +115,7 @@
 
     DisharmonyCalculator.prototype.alterNodesInComparisonMode = function(nodes, comparisonMode) {
       var aCell, bCell, cell, cellsToCompare, comparisonFn, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, smallestNewDisharmony, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1;
-      console.log("DisharmonyCalculator.alterNodesInComparisonMode --- mode: " + comparisonMode + ", nodes:", nodes);
       comparisonFn = comparisonMode === DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY ? 'getFactorDisharmonyForNodes' : 'getActualOrganismDisharmony';
-      console.log("   comparisonFn = " + comparisonFn);
       $(".node.comparing").removeClass('comparing');
       for (_i = 0, _len = nodes.length; _i < _len; _i++) {
         node = nodes[_i];
