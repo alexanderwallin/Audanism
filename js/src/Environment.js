@@ -99,7 +99,7 @@
     Environment.prototype.createInfluenceSources = function() {
       var sourceAdapter, _i, _len, _ref, _results;
       this._influenceSources = [];
-      this._influenceSources.push(new RandomSourceAdapter(this));
+      this._influenceSources.push(new InstagramSourceAdapter(this));
       _ref = this._influenceSources;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {

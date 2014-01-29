@@ -100,6 +100,8 @@ $runLocal = @$_GET['local'] == 'yes';
 		<!-- Source adapters -->
 		<script defer src="js/src/SourceAdapter.js"></script>
 		<script defer src="js/src/RandomSourceAdapter.js"></script>
+		<script defer src="js/src/TwitterSourceAdapter.js"></script>
+		<script defer src="js/src/InstagramSourceAdapter.js"></script>
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js"></script>

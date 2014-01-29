@@ -86,7 +86,9 @@ class Environment
 		@_influenceSources = []
 
 		# Add sources
-		@_influenceSources.push new RandomSourceAdapter(@)
+		# @_influenceSources.push new RandomSourceAdapter(@)
+		# @_influenceSources.push new TwitterSourceAdapter(@)
+		@_influenceSources.push new InstagramSourceAdapter(@)
 
 		# Activate sources
 		sourceAdapter.activate() for sourceAdapter in @_influenceSources
