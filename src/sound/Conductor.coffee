@@ -32,9 +32,9 @@ class Conductor
 		disharmonyOld = disharmonyData[0][2]
 		disharmonyRatio = disharmonyNew / disharmonyOld
 
-		console.log '... disharmonies', disharmonyOld, disharmonyNew
-		console.log '... ratio', disharmonyRatio
-		console.log '... ---> freq =', disharmonyRatio * 1000
+		#console.log '... disharmonies', disharmonyOld, disharmonyNew
+		#console.log '... ratio', disharmonyRatio
+		#console.log '... ---> freq =', disharmonyRatio * 1000
 
 		@noise.lpf.frequency.setValue disharmonyRatio * 1000
 

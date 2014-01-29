@@ -12,7 +12,7 @@
 
     Organism.NUM_FACTORS = 5;
 
-    Organism.DEFAULT_NUM_NODES = 10;
+    Organism.DEFAULT_NUM_NODES = 44;
 
     Organism.DISTRIBUTE_FACTOR_VALUES = false;
 
@@ -208,7 +208,6 @@
     };
 
     Organism.prototype._getRandomNodesOfFactorType = function(factorType, numNodes) {
-      console.log('#_getRandomNodesOfFactorType', factorType, numNodes, this._nodeCellIndex);
       return getRandomElements(this._nodeCellIndex[factorType], numNodes);
     };
 

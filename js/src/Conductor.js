@@ -35,9 +35,6 @@
       disharmonyNew = disharmonyData[disharmonyData.length - 1][2];
       disharmonyOld = disharmonyData[0][2];
       disharmonyRatio = disharmonyNew / disharmonyOld;
-      console.log('... disharmonies', disharmonyOld, disharmonyNew);
-      console.log('... ratio', disharmonyRatio);
-      console.log('... ---> freq =', disharmonyRatio * 1000);
       return this.noise.lpf.frequency.setValue(disharmonyRatio * 1000);
     };
 

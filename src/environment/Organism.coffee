@@ -5,7 +5,7 @@ class Organism
 
 	# Options
 	@NUM_FACTORS: 5
-	@DEFAULT_NUM_NODES: 10
+	@DEFAULT_NUM_NODES: 44
 	@DISTRIBUTE_FACTOR_VALUES: false
 
 	# Stress thresholds - the thresholds for when the organism enters
@@ -158,7 +158,7 @@ class Organism
 	# the given factor type.
 	#
 	_getRandomNodesOfFactorType: (factorType, numNodes) ->
-		console.log '#_getRandomNodesOfFactorType', factorType, numNodes, @_nodeCellIndex
+		#console.log '#_getRandomNodesOfFactorType', factorType, numNodes, @_nodeCellIndex
 		getRandomElements(@_nodeCellIndex[factorType], numNodes)
 
 

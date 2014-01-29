@@ -21,6 +21,7 @@
       this.photoSinceId = 0;
       this.tag = "belieber";
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
+      this.jqxhr = null;
       this.igGui = $('<div />', {
         'id': 'ig-photo'
       }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'));
@@ -34,7 +35,7 @@
       _queryPhotos = this.queryPhotos;
       setInterval(function() {
         return _this.queryPhotos.call(_this);
-      }, 10000);
+      }, 5000);
       return setTimeout(function() {
         return _this.queryPhotos.call(_this);
       }, 100);
@@ -42,8 +43,11 @@
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
       var _this = this;
-      console.log('query instagram photots', this.queryUrl);
-      return $.ajax({
+      console.log('••• query instagram photots', this.queryUrl, '•••');
+      if (this.jqxhr) {
+        return;
+      }
+      return this.jqxhr = $.ajax({
         dataType: 'jsonp',
         url: this.queryUrl,
         data: {
@@ -59,38 +63,40 @@
     };
 
     InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
-      var caption, captionVals, i, interpreter, modVal, photo, _i, _len, _results;
+      var caption, captionVals, i, interpreter, modVal, photo, _i, _j, _len, _ref;
+      console.log('••• parse instagram photos •••');
       interpreter = new TextInterpreter;
-      _results = [];
       for (_i = 0, _len = photos.length; _i < _len; _i++) {
         photo = photos[_i];
-        this.photoSinceId = photo.id;
-        caption = photo.caption.text;
-        if (!caption) {
-          this.queryPhotos();
+        if (photo.id === this.photoSinceId) {
+          console.log('   ## same photo, continue');
+          continue;
         }
+        this.photoSinceId = photo.id;
+        if (!photo.caption) {
+          console.log('   ## no caption, continue');
+          continue;
+        }
+        caption = photo.caption.text;
+        console.log('* old image source:', this.igGui.find('.ig-photo').attr('src'));
         this.igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url);
         this.igGui.find('.ig-caption').html(caption);
+        console.log('* new image source:', this.igGui.find('.ig-photo').attr('src'));
         captionVals = interpreter.getNumCharsInGroups(caption, 5);
         console.log('vals for text', caption, captionVals);
-        _results.push((function() {
-          var _j, _ref, _results1;
-          _results1 = [];
-          for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
-            modVal = Math.round(captionVals[i] * 10);
-            modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
-            _results1.push(this.triggerInfluence({
-              'node': {
-                'node': 'rand',
-                'factor': i + 1,
-                'valueModifier': modVal
-              }
-            }));
-          }
-          return _results1;
-        }).call(this));
+        for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
+          modVal = Math.round(captionVals[i] * 10);
+          modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
+          this.triggerInfluence({
+            'node': {
+              'node': 'rand',
+              'factor': i + 1,
+              'valueModifier': modVal
+            }
+          });
+        }
       }
-      return _results;
+      return this.jqxhr = null;
     };
 
     InstagramSourceAdapter.prototype.adaptSourceData = function() {};

@@ -18,7 +18,7 @@
     function Environment() {
       var i, organism, _i, _len, _ref;
       this._iterationCount = 0;
-      this._isRunning = false;
+      this._isRunning = true;
       this._isSingleStep = true;
       this._organisms = (function() {
         var _i, _ref, _results;
@@ -120,15 +120,12 @@
       if (!this._isRunning) {
         return;
       }
-      console.log("---");
-      console.log("#influence", influenceData);
       if (influenceData.node != null) {
         _ref = this._organisms;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           organism = _ref[_i];
           factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
           node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
-          console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier);
           $(document).trigger('audanism/influence/node', {
             'node': node,
             'factor': factor,

@@ -16,7 +16,7 @@ class Environment
 	constructor: () ->
 		
 		@_iterationCount = 0
-		@_isRunning = false
+		@_isRunning = true
 		@_isSingleStep = true
 
 		@_organisms = (new Organism for i in [1..Environment.NUM_ORGANISMS])
@@ -111,8 +111,8 @@ class Environment
 	influence: (influenceData) ->
 		return if not @_isRunning
 
-		console.log "---"
-		console.log "#influence", influenceData
+		#console.log "---"
+		#console.log "#influence", influenceData
 
 
 		# Node alteration
@@ -131,7 +131,7 @@ class Environment
 				#console.log '-- node', node
 
 				# Affect node
-				console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
+				#console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
 				$(document).trigger 'audanism/influence/node', { 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
 				

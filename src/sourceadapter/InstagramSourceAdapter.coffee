@@ -7,11 +7,14 @@ class InstagramSourceAdapter extends SourceAdapter
 	constructor: (@listener) ->
 		super(@listener)
 
+		# Query params
 		@clientId = "f42a4ce0632e412ea5a0353c2b5e581f"
 		@photoSinceId = 0
-
 		@tag = "belieber"
 		@queryUrl = "https://api.instagram.com/v1/tags/#{ @tag }/media/recent"
+
+		# Ajax handler
+		@jqxhr = null
 
 		# Instagram GUI
 		@igGui = $('<div />', { 'id':'ig-photo' }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'))
@@ -25,7 +28,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 		setInterval () =>
 			@queryPhotos.call _this
-		, 10000
+		, 5000
 
 		setTimeout () =>
 			@queryPhotos.call _this
@@ -33,9 +36,12 @@ class InstagramSourceAdapter extends SourceAdapter
 
 	# Performs a query for photos
 	queryPhotos: () ->
-		console.log('query instagram photots', @queryUrl)
+		console.log('••• query instagram photots', @queryUrl, '•••')
 
-		$.ajax {
+		if (@jqxhr)
+			return
+
+		@jqxhr = $.ajax {
 			dataType: 'jsonp',
 			url: @queryUrl, 
 			data: {
@@ -61,21 +67,31 @@ class InstagramSourceAdapter extends SourceAdapter
 
 	# Parse photos
 	parsePhotos: (photos) ->
+		console.log('••• parse instagram photos •••')
+
 		interpreter = new TextInterpreter
 
 		for photo in photos
 
 			# Store since id
+			if (photo.id is @photoSinceId)
+				console.log('   ## same photo, continue')
+				continue
+
 			@photoSinceId = photo.id
 
 			# Get caption
+			if (!photo.caption)
+				console.log('   ## no caption, continue')
+				continue
+
 			caption = photo.caption.text
-			if (!caption)
-				@queryPhotos()
 
 			# Update IG GUI
+			console.log '* old image source:', @igGui.find('.ig-photo').attr('src')
 			@igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url)
 			@igGui.find('.ig-caption').html(caption)
+			console.log '* new image source:', @igGui.find('.ig-photo').attr('src')
 
 			# Get values
 			captionVals = interpreter.getNumCharsInGroups caption, 5
@@ -94,6 +110,8 @@ class InstagramSourceAdapter extends SourceAdapter
 						'valueModifier': modVal
 					}
 				}
+
+		@jqxhr = null
 
 
 

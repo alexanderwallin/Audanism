@@ -16,7 +16,6 @@
 
   getRandomElements = function(arr, numElements) {
     var copy, elements, i, obj;
-    console.log("#getRandomElements", arr, numElements);
     copy = (function() {
       var _i, _len, _results;
       _results = [];
