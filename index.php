@@ -51,6 +51,11 @@ $runLocal = @$_GET['local'] == 'yes';
         		<p id="organism-state"></p>
 
         		<div id="disharmony-chart"></div>
+
+        		<div id="disharmony-meter">
+        			<div class="meter"></div>
+        			<div class="value"></div>
+        		</div>
         	</aside>
 
         	<menu id="controls">

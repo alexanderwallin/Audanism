@@ -14,6 +14,7 @@
       var _this = this;
       this.$factorsWrap = $('#factors');
       this.$nodesWrap = $('#nodes');
+      this.$meter = $('#disharmony-meter .value');
       this._renderedFactors = false;
       this._renderedNodes = false;
       this._setupControls();
@@ -35,7 +36,10 @@
     GUI.prototype.update = function(factors, nodes, tableData) {
       this._updateFactors(factors);
       this._updateNodes(nodes);
-      return this._drawCharts(tableData);
+      this._drawCharts(tableData);
+      if (tableData.length > 0) {
+        return this.$meter.html("" + (Math.round(tableData[tableData.length - 1][2])) + "<br /><small style='font-weight:normal;'>" + (Math.round(tableData[tableData.length - 1][1])) + "</small>");
+      }
     };
 
     GUI.prototype._drawCharts = function(tableData) {

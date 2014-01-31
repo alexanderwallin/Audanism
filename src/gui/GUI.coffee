@@ -7,6 +7,7 @@ class GUI
 	constructor: () ->
 		@$factorsWrap = $('#factors')
 		@$nodesWrap = $('#nodes')
+		@$meter = $('#disharmony-meter .value')
 
 		@_renderedFactors = false
 		@_renderedNodes = false
@@ -27,6 +28,9 @@ class GUI
 		@_updateFactors factors
 		@_updateNodes nodes
 		@_drawCharts tableData
+
+		if tableData.length > 0
+			@$meter.html "#{ Math.round(tableData[tableData.length-1][2]) }<br /><small style='font-weight:normal;'>#{ Math.round(tableData[tableData.length-1][1]) }</small>"
 
 	_drawCharts: (tableData) ->
 		return
