@@ -1,3 +1,5 @@
 window.Audanism = {
-	'Sound': {}
+	'Sound': {
+		'Instrument': {}
+	}
 }

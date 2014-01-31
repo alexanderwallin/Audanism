@@ -11,10 +11,34 @@
   Conductor = (function() {
 
     function Conductor() {
+      var i, self,
+        _this = this;
+      self = this;
       this.organism = null;
       this.audiolet = new Audiolet();
       this.noise = new Audanism.Sound.Noise(this.audiolet);
-      this.nodeSounds = [];
+      this.influenceSounds = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i <= 4; i = ++_i) {
+          _results.push(new Audanism.Sound.Instrument.NodeInfluenceSound2(this.audiolet));
+        }
+        return _results;
+      }).call(this);
+      this.comparisonSounds = (function() {
+        var _i, _results;
+        _results = [];
+        for (i = _i = 0; _i <= 1; i = ++_i) {
+          _results.push(new Audanism.Sound.Instrument.NodeComparisonSound1(this.audiolet));
+        }
+        return _results;
+      }).call(this);
+      $(document).on('audanism/influence/node', function(e, influenceData) {
+        return self.handleNodeInfluence.call(self, e, influenceData);
+      });
+      $(document).on('audanism/alternodes', function(e, nodes) {
+        return self.handleNodeComparison.call(self, e, nodes);
+      });
     }
 
     Conductor.prototype.setOrganism = function(organism) {
@@ -36,6 +60,40 @@
       disharmonyOld = disharmonyData[0][2];
       disharmonyRatio = disharmonyNew / disharmonyOld;
       return this.noise.lpf.frequency.setValue(disharmonyRatio * 1000);
+    };
+
+    Conductor.prototype.handleNodeInfluence = function(e, influenceData) {
+      var length, nodeFreq, nodeId, nodePan;
+      console.log('perform hit on', influenceData, this.organism);
+      console.log('   has meta:', influenceData.meta);
+      if (!this.organism || !influenceData.meta) {
+        return;
+      }
+      nodeId = influenceData.node.node.nodeId;
+      nodeFreq = 80 + (nodeId * 40);
+      nodePan = nodeId / this.organism.getNodes().length;
+      length = Math.pow(influenceData.meta.current * 0.2, 3);
+      console.log('--- hit synth', influenceData.meta.current - 1, ', s =', this.influenceSounds[influenceData.meta.current - 1]);
+      console.log('--- values:', nodeFreq, nodePan, length);
+      return this.influenceSounds[influenceData.meta.current - 1].hit(nodeFreq, nodePan, length);
+    };
+
+    Conductor.prototype.handleNodeComparison = function(e, comparisonData) {
+      var freq, i, length, node, _i, _ref, _results;
+      _results = [];
+      for (i = _i = 0, _ref = comparisonData.nodes.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        node = comparisonData.nodes[i];
+        freq = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1);
+        if ((comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 && i === 0) || (comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2 && i === 1)) {
+          length = 0.1;
+        } else {
+          length = 1;
+        }
+        console.log('compnode -- val:', node.getCell(comparisonData.factorType).factorValue, ' => freq:', freq);
+        console.log('         -- action:', comparisonData.action, ' => length:', length);
+        _results.push(this.comparisonSounds[i].hit(freq, length));
+      }
+      return _results;
     };
 
     return Conductor;

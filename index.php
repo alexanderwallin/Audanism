@@ -115,6 +115,11 @@ $runLocal = @$_GET['local'] == 'yes';
 		<script defer src="js/src/Conductor.js"></script>
 		<script defer src="js/src/Noise.js"></script>
 		<script defer src="js/src/Synth.js"></script>
+		<script defer src="js/src/Synth2.js"></script>
+		<script defer src="js/src/Blip.js"></script>
+		<script defer src="src/sound/instrument/NodeInfluenceSound1.js"></script>
+		<script defer src="src/sound/instrument/NodeInfluenceSound2.js"></script>
+		<script defer src="src/sound/instrument/NodeComparisonSound1.js"></script>
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js"></script>

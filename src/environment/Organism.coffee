@@ -5,7 +5,7 @@ class Organism
 
 	# Options
 	@NUM_FACTORS: 5
-	@DEFAULT_NUM_NODES: 44
+	@DEFAULT_NUM_NODES: 22
 	@DISTRIBUTE_FACTOR_VALUES: false
 
 	# Stress thresholds - the thresholds for when the organism enters

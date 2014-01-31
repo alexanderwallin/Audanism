@@ -155,7 +155,7 @@
             neededSaveNode = true;
           }
           if (neededSaveNode) {
-            console.log(" >>> ABRUPT: Needed to save nodes <<<");
+            console.log(" >>> ABRUPT: Needed to rescue nodes <<<");
             return;
           }
         }
@@ -180,11 +180,19 @@
       switch (action) {
         case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1:
           nodes[0].addCellValue(factorType, -1);
-          return nodes[1].addCellValue(factorType, 1);
+          nodes[1].addCellValue(factorType, 1);
+          break;
         case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2:
           nodes[0].addCellValue(factorType, 1);
-          return nodes[1].addCellValue(factorType, -1);
+          nodes[1].addCellValue(factorType, -1);
       }
+      return $(document).trigger('audanism/alternodes', [
+        {
+          'nodes': nodes,
+          'factorType': factorType,
+          'action': action
+        }
+      ]);
     };
 
     DisharmonyCalculator.prototype._calcFactorDisharmonyForNode_lteF = function(c, F) {

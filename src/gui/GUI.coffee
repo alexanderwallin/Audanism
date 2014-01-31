@@ -29,6 +29,7 @@ class GUI
 		@_drawCharts tableData
 
 	_drawCharts: (tableData) ->
+		return
 		return if not @disharmonyChart?
 		
 		tableData.unshift ['Iteration', 'Sum dish.', 'Actual dish.']

@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 100
+	@TIME_INTERVAL: 250
 
 	# Constructor
 	#
@@ -132,7 +132,7 @@ class Environment
 
 				# Affect node
 				#console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
-				$(document).trigger 'audanism/influence/node', { 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }
+				$(document).trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
 				
 				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')

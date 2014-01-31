@@ -2,7 +2,9 @@
 (function() {
 
   window.Audanism = {
-    'Sound': {}
+    'Sound': {
+      'Instrument': {}
+    }
   };
 
 }).call(this);

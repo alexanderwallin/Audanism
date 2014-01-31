@@ -157,7 +157,7 @@ class DisharmonyCalculator
 					node.addCellValue factorType, -1
 					neededSaveNode = true
 				if neededSaveNode
-					console.log " >>> ABRUPT: Needed to save nodes <<<"
+					console.log " >>> ABRUPT: Needed to rescue nodes <<<"
 					return
 
 			# Start by storing the current disharmony
@@ -200,6 +200,8 @@ class DisharmonyCalculator
 				nodes[0].addCellValue factorType, 1
 				nodes[1].addCellValue factorType, -1
 		#console.log "   after: #{ nodes[0].getString() }   #{ nodes[1].getString() }"
+
+		$(document).trigger 'audanism/alternodes', [{ 'nodes':nodes, 'factorType':factorType, 'action':action }]
 
 
 	_calcFactorDisharmonyForNode_lteF: (c, F) ->

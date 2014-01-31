@@ -40,6 +40,7 @@
 
     GUI.prototype._drawCharts = function(tableData) {
       var data, options;
+      return;
       if (!(this.disharmonyChart != null)) {
         return;
       }

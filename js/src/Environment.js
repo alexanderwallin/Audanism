@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 100;
+    Environment.TIME_INTERVAL = 250;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -126,11 +126,16 @@
           organism = _ref[_i];
           factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
           node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
-          $(document).trigger('audanism/influence/node', {
-            'node': node,
-            'factor': factor,
-            'value': influenceData.node.valueModifier
-          });
+          $(document).trigger('audanism/influence/node', [
+            {
+              'node': {
+                'node': node,
+                'factor': factor,
+                'value': influenceData.node.valueModifier
+              },
+              'meta': influenceData.meta
+            }
+          ]);
           node.addCellValue(factor.factorType, influenceData.node.valueModifier);
           $node = $("[data-node-id='" + node.nodeId + "']").addClass('altered');
           setTimeout(function() {

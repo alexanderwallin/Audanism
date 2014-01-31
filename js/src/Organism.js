@@ -12,7 +12,7 @@
 
     Organism.NUM_FACTORS = 5;
 
-    Organism.DEFAULT_NUM_NODES = 44;
+    Organism.DEFAULT_NUM_NODES = 22;
 
     Organism.DISTRIBUTE_FACTOR_VALUES = false;
 

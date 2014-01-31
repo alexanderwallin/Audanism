@@ -63,7 +63,7 @@
     };
 
     InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
-      var caption, captionVals, i, interpreter, modVal, photo, _i, _j, _len, _ref,
+      var caption, captionVals, i, influenceData, interpreter, modVal, photo, _i, _j, _len, _ref,
         _this = this;
       console.log('••• parse instagram photos •••');
       interpreter = new TextInterpreter;
@@ -90,13 +90,19 @@
         for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
           modVal = Math.round(captionVals[i] * 10);
           modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
-          this.triggerInfluence({
+          influenceData = {
             'node': {
               'node': 'rand',
               'factor': i + 1,
               'valueModifier': modVal
+            },
+            'meta': {
+              'current': i + 1,
+              'total': captionVals.length
             }
-          });
+          };
+          console.log('....... influence data', influenceData);
+          this.triggerInfluence(influenceData);
         }
       }
       return this.jqxhr = null;

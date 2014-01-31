@@ -105,13 +105,20 @@ class InstagramSourceAdapter extends SourceAdapter
 				modVal = Math.round captionVals[i] * 10
 				modVal = if Math.random() >= 0.5 then modVal * -1 else modVal
 
-				@triggerInfluence {
+				influenceData = {
 					'node': {
 						'node': 'rand'
 						'factor': i+1
 						'valueModifier': modVal
+					},
+					'meta': {
+						'current': i + 1,
+						'total': captionVals.length
 					}
 				}
+				console.log('....... influence data', influenceData)
+
+				@triggerInfluence influenceData
 
 		@jqxhr = null
 

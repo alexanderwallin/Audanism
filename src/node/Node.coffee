@@ -51,6 +51,7 @@ class Node
 		if cell then cell.factorValue else 0
 
 	setCellValue: (factorType, value) ->
+		#console.log '#setCellValue', factorType, value
 		cell = @getCell factorType
 		cell.factorValue = value
 		cell.factorValue = 0 if cell.factorValue < 0
