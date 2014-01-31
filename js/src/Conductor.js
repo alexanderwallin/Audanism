@@ -14,6 +14,7 @@
       var i, self,
         _this = this;
       self = this;
+      this.muted = true;
       this.organism = null;
       this.audiolet = new Audiolet();
       this.noise = new Audanism.Sound.Noise(this.audiolet);
@@ -46,11 +47,13 @@
     };
 
     Conductor.prototype.mute = function() {
-      return this.noise.gain.gain.setValue(0);
+      this.noise.gain.gain.setValue(0);
+      return this.muted = true;
     };
 
     Conductor.prototype.unmute = function() {
-      return this.noise.gain.gain.setValue(1);
+      this.noise.gain.gain.setValue(1);
+      return this.muted = false;
     };
 
     Conductor.prototype.updateSounds = function() {
@@ -64,6 +67,9 @@
 
     Conductor.prototype.handleNodeInfluence = function(e, influenceData) {
       var length, nodeFreq, nodeId, nodePan;
+      if (this.muted) {
+        return;
+      }
       console.log('perform hit on', influenceData, this.organism);
       console.log('   has meta:', influenceData.meta);
       if (!this.organism || !influenceData.meta) {
@@ -80,6 +86,9 @@
 
     Conductor.prototype.handleNodeComparison = function(e, comparisonData) {
       var freq, i, length, node, _i, _ref, _results;
+      if (this.muted) {
+        return;
+      }
       _results = [];
       for (i = _i = 0, _ref = comparisonData.nodes.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         node = comparisonData.nodes[i];

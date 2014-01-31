@@ -6,7 +6,7 @@ $runLocal = @$_GET['local'] == 'yes';
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js canvas-only"> <!--<![endif]-->
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -15,10 +15,12 @@ $runLocal = @$_GET['local'] == 'yes';
         <meta name="viewport" content="width=device-width">
 
         <link rel="shortcut icon" href="img/favicon.png">
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
 
-        <?php if ($runLocal) : ?>
+        <?php /* if ($runLocal) : ?>
 	        <script type="text/javascript" src="js/vendor/google.jsapi.js"></script>
 	        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js"></script> -->
 	        <script type="text/javascript" src="js/vendor/google.charts.js"></script>
@@ -27,7 +29,7 @@ $runLocal = @$_GET['local'] == 'yes';
 			<script type="text/javascript">
 			google.load("visualization", "1", {packages:["corechart"]});
 			</script>
-		<?php endif; ?>
+		<?php endif; */ ?>
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -58,23 +60,25 @@ $runLocal = @$_GET['local'] == 'yes';
         		</div>
         	</aside>
 
-        	<menu id="controls">
+        	<div id="controls">
         		<a class="btn" href="#start">Start</a>
         		<a class="btn" href="#pause">Pause</a>
         		<!-- <a class="btn" href="#stop">Stop</a> -->
-        		<span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span>
+        		<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
         		<a class="btn" href="#step">Step ></a>
-        		<span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span>
-        		<input id="stressmode" type="checkbox" name="stressmode" />
-        		<label for="stressmode">Stress mode</label>
-        	</menu>
+        		<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
+        		<!-- <input id="stressmode" type="checkbox" name="stressmode" /> -->
+        		<!-- <label for="stressmode">Stress mode</label> -->
+        	</div>
         </div>
 
         <!-- Vendor scripts -->
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script> -->
-        <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script>
+        <!-- <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script> -->
+        <script defer src="js/vendor/jquery-1.8.1.min.js"></script>
         <script defer src="js/vendor/instagram.js"></script>
         <script defer src="js/vendor/Audiolet.min.js"></script>
+        <script defer src="js/vendor/three.min.js"></script>
 
         <!-- Audanism object initializer -->
         <script defer src="js/src/Audanism.js"></script>
@@ -86,6 +90,9 @@ $runLocal = @$_GET['local'] == 'yes';
 
         <!-- Util -->
         <script defer src="js/src/TextInterpreter.js"></script>
+
+        <!-- Event -->
+        <script defer src="js/src/EventDispatcher.js"></script>
 
 		<!-- Node -->
 		<script defer src="js/src/Node.js"></script>
@@ -128,5 +135,9 @@ $runLocal = @$_GET['local'] == 'yes';
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js"></script>
+
+		<!-- Visual -->
+		<script defer src="js/vendor/fonts/helvetiker_regular.typeface.js"></script>
+		<script defer src="js/src/VisualOrganism.js"></script>
     </body>
 </html>

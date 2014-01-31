@@ -5,7 +5,7 @@ class Organism
 
 	# Options
 	@NUM_FACTORS: 5
-	@DEFAULT_NUM_NODES: 22
+	@DEFAULT_NUM_NODES: 33
 	@DISTRIBUTE_FACTOR_VALUES: false
 
 	# Stress thresholds - the thresholds for when the organism enters
@@ -27,12 +27,12 @@ class Organism
 
 		# Create factors
 		@_factors = (Factor.createFactor i, 0 for i in [1..Organism.NUM_FACTORS])
-		$('document').trigger 'audanism/init/factors', [@_factors]
+		EventDispatcher.trigger 'audanism/init/factors', [@_factors]
 
 		# Create nodes
 		numNodes = Organism.DEFAULT_NUM_NODES if numNodes <= 0
 		@_createNodes numNodes
-		$('document').trigger 'audanism/init/nodes', [@_nodes]
+		EventDispatcher.trigger 'audanism/init/nodes', [@_nodes]
 
 		# Disharmony calculator
 		@disharmonyCalculator = new DisharmonyCalculator @
@@ -94,6 +94,11 @@ class Organism
 
 			# Trigger alteration of nodes
 			comparisonMode = if @_inStressMode and false then DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
+
+			# Notify observes
+			EventDispatcher.trigger 'audanism/compare/nodes', [{ 'nodes':nodes, 'comparisonMode':comparisonMode }]
+
+			# Perform comparison
 			@disharmonyCalculator.alterNodesInComparisonMode nodes, comparisonMode
 
 		@disharmonyCalculator.debug = false

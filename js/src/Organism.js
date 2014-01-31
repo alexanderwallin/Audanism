@@ -12,7 +12,7 @@
 
     Organism.NUM_FACTORS = 5;
 
-    Organism.DEFAULT_NUM_NODES = 22;
+    Organism.DEFAULT_NUM_NODES = 33;
 
     Organism.DISTRIBUTE_FACTOR_VALUES = false;
 
@@ -40,12 +40,12 @@
         }
         return _results;
       })();
-      $('document').trigger('audanism/init/factors', [this._factors]);
+      EventDispatcher.trigger('audanism/init/factors', [this._factors]);
       if (numNodes <= 0) {
         numNodes = Organism.DEFAULT_NUM_NODES;
       }
       this._createNodes(numNodes);
-      $('document').trigger('audanism/init/nodes', [this._nodes]);
+      EventDispatcher.trigger('audanism/init/nodes', [this._nodes]);
       this.disharmonyCalculator = new DisharmonyCalculator(this);
       this.disharmonyHistory = [];
       this._gui = new GUI;
@@ -93,6 +93,12 @@
       for (i = _i = 1; 1 <= numComparisons ? _i <= numComparisons : _i >= numComparisons; i = 1 <= numComparisons ? ++_i : --_i) {
         nodes = this._getRandomNodes(2);
         comparisonMode = this._inStressMode && false ? DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY : DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY;
+        EventDispatcher.trigger('audanism/compare/nodes', [
+          {
+            'nodes': nodes,
+            'comparisonMode': comparisonMode
+          }
+        ]);
         this.disharmonyCalculator.alterNodesInComparisonMode(nodes, comparisonMode);
       }
       this.disharmonyCalculator.debug = false;

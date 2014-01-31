@@ -10,7 +10,7 @@ class InstagramSourceAdapter extends SourceAdapter
 		# Query params
 		@clientId = "f42a4ce0632e412ea5a0353c2b5e581f"
 		@photoSinceId = 0
-		@tag = "audanism"
+		@tag = if window.location.anchro then window.location.anchor.replace(/^(.*?)instatag=([^&]+)(.*)$/, "$1") || "belieber" else "belieber"
 		@queryUrl = "https://api.instagram.com/v1/tags/#{ @tag }/media/recent"
 
 		# Ajax handler
@@ -22,7 +22,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 	# Sets up mouse event listeners
 	activate: () ->
-		console.log('ISA activate')
+		#console.log('ISA activate')
 
 		_this = @
 		_queryPhotos = @queryPhotos
@@ -34,7 +34,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 	# Performs a query for photos
 	queryPhotos: () ->
-		console.log('••• query instagram photots', @queryUrl, '•••')
+		#console.log('••• query instagram photots', @queryUrl, '•••')
 
 		if (@jqxhr)
 			return
@@ -48,7 +48,7 @@ class InstagramSourceAdapter extends SourceAdapter
 				max_id: @photoSinceId
 			},
 			success: (response) =>
-				console.log('did fetch data', response)
+				#console.log('did fetch data', response)
 				@parsePhotos response.data
 		}
 
@@ -65,7 +65,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 	# Parse photos
 	parsePhotos: (photos) ->
-		console.log('••• parse instagram photos •••')
+		#console.log('••• parse instagram photos •••')
 
 		interpreter = new TextInterpreter
 
@@ -73,14 +73,14 @@ class InstagramSourceAdapter extends SourceAdapter
 
 			# Store since id
 			if (photo.id is @photoSinceId)
-				console.log('   ## same photo, continue')
+				#console.log('   ## same photo, continue')
 				continue
 
 			@photoSinceId = photo.id
 
 			# Get caption
 			if (!photo.caption)
-				console.log('   ## no caption, continue')
+				#console.log('   ## no caption, continue')
 				continue
 
 			caption = photo.caption.text
@@ -95,7 +95,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 			# Get values
 			captionVals = interpreter.getNumCharsInGroups caption, 5
-			console.log('vals for text', caption, captionVals)
+			#console.log('vals for text', caption, captionVals)
 
 			# Trigger alteration
 			for i in [0..captionVals.length-1]
@@ -117,7 +117,7 @@ class InstagramSourceAdapter extends SourceAdapter
 						'total': captionVals.length
 					}
 				}
-				console.log('....... influence data', influenceData)
+				#console.log('....... influence data', influenceData)
 
 				@triggerInfluence influenceData
 

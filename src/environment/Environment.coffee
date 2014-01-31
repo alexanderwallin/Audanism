@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 200
+	@TIME_INTERVAL: 1000
 
 	# Constructor
 	#
@@ -16,16 +16,18 @@ class Environment
 	constructor: () ->
 		
 		@_iterationCount = 0
-		@_isRunning = true
-		@_isSingleStep = true
+		@_isRunning      = true
+		@_isSingleStep   = true
+		
+		@visualOrganism  = new Audanism.Graphic.VisualOrganism()
+		
+		@_organisms      = (new Organism for i in [1..Environment.NUM_ORGANISMS])
+		EventDispatcher.trigger 'audanism/init/organism', [@_organisms[0]]
 
-		@_organisms = (new Organism for i in [1..Environment.NUM_ORGANISMS])
-		$(document).trigger 'audanism/init/organism', [@_organisms[0]]
+		#@_gui = new GUI
 
-		@_gui = new GUI
-
-		for organism in @_organisms
-			@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+		#for organism in @_organisms
+		#	@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 		@listenToControls()
 
@@ -89,7 +91,10 @@ class Environment
 				@updateConductor()
 
 				# Update GUI
-				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+				#@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+
+				# Trigger event
+				EventDispatcher.trigger 'audanism/iteration', [organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 1]
 
 				@_isSingleStep = false
 		else
@@ -132,8 +137,8 @@ class Environment
 				#console.log '-- node', node
 
 				# Affect node
-				#console.log('--> node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
-				$(document).trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
+				console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
+				EventDispatcher.trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
 				
 				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')
@@ -209,6 +214,7 @@ class Environment
 		@conductor = new Audanism.Sound.Conductor()
 
 		@conductor.setOrganism @_organisms[0]
+		@conductor.mute()
 
 	updateConductor: () ->
 		@conductor.updateSounds()

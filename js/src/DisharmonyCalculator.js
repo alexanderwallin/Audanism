@@ -186,7 +186,7 @@
           nodes[0].addCellValue(factorType, 1);
           nodes[1].addCellValue(factorType, -1);
       }
-      return $(document).trigger('audanism/alternodes', [
+      return EventDispatcher.trigger('audanism/alternodes', [
         {
           'nodes': nodes,
           'factorType': factorType,

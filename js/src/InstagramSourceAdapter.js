@@ -19,7 +19,7 @@
       InstagramSourceAdapter.__super__.constructor.call(this, this.listener);
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
-      this.tag = "audanism";
+      this.tag = window.location.anchro ? window.location.anchor.replace(/^(.*?)instatag=([^&]+)(.*)$/, "$1") || "belieber" : "belieber";
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
       this.jqxhr = null;
       this.igGui = $('<div />', {
@@ -30,7 +30,6 @@
     InstagramSourceAdapter.prototype.activate = function() {
       var _queryPhotos,
         _this = this;
-      console.log('ISA activate');
       _this = this;
       _queryPhotos = this.queryPhotos;
       return setInterval(function() {
@@ -40,7 +39,6 @@
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
       var _this = this;
-      console.log('••• query instagram photots', this.queryUrl, '•••');
       if (this.jqxhr) {
         return;
       }
@@ -53,7 +51,6 @@
           max_id: this.photoSinceId
         },
         success: function(response) {
-          console.log('did fetch data', response);
           return _this.parsePhotos(response.data);
         }
       });
@@ -62,17 +59,14 @@
     InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
       var caption, captionVals, i, influenceData, interpreter, modVal, photo, _i, _j, _len, _ref,
         _this = this;
-      console.log('••• parse instagram photos •••');
       interpreter = new TextInterpreter;
       for (_i = 0, _len = photos.length; _i < _len; _i++) {
         photo = photos[_i];
         if (photo.id === this.photoSinceId) {
-          console.log('   ## same photo, continue');
           continue;
         }
         this.photoSinceId = photo.id;
         if (!photo.caption) {
-          console.log('   ## no caption, continue');
           continue;
         }
         caption = photo.caption.text;
@@ -83,7 +77,6 @@
           return _this.igGui.fadeTo(1000, 0);
         }, 2000);
         captionVals = interpreter.getNumCharsInGroups(caption, 5);
-        console.log('vals for text', caption, captionVals);
         for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
           if (!captionVals[i]) {
             continue;
@@ -101,7 +94,6 @@
               'total': captionVals.length
             }
           };
-          console.log('....... influence data', influenceData);
           this.triggerInfluence(influenceData);
         }
       }

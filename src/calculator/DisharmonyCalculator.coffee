@@ -201,7 +201,7 @@ class DisharmonyCalculator
 				nodes[1].addCellValue factorType, -1
 		#console.log "   after: #{ nodes[0].getString() }   #{ nodes[1].getString() }"
 
-		$(document).trigger 'audanism/alternodes', [{ 'nodes':nodes, 'factorType':factorType, 'action':action }]
+		EventDispatcher.trigger 'audanism/alternodes', [{ 'nodes':nodes, 'factorType':factorType, 'action':action }]
 
 
 	_calcFactorDisharmonyForNode_lteF: (c, F) ->

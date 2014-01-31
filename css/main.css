@@ -89,13 +89,14 @@ textarea {
     padding: 0.2em 0;
 }
 
+
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
 
 * 									{ box-sizing: border-box; }
 
-body 								{ font-family: "Helvetica Neue", Helvetica; background: #eee; color: #444; }
+body 								{ font-family: 'Dosis', 'Open Sans', 'Helvetica Neue', sans-serif, Helvetica; background: #eee; color: #444; }
 
 ul, li 								{ list-style: none; padding: 0; margin: 0; }
 
@@ -142,11 +143,33 @@ h3 									{ font-size: 10px; text-transform: uppercase; margin-top: 0; margin-
 
 
 /* Controls */
-#controls 							{ position: absolute; left: 0; right: 0; bottom: 0; height: 30px; margin: 0; padding: 5px 20px; background: #333; }
+/*
+#controls 							{ position: absolute; left: 0; right: 0; bottom: 0; height: 30px; margin: 0; padding: 10px 20px; background: #333; }
 
 .btn 								{ float: left; line-height: 20px; margin-right: 10px; padding: 0 1em; border-radius: 100px; background: #999; color: #111; font-size: 0.75em; }
 a.btn 								{ text-decoration: none !important; }
 .btn:hover 							{ background: #ccc; }
+*/
+
+#controls 							{ position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 10px 20px; background: rgba(51,145,124, 0.2); /*border-top: 1px solid rgba(0,0,0,0.1)*/ }
+#controls .btn 						{ display: inline-block; padding: 4px 8px; color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 200; letter-spacing: 1px; text-decoration: none; transition: color 0.1s ease-in-out; }
+#controls .btn:hover				{ color: #fff; }
+
+
+
+/* ==========================================================================
+   WebGL
+   ========================================================================== */
+
+html.canvas-only					{ overflow: hidden; }
+
+.canvas-only #header,
+.canvas-only #main,
+.canvas-only #meta,
+/*.canvas-only #controls,*/
+.canvas-only #ig-photo				{ display: none; }
+
+
 
 
 

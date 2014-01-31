@@ -6,8 +6,11 @@ class Conductor
 	constructor: () ->
 		self = @
 
+		@muted            = true
+
 		@organism         = null
 		@audiolet         = new Audiolet()
+
 		@noise            = new Audanism.Sound.Noise(@audiolet)
 		
 		@influenceSounds  = (new Audanism.Sound.Instrument.NodeInfluenceSound2(@audiolet) for i in [0..4])
@@ -26,10 +29,12 @@ class Conductor
 	mute: () ->
 		@noise.gain.gain.setValue 0
 		#s.synth.gain.gain.setValue 0 for s in @nodeSounds
+		@muted = true
 
 	unmute: () ->
 		@noise.gain.gain.setValue 1
 		#s.synth.gain.gain.setValue 1 for s in @nodeSounds
+		@muted = false
 
 	updateSounds: () ->
 
@@ -46,6 +51,10 @@ class Conductor
 		@noise.lpf.frequency.setValue disharmonyRatio * 1000
 
 	handleNodeInfluence: (e, influenceData) ->
+		
+		if @muted
+			return
+
 		console.log 'perform hit on', influenceData, @organism
 		console.log '   has meta:', influenceData.meta
 		#console.log @nodeSounds
@@ -68,6 +77,9 @@ class Conductor
 		#new Audanism.Sound.Instrument.NodeInfluenceSound2(nodeFreq, nodePan)
 
 	handleNodeComparison: (e, comparisonData) ->
+
+		if @muted
+			return
 
 		#minor = new MinorScale()
 

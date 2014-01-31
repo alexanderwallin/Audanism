@@ -13,13 +13,14 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 200;
+    Environment.TIME_INTERVAL = 1000;
 
     function Environment() {
-      var i, organism, _i, _len, _ref;
+      var i;
       this._iterationCount = 0;
       this._isRunning = true;
       this._isSingleStep = true;
+      this.visualOrganism = new Audanism.Graphic.VisualOrganism();
       this._organisms = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -28,13 +29,7 @@
         }
         return _results;
       })();
-      $(document).trigger('audanism/init/organism', [this._organisms[0]]);
-      this._gui = new GUI;
-      _ref = this._organisms;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        organism = _ref[_i];
-        this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
-      }
+      EventDispatcher.trigger('audanism/init/organism', [this._organisms[0]]);
       this.listenToControls();
       this.createInfluenceSources();
       this.initConductor();
@@ -93,7 +88,7 @@
           organism = _ref[_i];
           organism.performNodeComparison();
           this.updateConductor();
-          this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
+          EventDispatcher.trigger('audanism/iteration', [organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(1)]);
           _results.push(this._isSingleStep = false);
         }
         return _results;
@@ -127,7 +122,8 @@
           organism = _ref[_i];
           factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
           node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
-          $(document).trigger('audanism/influence/node', [
+          console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier);
+          EventDispatcher.trigger('audanism/influence/node', [
             {
               'node': {
                 'node': node,
@@ -208,7 +204,8 @@
 
     Environment.prototype.initConductor = function() {
       this.conductor = new Audanism.Sound.Conductor();
-      return this.conductor.setOrganism(this._organisms[0]);
+      this.conductor.setOrganism(this._organisms[0]);
+      return this.conductor.mute();
     };
 
     Environment.prototype.updateConductor = function() {
