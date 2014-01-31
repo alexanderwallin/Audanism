@@ -20,7 +20,7 @@ var NodeComparisonSoundSynth1 = function(audiolet, freq) {
 								0.01, // Attack
 								0.2,  // Decay
 								0.2,  // Sustain
-								0.4,  // Release
+								0.01,  // Release
 								function() {
 									this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
 								}.bind(this)

@@ -19,7 +19,7 @@
       InstagramSourceAdapter.__super__.constructor.call(this, this.listener);
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
-      this.tag = "belieber";
+      this.tag = "audanism";
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
       this.jqxhr = null;
       this.igGui = $('<div />', {
@@ -33,12 +33,9 @@
       console.log('ISA activate');
       _this = this;
       _queryPhotos = this.queryPhotos;
-      setInterval(function() {
+      return setInterval(function() {
         return _this.queryPhotos.call(_this);
       }, 5000);
-      return setTimeout(function() {
-        return _this.queryPhotos.call(_this);
-      }, 100);
     };
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
@@ -88,6 +85,9 @@
         captionVals = interpreter.getNumCharsInGroups(caption, 5);
         console.log('vals for text', caption, captionVals);
         for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
+          if (!captionVals[i]) {
+            continue;
+          }
           modVal = Math.round(captionVals[i] * 10);
           modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
           influenceData = {

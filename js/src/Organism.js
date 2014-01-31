@@ -40,10 +40,12 @@
         }
         return _results;
       })();
+      $('document').trigger('audanism/init/factors', [this._factors]);
       if (numNodes <= 0) {
         numNodes = Organism.DEFAULT_NUM_NODES;
       }
       this._createNodes(numNodes);
+      $('document').trigger('audanism/init/nodes', [this._nodes]);
       this.disharmonyCalculator = new DisharmonyCalculator(this);
       this.disharmonyHistory = [];
       this._gui = new GUI;

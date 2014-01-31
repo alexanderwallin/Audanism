@@ -10,7 +10,7 @@ class InstagramSourceAdapter extends SourceAdapter
 		# Query params
 		@clientId = "f42a4ce0632e412ea5a0353c2b5e581f"
 		@photoSinceId = 0
-		@tag = "belieber"
+		@tag = "audanism"
 		@queryUrl = "https://api.instagram.com/v1/tags/#{ @tag }/media/recent"
 
 		# Ajax handler
@@ -18,6 +18,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 		# Instagram GUI
 		@igGui = $('<div />', { 'id':'ig-photo' }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'))
+
 
 	# Sets up mouse event listeners
 	activate: () ->
@@ -30,9 +31,6 @@ class InstagramSourceAdapter extends SourceAdapter
 			@queryPhotos.call _this
 		, 5000
 
-		setTimeout () =>
-			@queryPhotos.call _this
-		, 100
 
 	# Performs a query for photos
 	queryPhotos: () ->
@@ -101,6 +99,9 @@ class InstagramSourceAdapter extends SourceAdapter
 
 			# Trigger alteration
 			for i in [0..captionVals.length-1]
+
+				if not captionVals[i]
+					continue
 
 				modVal = Math.round captionVals[i] * 10
 				modVal = if Math.random() >= 0.5 then modVal * -1 else modVal

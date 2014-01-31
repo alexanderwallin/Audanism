@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 250
+	@TIME_INTERVAL: 100
 
 	# Constructor
 	#
@@ -20,6 +20,7 @@ class Environment
 		@_isSingleStep = true
 
 		@_organisms = (new Organism for i in [1..Environment.NUM_ORGANISMS])
+		$(document).trigger 'audanism/init/organism', [@_organisms[0]]
 
 		@_gui = new GUI
 

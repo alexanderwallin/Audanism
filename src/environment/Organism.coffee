@@ -27,10 +27,12 @@ class Organism
 
 		# Create factors
 		@_factors = (Factor.createFactor i, 0 for i in [1..Organism.NUM_FACTORS])
+		$('document').trigger 'audanism/init/factors', [@_factors]
 
 		# Create nodes
 		numNodes = Organism.DEFAULT_NUM_NODES if numNodes <= 0
 		@_createNodes numNodes
+		$('document').trigger 'audanism/init/nodes', [@_nodes]
 
 		# Disharmony calculator
 		@disharmonyCalculator = new DisharmonyCalculator @

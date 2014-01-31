@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 250;
+    Environment.TIME_INTERVAL = 100;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -28,6 +28,7 @@
         }
         return _results;
       })();
+      $(document).trigger('audanism/init/organism', [this._organisms[0]]);
       this._gui = new GUI;
       _ref = this._organisms;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
