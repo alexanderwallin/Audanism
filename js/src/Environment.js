@@ -13,10 +13,10 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 1000;
+    Environment.TIME_INTERVAL = 500;
 
     function Environment() {
-      var i;
+      var i, organism, _i, _len, _ref;
       this._iterationCount = 0;
       this._isRunning = true;
       this._isSingleStep = true;
@@ -30,6 +30,12 @@
         return _results;
       })();
       EventDispatcher.trigger('audanism/init/organism', [this._organisms[0]]);
+      this._gui = new GUI;
+      _ref = this._organisms;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        organism = _ref[_i];
+        this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
+      }
       this.listenToControls();
       this.createInfluenceSources();
       this.initConductor();
@@ -88,7 +94,8 @@
           organism = _ref[_i];
           organism.performNodeComparison();
           this.updateConductor();
-          EventDispatcher.trigger('audanism/iteration', [organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(1)]);
+          this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
+          EventDispatcher.trigger('audanism/iteration', [organism]);
           _results.push(this._isSingleStep = false);
         }
         return _results;

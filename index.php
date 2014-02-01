@@ -56,7 +56,10 @@ $runLocal = @$_GET['local'] == 'yes';
 
         		<div id="disharmony-meter">
         			<div class="meter"></div>
-        			<div class="value"></div>
+        			<div class="value">
+        				<span class="sum"></span>
+        				<span class="actual"></span>
+        			</div>
         		</div>
         	</aside>
 
@@ -79,6 +82,8 @@ $runLocal = @$_GET['local'] == 'yes';
         <script defer src="js/vendor/instagram.js"></script>
         <script defer src="js/vendor/Audiolet.min.js"></script>
         <script defer src="js/vendor/three.min.js"></script>
+        <script defer src="js/vendor/fonts/helvetiker_regular.typeface.js"></script>
+        <script defer src="js/vendor/tween.min.js"></script>
 
         <!-- Audanism object initializer -->
         <script defer src="js/src/Audanism.js"></script>
@@ -137,7 +142,6 @@ $runLocal = @$_GET['local'] == 'yes';
 		<script defer src="js/src/GUI.js"></script>
 
 		<!-- Visual -->
-		<script defer src="js/vendor/fonts/helvetiker_regular.typeface.js"></script>
 		<script defer src="js/src/VisualOrganism.js"></script>
     </body>
 </html>

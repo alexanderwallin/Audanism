@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 1000
+	@TIME_INTERVAL: 500
 
 	# Constructor
 	#
@@ -24,10 +24,10 @@ class Environment
 		@_organisms      = (new Organism for i in [1..Environment.NUM_ORGANISMS])
 		EventDispatcher.trigger 'audanism/init/organism', [@_organisms[0]]
 
-		#@_gui = new GUI
+		@_gui = new GUI
 
-		#for organism in @_organisms
-		#	@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+		for organism in @_organisms
+			@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 		@listenToControls()
 
@@ -91,10 +91,10 @@ class Environment
 				@updateConductor()
 
 				# Update GUI
-				#@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 				# Trigger event
-				EventDispatcher.trigger 'audanism/iteration', [organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 1]
+				EventDispatcher.trigger 'audanism/iteration', [organism]
 
 				@_isSingleStep = false
 		else

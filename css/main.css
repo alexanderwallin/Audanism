@@ -102,7 +102,9 @@ ul, li 								{ list-style: none; padding: 0; margin: 0; }
 
 #container 							{  }
 
-h1									{ margin: 0; padding: 0 20px; line-height: 40px; font-size: 1em; font-weight: 200; letter-spacing: 20px; text-transform: lowercase; text-align: center; background: rgba(255,255,255,0.3); border-bottom: 1px solid #ddd; }
+/*h1									{ margin: 0; padding: 0 20px; line-height: 40px; font-size: 1em; font-weight: 200; letter-spacing: 20px; text-transform: lowercase; text-align: center; background: rgba(255,255,255,0.3); border-bottom: 1px solid #ddd; }*/
+
+h1									{ position: absolute; top: 14px; left: 28px; font-size: 12px; font-weight: normal; color: #fff; letter-spacing: 2px; opacity: 0.8; }
 
 h3 									{ font-size: 10px; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; }
 
@@ -131,8 +133,10 @@ h3 									{ font-size: 10px; text-transform: uppercase; margin-top: 0; margin-
 
 #disharmony-chart					{ display: none; position: absolute; top: 0; right: 0; width: 100%; height: 300px; background: #ccc; }
 
-#disharmony-meter					{ position: absolute; top: 10px; right: 10px; float: right; text-align: right; }
-#disharmony-meter .value			{ font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+#disharmony-meter					{ position: fixed; top: 14px; right: 28px; float: right; text-align: right; }
+#disharmony-meter .value span		{ display: block; font-size: 12px; letter-spacing: 1px; text-align: right; }
+#disharmony-meter .sum				{ font-weight: bold; }
+#disharmony-meter .actual			{ font-size: 10px; }
 
 #ig-photo							{ position: absolute; bottom: 45px; right: 15px; width: 360px; height: 100px; background: #fff; box-shadow: 1px 1px 1px rgba(0,0,0,0.1); }
 #ig-photo::before					{ content: 'Source: Instagram'; display: block; position: absolute; bottom: 100%; right: 4px; float: right; padding: 4px 8px; background: #666; color: #eee; text-align: right; text-transform: uppercase; font-size: 9px; font-weight: bold; letter-spacing: 1px; }
@@ -163,9 +167,9 @@ a.btn 								{ text-decoration: none !important; }
 
 html.canvas-only					{ overflow: hidden; }
 
-.canvas-only #header,
+/*.canvas-only #header,*/
 .canvas-only #main,
-.canvas-only #meta,
+/*.canvas-only #meta,*/
 /*.canvas-only #controls,*/
 .canvas-only #ig-photo				{ display: none; }
 

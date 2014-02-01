@@ -34,11 +34,8 @@
     };
 
     GUI.prototype.update = function(factors, nodes, tableData) {
-      this._updateFactors(factors);
-      this._updateNodes(nodes);
-      this._drawCharts(tableData);
       if (tableData.length > 0) {
-        return this.$meter.html("" + (Math.round(tableData[tableData.length - 1][2])) + "<br /><small style='font-weight:normal;'>" + (Math.round(tableData[tableData.length - 1][1])) + "</small>");
+        return this.$meter.find('.sum').html(Math.round(tableData[tableData.length - 1][2])).end().find('.actual').html(Math.round(tableData[tableData.length - 1][1]));
       }
     };
 

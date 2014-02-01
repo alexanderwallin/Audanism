@@ -15,30 +15,41 @@
       _this = this;
       this.opts = {
         'roomSize': 2000,
-        'roomVertices': 100,
-        'roomColor': 0x3AAB92,
-        'ballSize': 20,
-        'ballColor': 0xF2ED50,
-        'ballColorCompare': 0xED8A34,
+        'roomVertices': 200,
+        'roomColor': new THREE.Color(0x3AAB92),
+        'cameraDistanceStart': 1300,
+        'cameraDistance': 1300,
+        'clusterSize': 500,
+        'ballSize': 10,
+        'ballColor': new THREE.Color(0xF2ED50),
+        'ballColorCompare': new THREE.Color(0xED8A34),
         'ballCompareTime': 1000,
-        'ballColorInfluence': 0xED34A0,
+        'ballColorInfluence': new THREE.Color(0xED34A0),
         'ballInfluenceTime': 2000
       };
-      EventDispatcher.listen('audanism/init/organism', this, this.onInitOrgasm);
+      EventDispatcher.listen('audanism/init/organism', this, this.onInitOrganism);
+      EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/influence/node', this, this.onInfluenceNode);
       EventDispatcher.listen('audanism/compare/nodes', this, this.onCompareNodes);
       this.initControls();
     }
 
-    VisualOrganism.prototype.onInitOrgasm = function(organism) {
-      console.log('#onInitOrgasm', organism, this);
+    VisualOrganism.prototype.onInitOrganism = function(organism) {
+      console.log('#onInitOrganism', organism, this);
       this.organism = organism;
-      return this.buildScene();
+      return this.init();
+    };
+
+    VisualOrganism.prototype.init = function() {
+      window.Audanism.Graphic["public"] = {
+        'animate': this.animate.bind(this)
+      };
+      this.buildScene();
+      return this.animate();
     };
 
     VisualOrganism.prototype.buildScene = function() {
-      var animate, createAxis, init,
-        _this = this;
+      var ball, ball3d, ballGeometry, ballMaterial, i, _i, _ref;
       console.log('#buildScene');
       this.camera;
       this.scene;
@@ -61,131 +72,74 @@
       this.keyRight = false;
       this.keyUp = false;
       this.keyDown = false;
-      init = function() {
-        var ball, ball3d, ballGeometry, ballMaterial, i, sphere, _i, _ref;
-        _this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
-        _this.camera.position = new THREE.Vector3(_this.sphereSize * 2, _this.sphereSize / 2, _this.sphereSize * 2);
-        _this.camera.target = new THREE.Vector3(0, 0, 0);
-        _this.camera.lookAt(_this.camera.target);
-        _this.camera.setLens(35);
-        _this.scene = new THREE.Scene();
-        sphere = new THREE.Mesh(new THREE.SphereGeometry(_this.opts.roomSize, _this.opts.roomVertices, _this.opts.roomVertices), new THREE.MeshPhongMaterial({
-          'ambient': _this.opts.roomColor,
-          'side': THREE.BackSide,
+      this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+      this.camera.position = new THREE.Vector3(1, 0.25, 1).multiplyScalar(this.opts.cameraDistanceStart);
+      this.camera.target = new THREE.Vector3(0, 0, 0);
+      this.camera.lookAt(this.camera.target);
+      this.camera.setLens(35);
+      this.scene = new THREE.Scene();
+      this.scene.fog = new THREE.Fog(0x999999, this.opts.clusterSize / 2, this.opts.clusterSize * 9);
+      this.room = new THREE.Mesh(new THREE.SphereGeometry(this.opts.roomSize, this.opts.roomVertices, this.opts.roomVertices), new THREE.MeshPhongMaterial({
+        'ambient': this.opts.roomColor,
+        'side': THREE.BackSide,
+        'shading': THREE.FlatShading,
+        'blending': THREE.AdditiveBlending,
+        'vertexColors': THREE.VertexColors
+      }));
+      this.scene.add(this.room);
+      for (i = _i = 0, _ref = this.numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        ball = {
+          ballId: i,
+          hello: "hello. i am ball no " + i + ".",
+          direction: new THREE.Vector3(2 * Math.random() - 1, 2 * Math.random() - 1, 2 * Math.random() - 1),
+          ballSize: this.opts.ballSize
+        };
+        ball.pos = new THREE.Vector3(ball.direction.x * Math.random() * this.opts.clusterSize, ball.direction.y * Math.random() * this.opts.clusterSize, ball.direction.z * Math.random() * this.opts.clusterSize);
+        if (i === 0) {
+          console.log('>> ball', ball);
+          console.log('>> ball start at', ball.pos);
+        }
+        ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 20);
+        ballMaterial = new THREE.MeshLambertMaterial({
+          'ambient': this.opts.ballColor,
+          'side': THREE.DoubleSide,
           'shading': THREE.FlatShading,
           'blending': THREE.AdditiveBlending,
           'vertexColors': THREE.VertexColors
-        }));
-        _this.scene.add(sphere);
-        for (i = _i = 0, _ref = _this.numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-          ball = {
-            ballId: i,
-            pos: new THREE.Vector3(Math.round(Math.random() * _this.sphereSize - (_this.sphereSize / 2)), Math.round(Math.random() * _this.sphereSize - (_this.sphereSize / 2)), Math.round(Math.random() * _this.sphereSize - (_this.sphereSize / 2))),
-            ballSize: _this.opts.ballSize
-          };
-          ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 20);
-          ballMaterial = new THREE.MeshLambertMaterial({
-            'ambient': _this.opts.ballColor,
-            'side': THREE.DoubleSide,
-            'shading': THREE.FlatShading,
-            'blending': THREE.AdditiveBlending,
-            'vertexColors': THREE.VertexColors
-          });
-          ball3d = new THREE.Mesh(ballGeometry, ballMaterial);
-          ball3d.ballId = ball.ballId;
-          ball.ball3d = ball3d;
-          ball.ball3d.position.set(ball.pos.x, ball.pos.y, ball.pos.z);
-          console.log(ball.pos);
-          _this.scene.add(ball.ball3d);
-          _this.balls[i] = ball;
-        }
-        console.log(_this.balls);
-        _this.lightAmb = new THREE.AmbientLight(0xffffff);
-        _this.scene.add(_this.lightAmb);
-        _this.lightSpot = new THREE.DirectionalLight(0xffffff, 0.2);
-        _this.lightSpot.position.set(0, 1, 1);
-        _this.scene.add(_this.lightSpot);
-        _this.renderer = new THREE.WebGLRenderer({
-          'alpha': false,
-          'antialias': true
         });
-        _this.renderer.setSize(window.innerWidth, window.innerHeight);
-        console.log(_this.scene);
-        return $('#container').append(_this.renderer.domElement);
-      };
-      createAxis = function() {
-        _this.axis = new THREE.AxisHelper(500);
-        return _this.scene.add(_this.axis);
-        /*
-        			textGeo = new THREE.TextGeometry 'Y', {
-        				size: 20
-        				height: 2
-        				curveSegments: 6
-        				font: "helvetiker"
-        				style: "normal"
-        			}
-        			color = new THREE.Color()
-        			color.setRGB(255, 250, 250)
-        			textMaterial = new THREE.MeshBasicMaterial({ color: color })
-        			text = new THREE.Mesh(textGeo , textMaterial)
-        
-        			text.position.x = @axis.geometry.vertices[1].x;
-        			text.position.y = @axis.geometry.vertices[1].y;
-        			text.position.z = @axis.geometry.vertices[1].z;
-        			text.rotation   = @camera.rotation;
-        			@scene.add(text);
-        */
+        ball3d = new THREE.Mesh(ballGeometry, ballMaterial);
+        ball3d.ballId = ball.ballId;
+        ball.ball3d = ball3d;
+        ball.ball3d.position = ball.pos.clone();
+        console.log(ball.pos);
+        this.scene.add(ball.ball3d);
+        this.balls[i] = ball;
+      }
+      console.log(this.balls);
+      this.lightAmb = new THREE.AmbientLight(0xffffff);
+      this.scene.add(this.lightAmb);
+      this.lightSpot = new THREE.DirectionalLight(0xffffff, 0.2);
+      this.lightSpot.position.set(0, 1, 1);
+      this.scene.add(this.lightSpot);
+      this.axis = new THREE.AxisHelper(500);
+      this.scene.add(this.axis);
+      this.renderer = new THREE.WebGLRenderer({
+        'alpha': false,
+        'antialias': true
+      });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      console.log(this.scene);
+      return $('#container').append(this.renderer.domElement);
+    };
 
-      };
-      animate = function() {
-        requestAnimationFrame(Audanism.Graphic["public"].animate);
-        _this.frame++;
-        if (_this.keyLeft) {
-          _this.camera.rotation.y += 0.05;
-        }
-        if (_this.keyRight) {
-          _this.camera.rotation.y -= 0.05;
-        }
-        if (_this.keyUp) {
-          _this.camera.rotation.x += 0.05;
-        }
-        if (_this.keyDown) {
-          _this.camera.rotation.x -= 0.05;
-        }
-        _this.camera.position.x = Math.sin(_this.frame / 200) * _this.sphereSize * 2;
-        _this.camera.position.z = Math.cos(_this.frame / 200) * _this.sphereSize * 2;
-        _this.camera.lookAt(_this.camera.target);
-        return _this.renderer.render(_this.scene, _this.camera);
-      };
-      /*
-      		function setSkyBgFromAngle(angle) {
-      			var angle1 = angle + Math.PI / 8,
-      				angle2 = angle - Math.PI / 8
-      			var color1 = [
-      					150 + Math.floor(80 * (Math.sin(angle1) / 2 + 0.5)),
-      					150 + Math.floor(80 * (Math.sin(angle1 + Math.PI / 3) / 2 + 0.5)),
-      					150 + Math.floor(80 * (Math.sin(angle1 + 2 * Math.PI / 3) / 2 + 0.5))
-      				],
-      				color2 = [
-      					150 + Math.floor(80 * (Math.sin(angle2) / 2 + 0.5)),
-      					150 + Math.floor(80 * (Math.sin(angle2 + Math.PI / 3) / 2 + 0.5)),
-      					150 + Math.floor(80 * (Math.sin(angle2 + 2 * Math.PI / 3) / 2 + 0.5))
-      				]
-      
-      			$body
-      				.css({
-      					'background-image': '-webkit-linear-gradient(left, rgb(' + color1.join(',') + '), rgb(' + color2.join(',') + '))'
-      				})
-      		}
-      */
-
-      window.Audanism.Graphic["public"] = {
-        'animate': animate
-      };
-      init();
-      createAxis();
-      animate();
-      return this;
+    VisualOrganism.prototype.animate = function() {
+      requestAnimationFrame(Audanism.Graphic["public"].animate);
+      this.frame++;
+      this.camera.position.x = Math.sin(this.frame / 200) * this.opts.cameraDistance;
+      this.camera.position.z = Math.cos(this.frame / 200) * this.opts.cameraDistance;
+      this.camera.lookAt(this.camera.target);
+      TWEEN.update();
+      return this.renderer.render(this.scene, this.camera);
     };
 
     VisualOrganism.prototype.initControls = function() {
@@ -217,11 +171,65 @@
       });
     };
 
-    VisualOrganism.prototype.onIteration = function() {};
+    VisualOrganism.prototype.onIteration = function(organism) {
+      var ball, disharmony, newPos, relativeDisharmony, tweenFrom, tweenTo, _i, _len, _ref;
+      console.log('#onIteration');
+      disharmony = organism.getDisharmonyHistoryData();
+      if (disharmony.length === 0) {
+        return;
+      }
+      disharmony = disharmony[disharmony.length - 1];
+      if (!(this.opts.initialDisharmonyData != null)) {
+        this.opts.initialDisharmonyData = disharmony;
+        console.log('stored initial disharmony', disharmony);
+      }
+      relativeDisharmony = disharmony[2] / this.opts.initialDisharmonyData[2];
+      this.largestDistance = 0;
+      _ref = this.balls;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        ball = _ref[_i];
+        newPos = ball.pos.clone().multiplyScalar(relativeDisharmony);
+        tweenFrom = ball.ball3d.position.clone();
+        tweenTo = {
+          'x': newPos.x,
+          'y': newPos.y,
+          'z': newPos.z
+        };
+        this._tweenBall(ball, tweenFrom, tweenTo);
+        if (ball.ball3d.position.length() > this.largestDistance) {
+          this.largestDistance = ball.ball3d.position.length();
+        }
+      }
+      return this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
+    };
+
+    VisualOrganism.prototype._tweenBall = function(ball, from, to) {
+      var tween;
+      tween = new TWEEN.Tween(from).to(to, 300);
+      tween.easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        return ball.ball3d.position.set(this.x, this.y, this.z);
+      });
+      return tween.start();
+    };
+
+    VisualOrganism.prototype._tweenCameraDistance = function(to) {
+      var tween, _this;
+      _this = this;
+      tween = new TWEEN.Tween({
+        'distance': this.opts.cameraDistance
+      }).to({
+        'distance': to
+      }, 1000);
+      tween.easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        return _this.opts.cameraDistance = this.distance;
+      });
+      return tween.start();
+    };
 
     VisualOrganism.prototype.onCompareNodes = function(compareData) {
       var ball, node, _i, _len, _ref, _results;
-      console.log('#onCompareNodes', compareData);
       _ref = compareData.nodes;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -234,10 +242,9 @@
 
     VisualOrganism.prototype._animateComparingBall = function(ball) {
       var _this = this;
-      ball.ball3d.material.ambient.setHex(this.opts.ballColorCompare);
-      return setTimeout(function() {
-        return ball.ball3d.material.ambient.setHex(_this.opts.ballColor);
-      }, this.opts.ballCompareTime);
+      return this._tweenBallColor(ball, this.opts.ballColor, this.opts.ballColorCompare, 200, function() {
+        return _this._tweenBallColor(ball, ball.ball3d.material.ambient, _this.opts.ballColor, 1000);
+      });
     };
 
     VisualOrganism.prototype.onInfluenceNode = function(influenceData) {
@@ -246,10 +253,31 @@
 
     VisualOrganism.prototype._animateInfluencedBall = function(ball) {
       var _this = this;
-      ball.ball3d.material.ambient.setHex(this.opts.ballColorInfluence);
-      return setTimeout(function() {
-        return ball.ball3d.material.ambient.setHex(_this.opts.ballColor);
-      }, this.opts.ballInfluenceTime);
+      return this._tweenBallColor(ball, this.opts.ballColor, this.opts.ballColorInfluence, 200, function() {
+        return _this._tweenBallColor(ball, ball.ball3d.material.ambient, _this.opts.ballColor, 3000);
+      });
+    };
+
+    VisualOrganism.prototype._tweenBallColor = function(ball, fromColor, toColor, duration, callback) {
+      var colorFrom, colorTo, tween;
+      colorFrom = {
+        'r': fromColor.r,
+        'g': fromColor.g,
+        'b': fromColor.b
+      };
+      colorTo = {
+        'r': toColor.r,
+        'g': toColor.g,
+        'b': toColor.b
+      };
+      tween = new TWEEN.Tween(colorFrom).to(colorTo, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        return ball.ball3d.material.ambient.setRGB(this.r, this.g, this.b);
+      });
+      if (callback) {
+        tween.onComplete(callback);
+      }
+      return tween.start();
     };
 
     return VisualOrganism;

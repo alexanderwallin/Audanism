@@ -10,22 +10,25 @@ class VisualOrganism
 
 		# Options
 		@opts = {
-			'roomSize': 2000
-			'roomVertices': 100
-			'roomColor': 0x3AAB92
-			'ballSize': 20
-			'ballColor': 0xF2ED50
-			'ballColorCompare': 0xED8A34
-			'ballCompareTime': 1000
-			'ballColorInfluence': 0xED34A0
-			'ballInfluenceTime': 2000
+			'roomSize':            2000
+			'roomVertices':        200
+			'roomColor':           new THREE.Color(0x3AAB92)
+			'cameraDistanceStart': 1300
+			'cameraDistance':      1300
+			'clusterSize':         500
+			'ballSize':            10
+			'ballColor':           new THREE.Color(0xF2ED50)
+			'ballColorCompare':    new THREE.Color(0xED8A34)
+			'ballCompareTime':     1000
+			'ballColorInfluence':  new THREE.Color(0xED34A0)
+			'ballInfluenceTime':   2000
 		}
 
 		# Init handlers
-		EventDispatcher.listen 'audanism/init/organism',  @, @onInitOrgasm
+		EventDispatcher.listen 'audanism/init/organism',  @, @onInitOrganism
 
 		# Real-time handlers
-		#$(document).on 'audanism/iteration', @onIteration
+		EventDispatcher.listen 'audanism/iteration',      @, @onIteration
 		EventDispatcher.listen 'audanism/influence/node', @, @onInfluenceNode
 		EventDispatcher.listen 'audanism/compare/nodes',  @, @onCompareNodes
 
@@ -34,11 +37,24 @@ class VisualOrganism
 		#$('html').addClass 'canvas-only'
 
 
-	onInitOrgasm: (organism) ->
-		console.log '#onInitOrgasm', organism, @
+	# Handles organism init
+	onInitOrganism: (organism) ->
+		console.log '#onInitOrganism', organism, @
 		@organism = organism
 
+		@init()
+
+
+	# Initialzer
+	init: () ->
+
+		# Make the animate() functions public
+		window.Audanism.Graphic.public = {
+			'animate': @animate.bind(@)
+		}
+
 		@buildScene()
+		@animate()
 
 
 	# Builds the WebGL scene
@@ -79,169 +95,106 @@ class VisualOrganism
 		@keyDown     = false
 
 
-		# Init
-		init = () =>
+		# --- Start creating --- #
 
-			# Camera && scene
-			@camera = new THREE.PerspectiveCamera 50, window.innerWidth / window.innerHeight, 1, 10000
-			#camera.position.z = 1000
-			#@camera.position.z = 0
-			@camera.position = new THREE.Vector3 @sphereSize * 2, @sphereSize / 2, @sphereSize * 2
-			@camera.target = new THREE.Vector3 0, 0, 0
-			@camera.lookAt @camera.target
-			@camera.setLens 35
 
-			@scene = new THREE.Scene()
-			#scene.fog = new THREE.Fog( 0x050505, 2000, 4000 )
+		# Camera && scene
+		@camera = new THREE.PerspectiveCamera 50, window.innerWidth / window.innerHeight, 1, 10000
+		@camera.position = new THREE.Vector3( 1, 0.25, 1 ).multiplyScalar( @opts.cameraDistanceStart )
+		@camera.target = new THREE.Vector3 0, 0, 0
+		@camera.lookAt @camera.target
+		@camera.setLens 35
 
-			# Container sphere
-			sphere = new THREE.Mesh( new THREE.SphereGeometry(@opts.roomSize, @opts.roomVertices, @opts.roomVertices), new THREE.MeshPhongMaterial({ 'ambient': @opts.roomColor, 'side': THREE.BackSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors }) )
-			@scene.add sphere
+		@scene = new THREE.Scene()
+		@scene.fog = new THREE.Fog( 0x999999, @opts.clusterSize / 2, @opts.clusterSize * 9 )
 
-			# Make balls
-			for i in [0..@numBalls-1]
+		# Container sphere
+		@room = new THREE.Mesh( new THREE.SphereGeometry(@opts.roomSize, @opts.roomVertices, @opts.roomVertices), new THREE.MeshPhongMaterial({ 'ambient': @opts.roomColor, 'side': THREE.BackSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors }) )
+		@scene.add @room
 
-				# Make ball info object
-				ball = {
-					ballId:     i
-					pos:        new THREE.Vector3 Math.round(Math.random() * @sphereSize - (@sphereSize / 2)), Math.round(Math.random()  * @sphereSize - (@sphereSize / 2)), Math.round(Math.random() * @sphereSize - (@sphereSize / 2))
-					ballSize:   @opts.ballSize
-				}
+		# Make balls
+		for i in [0..@numBalls-1]
 
-				# Make ball 3d object
-				ballGeometry  = new THREE.SphereGeometry ball.ballSize, 20, 20
-				ballMaterial  = new THREE.MeshLambertMaterial({ 'ambient':@opts.ballColor, 'side': THREE.DoubleSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors })
-				ball3d        = new THREE.Mesh ballGeometry, ballMaterial
-				ball3d.ballId = ball.ballId; # Store id reference
-
-				# Store ball 3d object in ball info object
-				ball.ball3d   = ball3d
-
-				# Position ball
-				ball.ball3d.position.set ball.pos.x, ball.pos.y, ball.pos.z
-
-				console.log ball.pos
-				@scene.add ball.ball3d
-				@balls[i] = ball
-
-			console.log @balls
-
-			# Create a plane
-			#planeXZ = new THREE.Mesh( new THREE.PlaneGeometry @sphereSize * 3, @sphereSize * 3, new THREE.MeshLambertMaterial { 'color':0x22eecc, 'side': THREE.DoubleSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors } )
-			#planeXZ.position.set 0, 0, 0
-			#@scene.add planeXZ
-
-			# lights
-			@lightAmb = new THREE.AmbientLight 0xffffff
-			@scene.add @lightAmb
-
-			@lightSpot = new THREE.DirectionalLight 0xffffff, 0.2
-			@lightSpot.position.set 0, 1, 1
-			@scene.add @lightSpot
-
-			@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':true }
-			#renderer.setClearColor( 0x000000, 0 )
-			@renderer.setSize window.innerWidth, window.innerHeight
-
-			console.log @scene
-
-			$('#container').append @renderer.domElement
-
-		createAxis = () =>
-
-			@axis = new THREE.AxisHelper( 500 )
-			@scene.add @axis
-
-			###
-			textGeo = new THREE.TextGeometry 'Y', {
-				size: 20
-				height: 2
-				curveSegments: 6
-				font: "helvetiker"
-				style: "normal"
+			# Make ball info object
+			ball = {
+				ballId:     i
+				hello:      "hello. i am ball no #{ i }."
+				direction:  new THREE.Vector3 (2 * Math.random() - 1), (2 * Math.random() - 1), (2 * Math.random() - 1)
+				ballSize:   @opts.ballSize
 			}
-			color = new THREE.Color()
-			color.setRGB(255, 250, 250)
-			textMaterial = new THREE.MeshBasicMaterial({ color: color })
-			text = new THREE.Mesh(textGeo , textMaterial)
 
-			text.position.x = @axis.geometry.vertices[1].x;
-			text.position.y = @axis.geometry.vertices[1].y;
-			text.position.z = @axis.geometry.vertices[1].z;
-			text.rotation   = @camera.rotation;
-			@scene.add(text);
-			###
+			# Set ball position from direction
+			ball.pos = new THREE.Vector3 (ball.direction.x * Math.random() * @opts.clusterSize), (ball.direction.y * Math.random() * @opts.clusterSize), (ball.direction.z * Math.random() * @opts.clusterSize)
+
+			if i is 0
+				console.log '>> ball', ball
+				console.log '>> ball start at', ball.pos
+
+			# Make ball 3d object
+			ballGeometry  = new THREE.SphereGeometry ball.ballSize, 20, 20
+			ballMaterial  = new THREE.MeshLambertMaterial({ 'ambient':@opts.ballColor, 'side': THREE.DoubleSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors })
+			ball3d        = new THREE.Mesh ballGeometry, ballMaterial
+			ball3d.ballId = ball.ballId; # Store id reference
+
+			# Store ball 3d object in ball info object
+			ball.ball3d   = ball3d
+
+			# Position ball
+			ball.ball3d.position = ball.pos.clone()
+
+			console.log ball.pos
+			@scene.add ball.ball3d
+			@balls[i] = ball
+
+		console.log @balls
+
+		# Create a plane
+		#planeXZ = new THREE.Mesh( new THREE.PlaneGeometry @opts.clusterSize * 3, @opts.clusterSize * 3, new THREE.MeshLambertMaterial { 'color':0x22eecc, 'side': THREE.DoubleSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors } )
+		#planeXZ.position.set 0, 0, 0
+		#@scene.add planeXZ
+
+		# Add lights
+		@lightAmb = new THREE.AmbientLight 0xffffff
+		@scene.add @lightAmb
+
+		@lightSpot = new THREE.DirectionalLight 0xffffff, 0.2
+		@lightSpot.position.set 0, 1, 1
+		@scene.add @lightSpot
+
+		# Add axises
+		@axis = new THREE.AxisHelper( 500 )
+		@scene.add @axis
+
+		# Renderer
+		@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':true }
+		#renderer.setClearColor( 0x000000, 0 )
+		@renderer.setSize window.innerWidth, window.innerHeight
+
+		console.log @scene
+
+		$('#container').append @renderer.domElement
 
 
-		# Animate
-		animate = () =>
+	# Animate
+	animate: () ->
 
-			# note: three.js includes requestAnimationFrame shim
-			requestAnimationFrame( Audanism.Graphic.public.animate )
+		# note: three.js includes requestAnimationFrame shim
+		requestAnimationFrame( Audanism.Graphic.public.animate )
 
-			#if frame is 0
-			#	@setSkyBgFromAngle(@camera.rotation.y)
+		@frame++
 
-			@frame++
+		# Rotate camera around cluster
+		@camera.position.x = Math.sin(  @frame / 200 ) * @opts.cameraDistance # + (Math.sin( @frame / 100) * @opts.clusterSize / 10)
+		@camera.position.z = Math.cos(  @frame / 200 ) * @opts.cameraDistance # + (Math.sin( @frame / 100) * @opts.clusterSize / 10)
+		@camera.lookAt( @camera.target )
 
-			
-			if (@keyLeft)
-				@camera.rotation.y += 0.05
-			if (@keyRight)
-				@camera.rotation.y -= 0.05
-			if (@keyUp)
-				@camera.rotation.x += 0.05
-			if (@keyDown)
-				@camera.rotation.x -= 0.05
-			
-			#@camera.lookAt new THREE.Vector3 0, 0, 0
+		TWEEN.update()
 
-			#@camera.rotation.y += 0.02
-
-			# Rotate camera around cluster
-			@camera.position.x = Math.sin(  @frame / 200 ) * @sphereSize * 2
-			@camera.position.z = Math.cos(  @frame / 200 ) * @sphereSize * 2
-			#console.log @camera.position
-			#@camera.rotation.y = Math.asin( @frame / 100 )
-			@camera.lookAt( @camera.target )
-
-			# Render
-			@renderer.render( @scene, @camera )
+		# Render
+		@renderer.render( @scene, @camera )
 
 
-		###
-		function setSkyBgFromAngle(angle) {
-			var angle1 = angle + Math.PI / 8,
-				angle2 = angle - Math.PI / 8
-			var color1 = [
-					150 + Math.floor(80 * (Math.sin(angle1) / 2 + 0.5)),
-					150 + Math.floor(80 * (Math.sin(angle1 + Math.PI / 3) / 2 + 0.5)),
-					150 + Math.floor(80 * (Math.sin(angle1 + 2 * Math.PI / 3) / 2 + 0.5))
-				],
-				color2 = [
-					150 + Math.floor(80 * (Math.sin(angle2) / 2 + 0.5)),
-					150 + Math.floor(80 * (Math.sin(angle2 + Math.PI / 3) / 2 + 0.5)),
-					150 + Math.floor(80 * (Math.sin(angle2 + 2 * Math.PI / 3) / 2 + 0.5))
-				]
-
-			$body
-				.css({
-					'background-image': '-webkit-linear-gradient(left, rgb(' + color1.join(',') + '), rgb(' + color2.join(',') + '))'
-				})
-		}
-		####
-
-		window.Audanism.Graphic.public = {
-			'animate': animate
-		}
-
-		# Go
-		init()
-		createAxis()
-		animate()
-
-		@
-
+	# Sets up manual controls
 	initControls: () ->
 
 		_this = @
@@ -261,34 +214,101 @@ class VisualOrganism
 				when 40 then _this.keyDown  = false
 
 
-	onIteration: () ->
+	# Handles an organism iteration
+	onIteration: (organism) ->
+		console.log '#onIteration'
+
+		disharmony = organism.getDisharmonyHistoryData()
+		if disharmony.length == 0
+			return
+
+		disharmony = disharmony[disharmony.length - 1]
+
+		if not @opts.initialDisharmonyData?
+			@opts.initialDisharmonyData = disharmony
+			console.log 'stored initial disharmony', disharmony
+
+		relativeDisharmony = disharmony[2] / @opts.initialDisharmonyData[2]
+
+		@largestDistance = 0
+
+		# Set balls distance from center depending on the organism's state
+		for ball in @balls
+
+			# Tween the ball
+			newPos = ball.pos.clone().multiplyScalar relativeDisharmony
+			tweenFrom = ball.ball3d.position.clone()
+			tweenTo   = { 'x':newPos.x, 'y':newPos.y, 'z':newPos.z } # newPos.clone()
+
+			@_tweenBall ball, tweenFrom, tweenTo
+
+			# Store furthest position if this is that
+			if (ball.ball3d.position.length() > @largestDistance)
+				@largestDistance = ball.ball3d.position.length()
+
+		# Move camera according to the ball furthest out
+		@_tweenCameraDistance @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
 
 
+	# Tweens a ball's position between two points
+	_tweenBall: (ball, from, to) ->
+		tween = new TWEEN.Tween( from ).to( to, 300 )
+		tween.easing TWEEN.Easing.Quadratic.InOut
+		tween.onUpdate () ->
+			ball.ball3d.position.set @.x, @.y, @.z
+		tween.start()
+
+
+	# Tweens the camera's distance between two points
+	_tweenCameraDistance: (to) ->
+		_this = @
+
+		tween = new TWEEN.Tween( { 'distance':@opts.cameraDistance } ).to( { 'distance':to }, 1000 )
+		tween.easing TWEEN.Easing.Quadratic.InOut
+		tween.onUpdate () ->
+			_this.opts.cameraDistance = @.distance
+		tween.start()
+
+
+	# Handles node comparison
 	onCompareNodes: (compareData) ->
-		console.log '#onCompareNodes', compareData
-
 		for node in compareData.nodes
 			ball = @balls[node.nodeId]
 			@_animateComparingBall ball
 
+
+	# Animates the color of an ball whose node is in comparison
 	_animateComparingBall: (ball) ->
-		ball.ball3d.material.ambient.setHex @opts.ballColorCompare
-
-		setTimeout () =>
-			ball.ball3d.material.ambient.setHex @opts.ballColor
-		, @opts.ballCompareTime
+		@_tweenBallColor ball, @opts.ballColor, @opts.ballColorCompare, 200, () =>
+			@_tweenBallColor ball, ball.ball3d.material.ambient, @opts.ballColor, 1000
 
 
+	# Handles node influence
 	onInfluenceNode: (influenceData) ->
 		@_animateInfluencedBall @balls[influenceData.node.node.nodeId]
 
 
+	# Animates properties of a ball being influenced
 	_animateInfluencedBall: (ball) ->
-		ball.ball3d.material.ambient.setHex @opts.ballColorInfluence
+		@_tweenBallColor ball, @opts.ballColor, @opts.ballColorInfluence, 200, () =>
+			@_tweenBallColor ball, ball.ball3d.material.ambient, @opts.ballColor, 3000
 
-		setTimeout () =>
-			ball.ball3d.material.ambient.setHex @opts.ballColor
-		, @opts.ballInfluenceTime
+
+	# Tweens a ball's color between two values
+	_tweenBallColor: (ball, fromColor, toColor, duration, callback) ->
+		colorFrom = { 'r':fromColor.r, 'g':fromColor.g, 'b':fromColor.b }
+		colorTo   = { 'r':toColor.r,   'g':toColor.g,   'b':toColor.b   }
+
+		# Tween color
+		tween = new TWEEN.Tween( colorFrom ).to( colorTo, duration ).easing( TWEEN.Easing.Quadratic.InOut )
+		tween.onUpdate () ->
+			ball.ball3d.material.ambient.setRGB @.r, @.g, @.b
+
+		# Add possible callback
+		if callback
+			tween.onComplete callback
+
+		tween.start()
 
 
 

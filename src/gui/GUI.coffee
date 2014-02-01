@@ -25,12 +25,14 @@ class GUI
 			$(document).trigger "dm#{ $(e.currentTarget).attr('href').replace("#", "") }"
 
 	update: (factors, nodes, tableData) ->
-		@_updateFactors factors
-		@_updateNodes nodes
-		@_drawCharts tableData
+		#@_updateFactors factors
+		#@_updateNodes nodes
+		#@_drawCharts tableData
+
+		#console.log('#GUI.update', tableData)
 
 		if tableData.length > 0
-			@$meter.html "#{ Math.round(tableData[tableData.length-1][2]) }<br /><small style='font-weight:normal;'>#{ Math.round(tableData[tableData.length-1][1]) }</small>"
+			@$meter.find('.sum').html(Math.round(tableData[tableData.length-1][2])).end().find('.actual').html(Math.round(tableData[tableData.length-1][1]))
 
 	_drawCharts: (tableData) ->
 		return

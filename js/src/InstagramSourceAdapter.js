@@ -34,7 +34,7 @@
       _queryPhotos = this.queryPhotos;
       return setInterval(function() {
         return _this.queryPhotos.call(_this);
-      }, 5000);
+      }, 3000);
     };
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
@@ -51,12 +51,12 @@
           max_id: this.photoSinceId
         },
         success: function(response) {
-          return _this.parsePhotos(response.data);
+          return _this.processPhotos(response.data);
         }
       });
     };
 
-    InstagramSourceAdapter.prototype.parsePhotos = function(photos) {
+    InstagramSourceAdapter.prototype.processPhotos = function(photos) {
       var caption, captionVals, i, influenceData, interpreter, modVal, photo, _i, _j, _len, _ref,
         _this = this;
       interpreter = new TextInterpreter;
@@ -81,7 +81,7 @@
           if (!captionVals[i]) {
             continue;
           }
-          modVal = Math.round(captionVals[i] * 10);
+          modVal = Math.round(captionVals[i] * 20);
           modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
           influenceData = {
             'node': {

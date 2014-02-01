@@ -29,7 +29,7 @@ class InstagramSourceAdapter extends SourceAdapter
 
 		setInterval () =>
 			@queryPhotos.call _this
-		, 5000
+		, 3000
 
 
 	# Performs a query for photos
@@ -49,7 +49,7 @@ class InstagramSourceAdapter extends SourceAdapter
 			},
 			success: (response) =>
 				#console.log('did fetch data', response)
-				@parsePhotos response.data
+				@processPhotos response.data
 		}
 
 		#	console.log 'instagram data', data
@@ -63,8 +63,8 @@ class InstagramSourceAdapter extends SourceAdapter
 		#}
 	
 
-	# Parse photos
-	parsePhotos: (photos) ->
+	# Process photos
+	processPhotos: (photos) ->
 		#console.log('••• parse instagram photos •••')
 
 		interpreter = new TextInterpreter
@@ -103,7 +103,7 @@ class InstagramSourceAdapter extends SourceAdapter
 				if not captionVals[i]
 					continue
 
-				modVal = Math.round captionVals[i] * 10
+				modVal = Math.round captionVals[i] * 20
 				modVal = if Math.random() >= 0.5 then modVal * -1 else modVal
 
 				influenceData = {
