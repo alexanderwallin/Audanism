@@ -78,14 +78,14 @@
       nodeId = influenceData.node.node.nodeId;
       nodeFreq = 80 + (nodeId * 40);
       nodePan = nodeId / this.organism.getNodes().length;
-      length = Math.pow(influenceData.meta.current * 0.2, 3);
+      length = 1;
       console.log('--- hit synth', influenceData.meta.current - 1, ', s =', this.influenceSounds[influenceData.meta.current - 1]);
       console.log('--- values:', nodeFreq, nodePan, length);
       return this.influenceSounds[influenceData.meta.current - 1].hit(nodeFreq, nodePan, length);
     };
 
     Conductor.prototype.handleNodeComparison = function(e, comparisonData) {
-      var freq, i, length, node, _i, _ref, _results;
+      var freq, i, length, node, pan, _i, _ref, _results;
       if (this.muted) {
         return;
       }
@@ -93,6 +93,7 @@
       for (i = _i = 0, _ref = comparisonData.nodes.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         node = comparisonData.nodes[i];
         freq = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1);
+        pan = node.nodeId / this.organism.getNodes().length;
         if ((comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 && i === 0) || (comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2 && i === 1)) {
           length = 0.1;
         } else {
@@ -100,7 +101,7 @@
         }
         console.log('compnode -- val:', node.getCell(comparisonData.factorType).factorValue, ' => freq:', freq);
         console.log('         -- action:', comparisonData.action, ' => length:', length);
-        _results.push(this.comparisonSounds[i].hit(freq, length));
+        _results.push(this.comparisonSounds[i].hit(freq, pan, length));
       }
       return _results;
     };

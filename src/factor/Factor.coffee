@@ -48,11 +48,16 @@ class Factor
 		# Disharmony states
 		@disharmony = 0
 		@relativeDisharmony = []
+		@disharmonyHistory = []
 
 	addValue: (value) ->
 		@factorValue += value
 		@factorValue = 0 if @factorValue < 0
 		@factorValue = 100 if @factorValue > 100
+
+	setDisharmony: (disharmony) ->
+		@disharmony = disharmony
+		@disharmonyHistory.push disharmony
 
 	toString: () ->
 		"<Factor ##{ @factorType } (#{ @name }); factorValue = #{ @factorValue }>"

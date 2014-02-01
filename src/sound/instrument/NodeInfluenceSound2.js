@@ -19,7 +19,7 @@ var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 	this.modulatorMulAdd = new MulAdd(audiolet, frequency / 2, frequency);
 
 	// Gain envelope
-	this.gain = new Gain(audiolet);
+	this.gain = new Gain(audiolet, 0);
 	/*this.env = new PercussiveEnvelope(audiolet, 0.1, 0.2, 1,
 		function() {
 			this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
@@ -29,7 +29,7 @@ var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 	this.env = new ADSREnvelope(audiolet,
 								1,    // Gate
 								0.2, // Attack
-								0.1,  // Decay
+								0.5,  // Decay
 								0.1,  // Sustain
 								2,  // Release
 								function() {
@@ -39,7 +39,6 @@ var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 
 	// Pan
 	pan = pan || 0.5;
-	console.log('	pan =', pan);
 	this.pan = new Pan(audiolet, pan);
 
 	// Main signal path

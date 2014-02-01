@@ -10,12 +10,17 @@ class VisualOrganism
 
 		# Options
 		@opts = {
-			'roomSize':            2000
-			'roomVertices':        200
-			'roomColor':           new THREE.Color(0x3AAB92)
 			'cameraDistanceStart': 1300
 			'cameraDistance':      1300
 			'clusterSize':         500
+
+			'roomSize':            2000
+			'roomVertices':        200
+			'roomColor':           new THREE.Color(0x3AAB92)
+			'roomColorChaos':      new THREE.Color(0x941950)
+
+			'fogColorStart':       new THREE.Color(0x999999)
+
 			'ballSize':            10
 			'ballColor':           new THREE.Color(0xF2ED50)
 			'ballColorCompare':    new THREE.Color(0xED8A34)
@@ -106,7 +111,7 @@ class VisualOrganism
 		@camera.setLens 35
 
 		@scene = new THREE.Scene()
-		@scene.fog = new THREE.Fog( 0x999999, @opts.clusterSize / 2, @opts.clusterSize * 9 )
+		@scene.fog = new THREE.Fog( 0x999999, @opts.clusterSize / 2, @opts.clusterSize * 12 )
 
 		# Container sphere
 		@room = new THREE.Mesh( new THREE.SphereGeometry(@opts.roomSize, @opts.roomVertices, @opts.roomVertices), new THREE.MeshPhongMaterial({ 'ambient': @opts.roomColor, 'side': THREE.BackSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors }) )
@@ -249,6 +254,111 @@ class VisualOrganism
 		# Move camera according to the ball furthest out
 		@_tweenCameraDistance @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
 
+		# Tween fog
+		latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10)
+
+		disharmonySum = 0
+		(disharmonySum += dish[2] for dish in latestDisharmonyBlock)
+		disharmonyAvg = disharmonySum / latestDisharmonyBlock.length
+
+		#latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / latestDisharmonyBlock[0][2]
+		latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg
+
+		###
+		console.log 'fog color start:', @opts.fogColorStart
+		console.log 'latestDisharmonyBlock', latestDisharmonyBlock
+		console.log 'latestDisharmonyChange', latestDisharmonyChange
+		console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
+		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
+		console.log 'new fog color', newFogColor
+		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
+		###
+
+		# Change room color
+		#console.log 'latest disharmony change', latestDisharmonyChange
+		#@_tweenColor @room.material.ambient, @opts.roomColor, @opts.roomColor.clone().lerp( @opts.roomColorChaos, 1 - Math.pow(latestDisharmonyChange, 2) ), 100
+
+
+		# Change ball size depending on factor disharmonies
+		for node in @organism.getNodes()
+			cells = node.getCells()
+			#factorDisharmonySum = @organism.getFactorOfType(cell.factorType) for cell in cells
+
+			###
+
+			Relative changes to a node from its cells' factors' current conditions
+
+			factorsConditionSum = 0
+			factorsRelConditionSum = 0
+
+			for cell in cells
+
+				# Get the cell's factor's latest history
+				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
+				factorLatestHistory = factorDisharmonyHistory.slice(-10)
+				console.log '··· factor history', factorLatestHistory
+
+				# Total disharmony over this period
+				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
+				console.log('··· factorDisharmonySum', factorDisharmonySum)
+
+				# Calculate the factor's average dishamonry over this period
+				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
+				console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
+
+				# Calculate the factor's current condition relative the average disharmony
+				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
+				console.log '··· factorCurrCondition', factorCurrCondition
+
+				# Add it to the sum of current conditions
+				factorsRelConditionSum += factorCurrCondition
+				
+
+			#factorConditionAvg = factorConditionsSum / cells.length
+			factorsCurrCondition = factorsRelConditionSum / cells.length
+			console.log 'factor condition sum', factorsConditionSum
+			console.log 'factor condition cur', factorsCurrCondition
+			console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
+			console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
+
+			# Tween size
+			ball = @balls[node.nodeId]
+			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
+			###
+
+			allFactorsChangeSum = 0
+			allFactorsChangeAvg = 0
+
+			for cell in cells
+				factor = @organism.getFactorOfType cell.factorType
+				
+				factorDishStart = factor.disharmonyHistory[0]
+				factorDishCurr  = factor.disharmonyHistory[factor.disharmonyHistory.length - 1]
+				allFactorsChangeSum += factorDishCurr / factorDishStart
+
+				#console.log '··· factor dish start', factorDishStart
+				#console.log '··· factor dish current', factorDishCurr
+				#console.log '··· factor dish rel', factorDishCurr / factorDishStart
+
+			allFactorsChangeAvg = allFactorsChangeSum / cells.length
+			#console.log '::: node factors relative dish avg', allFactorsChangeAvg
+
+			# Tween size
+			ball = @balls[node.nodeId]
+			newBallRelSize = Math.pow(allFactorsChangeAvg, 3.5)
+			#newBallSize = @opts.ballSize * Math.pow(allFactorsChangeAvg, 10)
+			#@_tweenBallSize ball, ball.ball3d.geometry.radius, 
+			#ball.ball3d.geometry.radius = newBallSize
+			ballScaleFrom = { 'x':ball.ball3d.scale.clone().x, 'y':ball.ball3d.scale.clone().y, 'z':ball.ball3d.scale.clone().z }
+			ballScaleTo = { 'x':newBallRelSize, 'y':newBallRelSize, 'z':newBallRelSize }
+			#ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize # new THREE.Vector3 newBallRelSize, newBallRelSize, newBallRelSize
+			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 300
+
+			#console.log '::: ball size current', ball.ball3d.geometry.radius
+			#console.log '::: ball size new', newBallRelSize
+
+
+
 
 	# Tweens a ball's position between two points
 	_tweenBall: (ball, from, to) ->
@@ -258,12 +368,19 @@ class VisualOrganism
 			ball.ball3d.position.set @.x, @.y, @.z
 		tween.start()
 
+	_tweenBallSize: (ball, from, to) ->
+		tween = new TWEEN.Tween( { 'size':from } ).to( { 'size':to }, 100 )
+		tween.easing TWEEN.Easing.Quadratic.InOut
+		tween.onUpdate () ->
+			ball.ball3d.radius = @.size
+		tween.start()
+
 
 	# Tweens the camera's distance between two points
 	_tweenCameraDistance: (to) ->
 		_this = @
 
-		tween = new TWEEN.Tween( { 'distance':@opts.cameraDistance } ).to( { 'distance':to }, 1000 )
+		tween = new TWEEN.Tween( { 'distance':@opts.cameraDistance } ).to( { 'distance':to }, 400 )
 		tween.easing TWEEN.Easing.Quadratic.InOut
 		tween.onUpdate () ->
 			_this.opts.cameraDistance = @.distance
@@ -303,6 +420,40 @@ class VisualOrganism
 		tween = new TWEEN.Tween( colorFrom ).to( colorTo, duration ).easing( TWEEN.Easing.Quadratic.InOut )
 		tween.onUpdate () ->
 			ball.ball3d.material.ambient.setRGB @.r, @.g, @.b
+
+		# Add possible callback
+		if callback
+			tween.onComplete callback
+
+		tween.start()
+
+
+	# Tweens a color object between two values
+	_tweenColor: (targetColor, fromColor, toColor, duration, callback) ->
+		colorFrom = { 'r':fromColor.r, 'g':fromColor.g, 'b':fromColor.b }
+		colorTo   = { 'r':toColor.r,   'g':toColor.g,   'b':toColor.b   }
+
+		# Tween color
+		tween = new TWEEN.Tween( colorFrom ).to( colorTo, duration ).easing( TWEEN.Easing.Quadratic.InOut )
+		tween.onUpdate () ->
+			targetColor.setRGB @.r, @.g, @.b
+
+		# Add possible callback
+		if callback
+			tween.onComplete callback
+
+		tween.start()
+
+
+	# Generic tween function
+	_tweenSomething: (something, from, to, duration, callback) ->
+		#console.log '#_tweenSomething', something, from, to, duration
+
+		# Create tween
+		tween = new TWEEN.Tween( from ).to( to, duration ).easing( TWEEN.Easing.Quadratic.InOut )
+		tween.onUpdate () ->
+			for key in Object.keys(to)
+				something[key] = to[key]
 
 		# Add possible callback
 		if callback

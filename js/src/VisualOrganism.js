@@ -14,12 +14,14 @@
       var _this;
       _this = this;
       this.opts = {
-        'roomSize': 2000,
-        'roomVertices': 200,
-        'roomColor': new THREE.Color(0x3AAB92),
         'cameraDistanceStart': 1300,
         'cameraDistance': 1300,
         'clusterSize': 500,
+        'roomSize': 2000,
+        'roomVertices': 200,
+        'roomColor': new THREE.Color(0x3AAB92),
+        'roomColorChaos': new THREE.Color(0x941950),
+        'fogColorStart': new THREE.Color(0x999999),
         'ballSize': 10,
         'ballColor': new THREE.Color(0xF2ED50),
         'ballColorCompare': new THREE.Color(0xED8A34),
@@ -78,7 +80,7 @@
       this.camera.lookAt(this.camera.target);
       this.camera.setLens(35);
       this.scene = new THREE.Scene();
-      this.scene.fog = new THREE.Fog(0x999999, this.opts.clusterSize / 2, this.opts.clusterSize * 9);
+      this.scene.fog = new THREE.Fog(0x999999, this.opts.clusterSize / 2, this.opts.clusterSize * 12);
       this.room = new THREE.Mesh(new THREE.SphereGeometry(this.opts.roomSize, this.opts.roomVertices, this.opts.roomVertices), new THREE.MeshPhongMaterial({
         'ambient': this.opts.roomColor,
         'side': THREE.BackSide,
@@ -172,7 +174,7 @@
     };
 
     VisualOrganism.prototype.onIteration = function(organism) {
-      var ball, disharmony, newPos, relativeDisharmony, tweenFrom, tweenTo, _i, _len, _ref;
+      var allFactorsChangeAvg, allFactorsChangeSum, ball, ballScaleFrom, ballScaleTo, cell, cells, dish, disharmony, disharmonyAvg, disharmonySum, factor, factorDishCurr, factorDishStart, latestDisharmonyBlock, latestDisharmonyChange, newBallRelSize, newPos, node, relativeDisharmony, tweenFrom, tweenTo, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _results;
       console.log('#onIteration');
       disharmony = organism.getDisharmonyHistoryData();
       if (disharmony.length === 0) {
@@ -200,7 +202,97 @@
           this.largestDistance = ball.ball3d.position.length();
         }
       }
-      return this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
+      this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
+      latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10);
+      disharmonySum = 0;
+      for (_j = 0, _len1 = latestDisharmonyBlock.length; _j < _len1; _j++) {
+        dish = latestDisharmonyBlock[_j];
+        disharmonySum += dish[2];
+      }
+      disharmonyAvg = disharmonySum / latestDisharmonyBlock.length;
+      latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg;
+      /*
+      		console.log 'fog color start:', @opts.fogColorStart
+      		console.log 'latestDisharmonyBlock', latestDisharmonyBlock
+      		console.log 'latestDisharmonyChange', latestDisharmonyChange
+      		console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
+      		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
+      		console.log 'new fog color', newFogColor
+      		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
+      */
+
+      _ref1 = this.organism.getNodes();
+      _results = [];
+      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+        node = _ref1[_k];
+        cells = node.getCells();
+        /*
+        
+        			Relative changes to a node from its cells' factors' current conditions
+        
+        			factorsConditionSum = 0
+        			factorsRelConditionSum = 0
+        
+        			for cell in cells
+        
+        				# Get the cell's factor's latest history
+        				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
+        				factorLatestHistory = factorDisharmonyHistory.slice(-10)
+        				console.log '··· factor history', factorLatestHistory
+        
+        				# Total disharmony over this period
+        				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
+        				console.log('··· factorDisharmonySum', factorDisharmonySum)
+        
+        				# Calculate the factor's average dishamonry over this period
+        				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
+        				console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
+        
+        				# Calculate the factor's current condition relative the average disharmony
+        				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
+        				console.log '··· factorCurrCondition', factorCurrCondition
+        
+        				# Add it to the sum of current conditions
+        				factorsRelConditionSum += factorCurrCondition
+        				
+        
+        			#factorConditionAvg = factorConditionsSum / cells.length
+        			factorsCurrCondition = factorsRelConditionSum / cells.length
+        			console.log 'factor condition sum', factorsConditionSum
+        			console.log 'factor condition cur', factorsCurrCondition
+        			console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
+        			console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
+        
+        			# Tween size
+        			ball = @balls[node.nodeId]
+        			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
+        */
+
+        allFactorsChangeSum = 0;
+        allFactorsChangeAvg = 0;
+        for (_l = 0, _len3 = cells.length; _l < _len3; _l++) {
+          cell = cells[_l];
+          factor = this.organism.getFactorOfType(cell.factorType);
+          factorDishStart = factor.disharmonyHistory[0];
+          factorDishCurr = factor.disharmonyHistory[factor.disharmonyHistory.length - 1];
+          allFactorsChangeSum += factorDishCurr / factorDishStart;
+        }
+        allFactorsChangeAvg = allFactorsChangeSum / cells.length;
+        ball = this.balls[node.nodeId];
+        newBallRelSize = Math.pow(allFactorsChangeAvg, 3.5);
+        ballScaleFrom = {
+          'x': ball.ball3d.scale.clone().x,
+          'y': ball.ball3d.scale.clone().y,
+          'z': ball.ball3d.scale.clone().z
+        };
+        ballScaleTo = {
+          'x': newBallRelSize,
+          'y': newBallRelSize,
+          'z': newBallRelSize
+        };
+        _results.push(this._tweenSomething(ball.ball3d.scale, ballScaleFrom, ballScaleTo, 300));
+      }
+      return _results;
     };
 
     VisualOrganism.prototype._tweenBall = function(ball, from, to) {
@@ -213,6 +305,20 @@
       return tween.start();
     };
 
+    VisualOrganism.prototype._tweenBallSize = function(ball, from, to) {
+      var tween;
+      tween = new TWEEN.Tween({
+        'size': from
+      }).to({
+        'size': to
+      }, 100);
+      tween.easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        return ball.ball3d.radius = this.size;
+      });
+      return tween.start();
+    };
+
     VisualOrganism.prototype._tweenCameraDistance = function(to) {
       var tween, _this;
       _this = this;
@@ -220,7 +326,7 @@
         'distance': this.opts.cameraDistance
       }).to({
         'distance': to
-      }, 1000);
+      }, 400);
       tween.easing(TWEEN.Easing.Quadratic.InOut);
       tween.onUpdate(function() {
         return _this.opts.cameraDistance = this.distance;
@@ -273,6 +379,47 @@
       tween = new TWEEN.Tween(colorFrom).to(colorTo, duration).easing(TWEEN.Easing.Quadratic.InOut);
       tween.onUpdate(function() {
         return ball.ball3d.material.ambient.setRGB(this.r, this.g, this.b);
+      });
+      if (callback) {
+        tween.onComplete(callback);
+      }
+      return tween.start();
+    };
+
+    VisualOrganism.prototype._tweenColor = function(targetColor, fromColor, toColor, duration, callback) {
+      var colorFrom, colorTo, tween;
+      colorFrom = {
+        'r': fromColor.r,
+        'g': fromColor.g,
+        'b': fromColor.b
+      };
+      colorTo = {
+        'r': toColor.r,
+        'g': toColor.g,
+        'b': toColor.b
+      };
+      tween = new TWEEN.Tween(colorFrom).to(colorTo, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        return targetColor.setRGB(this.r, this.g, this.b);
+      });
+      if (callback) {
+        tween.onComplete(callback);
+      }
+      return tween.start();
+    };
+
+    VisualOrganism.prototype._tweenSomething = function(something, from, to, duration, callback) {
+      var tween;
+      tween = new TWEEN.Tween(from).to(to, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      tween.onUpdate(function() {
+        var key, _i, _len, _ref, _results;
+        _ref = Object.keys(to);
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          key = _ref[_i];
+          _results.push(something[key] = to[key]);
+        }
+        return _results;
       });
       if (callback) {
         tween.onComplete(callback);

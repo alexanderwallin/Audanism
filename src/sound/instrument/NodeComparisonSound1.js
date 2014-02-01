@@ -1,6 +1,6 @@
 (function(){
 
-var NodeComparisonSoundSynth1 = function(audiolet, freq) {
+var NodeComparisonSoundSynth1 = function(audiolet, freq, pan) {
 	AudioletGroup.apply(this, [audiolet, 0, 1]);
 
 	// Basic wave
@@ -33,6 +33,10 @@ var NodeComparisonSoundSynth1 = function(audiolet, freq) {
 	//this.verb.connect(this.verbHPF);
 	//this.verbHPF.connect(this.outputs[0]);
 
+	// Pan
+	pan = pan || 0.5;
+	this.pan = new Pan(audiolet, pan);
+
 	// Main signal path
 	this.saw.connect(this.filter);
 	this.filter.connect(this.gain);
@@ -43,7 +47,8 @@ var NodeComparisonSoundSynth1 = function(audiolet, freq) {
 
 	// Envelope
 	this.env.connect(this.gain, 0, 1);
-	this.gain.connect(this.outputs[0]);
+	this.gain.connect(this.pan);
+	this.pan.connect(this.outputs[0]);
 };
 extend(NodeComparisonSoundSynth1, AudioletGroup);
 
@@ -51,8 +56,8 @@ var NodeComparisonSound1 = function() {
 	this.audiolet = new Audiolet();
 }
 
-NodeComparisonSound1.prototype.hit = function(freq, length) {
-	var synth = new NodeComparisonSoundSynth1(this.audiolet, freq);
+NodeComparisonSound1.prototype.hit = function(freq, pan, length) {
+	var synth = new NodeComparisonSoundSynth1(this.audiolet, freq, pan);
 
 	var gatePattern = new PSequence([1, 0], 1);
 

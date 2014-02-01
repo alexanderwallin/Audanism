@@ -64,6 +64,7 @@
       this.name = this.constructor.name.replace(/^(\w+)Factor$/, "$1");
       this.disharmony = 0;
       this.relativeDisharmony = [];
+      this.disharmonyHistory = [];
     }
 
     Factor.prototype.addValue = function(value) {
@@ -74,6 +75,11 @@
       if (this.factorValue > 100) {
         return this.factorValue = 100;
       }
+    };
+
+    Factor.prototype.setDisharmony = function(disharmony) {
+      this.disharmony = disharmony;
+      return this.disharmonyHistory.push(disharmony);
     };
 
     Factor.prototype.toString = function() {

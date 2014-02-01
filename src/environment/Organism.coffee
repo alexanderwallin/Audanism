@@ -108,7 +108,7 @@ class Organism
 		@_actualDisharmony 	= @disharmonyCalculator.getActualOrganismDisharmony @
 		@disharmonyHistory.push [@disharmonyHistory.length, @_sumDisharmony, @_actualDisharmony]
 
-		factor.disharmony = @disharmonyCalculator.getFactorDisharmonyForNodes factor, @_nodes for factor in @_factors
+		factor.setDisharmony @disharmonyCalculator.getFactorDisharmonyForNodes factor, @_nodes for factor in @_factors
 
 		# Check if it should enter or leave stress mode
 		if not @_inStressMode and @_actualDisharmony < Organism.STRESS_THRESHOLD_ENTER

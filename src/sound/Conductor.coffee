@@ -68,7 +68,7 @@ class Conductor
 		nodeFreq = 80 + (nodeId * 40)
 		nodePan = nodeId / @organism.getNodes().length
 
-		length = Math.pow(influenceData.meta.current * 0.2, 3)
+		length = 1 #Math.pow(influenceData.meta.current * 0.2, 3)
 
 		console.log '--- hit synth', influenceData.meta.current - 1, ', s =', @influenceSounds[influenceData.meta.current - 1]
 		console.log '--- values:', nodeFreq, nodePan, length
@@ -86,6 +86,7 @@ class Conductor
 		for i in [0..comparisonData.nodes.length-1]
 			node   = comparisonData.nodes[i]
 			freq   = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1)
+			pan    = node.nodeId / @organism.getNodes().length
 
 			# Adjust freq to harmonic minor scale
 			# ...
@@ -102,7 +103,7 @@ class Conductor
 			#new Audanism.Sound.Instrument.NodeComparisonSound1 freq, length
 			#, i * 500
 
-			@comparisonSounds[i].hit(freq, length)
+			@comparisonSounds[i].hit(freq, pan, length)
 
 
 

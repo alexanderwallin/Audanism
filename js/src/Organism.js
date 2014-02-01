@@ -108,7 +108,7 @@
       _ref = this._factors;
       for (_j = 0, _len = _ref.length; _j < _len; _j++) {
         factor = _ref[_j];
-        factor.disharmony = this.disharmonyCalculator.getFactorDisharmonyForNodes(factor, this._nodes);
+        factor.setDisharmony(this.disharmonyCalculator.getFactorDisharmonyForNodes(factor, this._nodes));
       }
       if (!this._inStressMode && this._actualDisharmony < Organism.STRESS_THRESHOLD_ENTER) {
         return this._inStressMode = true;
