@@ -16,7 +16,8 @@ class VisualOrganism
 
 			'roomSize':            3000
 			'roomVertices':        100
-			'roomColor':           new THREE.Color(0x3AAB92)
+			'roomColor':           new THREE.Color(0x4A6D8A) #(0x3AAB92)
+			'roomColor2':          new THREE.Color(0x3D6D7D)
 			'roomColorChaos':      new THREE.Color(0x941950)
 
 			'fogColorStart':       new THREE.Color(0x999999)
@@ -302,9 +303,13 @@ class VisualOrganism
 			@newCubes = []
 
 		# Room color
-		colorDiff = Math.pow(1 - @state.latestDisharmonyChange, 2)
-		rgbString = "rgb(#{Math.round(20 + Math.sin(Math.PI / 2 + @frame / 3000))}, #{Math.round(150 + (Math.sin( Math.PI + @frame / 3000 ) * 80))}, #{Math.round(150 + (Math.sin( @frame / 3000 ) * 80))})"
-		roomColor = new THREE.Color rgbString
+		colorDiff = 1 - @state.latestDisharmonyChange
+		#rgbString = "rgb(100, #{Math.round(100 + (Math.cos( @frame / 200 ) * 20))}, #{Math.round(80 + (Math.sin( @frame / 200 ) * 20))})"
+
+		roomColor = @opts.roomColor.clone()
+		roomColor.lerp(@opts.roomColor2.clone(), 0.5 + Math.sin(@frame / 20) / 2)
+
+		#roomColor = new THREE.Color rgbString
 		relRoomColor = roomColor.clone()
 			
 		if colorDiff <= 0
@@ -312,7 +317,7 @@ class VisualOrganism
 		else
 			relRoomColor.lerp(new THREE.Color(0xffffff), Math.abs(colorDiff))
 
-		@room.material.ambient = relRoomColor
+		#@room.material.ambient = relRoomColor
 
 		TWEEN.update()
 

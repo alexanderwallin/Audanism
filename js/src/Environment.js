@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 550;
+    Environment.TIME_INTERVAL = 800;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -88,7 +88,9 @@
       var organism, _i, _len, _ref, _results;
       this._iterationCount++;
       if (this._isRunning || this._isSingleStep) {
-        this.conductor.unmute();
+        if (this.conductor != null) {
+          this.conductor.unmute();
+        }
         _ref = this._organisms;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -105,7 +107,9 @@
         }
         return _results;
       } else {
-        return this.conductor.mute();
+        if (this.conductor != null) {
+          return this.conductor.mute();
+        }
       }
     };
 

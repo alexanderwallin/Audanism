@@ -73,7 +73,7 @@
       disharmonyOld = disharmonyData[0][2];
       disharmonyRatio = disharmonyNew / disharmonyOld;
       if (this.noise != null) {
-        return this.noise.lpf.frequency.setValue(disharmonyRatio * 1000);
+        return this.noise.lpf.frequency.setValue(disharmonyRatio * 100);
       }
     };
 

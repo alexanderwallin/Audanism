@@ -35,13 +35,16 @@ var InfluenceActionSoundSynth1 = function(audiolet, modRate, modFreq1, modFreq2)
 	this.verbHPF.connect(this.outputs[0]);
 	*/
 
+	this.gain2 = new Gain(audiolet, 1);
+	this.gain.connect(this.gain2);
+
 	// Pan
 	this.pan = new Pan(audiolet, 1 - (Math.random() * 2));
 
 	// Main signal path
 	this.saw.connect(this.filter);
 	this.filter.connect(this.gain);
-	this.gain.connect(this.pan);
+	this.gain2.connect(this.pan);
 	this.pan.connect(this.outputs[0]);
 
 	// Frequency LFO

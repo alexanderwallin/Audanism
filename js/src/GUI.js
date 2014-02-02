@@ -28,8 +28,15 @@
 
     GUI.prototype._setupControls = function() {
       var _this = this;
-      return $('#controls .btn').click(function(e) {
+      $('#controls .btn').click(function(e) {
+        e.preventDefault();
         return $(document).trigger("dm" + ($(e.currentTarget).attr('href').replace("#", "")));
+      });
+      $(document).on('dmstart', function(e) {
+        return $('body').removeClass('paused').addClass('running');
+      });
+      return $(document).on('dmpause', function(e) {
+        return $('body').removeClass('running').addClass('paused');
       });
     };
 

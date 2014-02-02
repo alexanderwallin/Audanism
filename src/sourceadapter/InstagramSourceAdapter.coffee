@@ -10,7 +10,8 @@ class InstagramSourceAdapter extends SourceAdapter
 		# Query params
 		@clientId = "f42a4ce0632e412ea5a0353c2b5e581f"
 		@photoSinceId = 0
-		@tag = if window.location.anchro then window.location.anchor.replace(/^(.*?)instatag=([^&]+)(.*)$/, "$1") || "belieber" else "belieber"
+		@tag = if window.location.hash.match(/instatag=\w+/) then window.location.hash.replace(/^#instatag=([^&]+)$/, "$1") || "audanism" else "audanism"
+		console.log 'insta tag:', @tag, '(', window.location.hash, ')'
 		@queryUrl = "https://api.instagram.com/v1/tags/#{ @tag }/media/recent"
 
 		# Ajax handler
@@ -18,6 +19,9 @@ class InstagramSourceAdapter extends SourceAdapter
 
 		# Instagram GUI
 		@igGui = $('<div />', { 'id':'ig-photo' }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'))
+		@igGui.find('.ig-photo').on 'load', (e) =>
+			console.log 'image load', this
+			$(e.currentTarget).fadeTo 100, 1
 
 
 	# Sets up mouse event listeners
@@ -86,7 +90,7 @@ class InstagramSourceAdapter extends SourceAdapter
 			caption = photo.caption.text
 
 			# Update IG GUI
-			@igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url)
+			@igGui.find('.ig-photo').css('opacity', 0).attr('src', photo.images.thumbnail.url)
 			@igGui.find('.ig-caption').html(caption)
 			@igGui.fadeTo(50, 1)
 			setTimeout () =>

@@ -22,7 +22,13 @@ class GUI
 
 	_setupControls: () ->
 		$('#controls .btn').click (e) =>
+			e.preventDefault()
 			$(document).trigger "dm#{ $(e.currentTarget).attr('href').replace("#", "") }"
+
+		$(document).on 'dmstart', (e) =>
+			$('body').removeClass('paused').addClass('running')
+		$(document).on 'dmpause', (e) =>
+			$('body').removeClass('running').addClass('paused')
 
 	update: (factors, nodes, tableData) ->
 		#@_updateFactors factors

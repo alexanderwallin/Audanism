@@ -21,9 +21,9 @@ $runLocal = @$_GET['local'] == 'yes';
         <link rel="stylesheet" href="css/main.css">
 
         <?php /* if ($runLocal) : ?>
-	        <script type="text/javascript" src="js/vendor/google.jsapi.js"></script>
-	        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js"></script> -->
-	        <script type="text/javascript" src="js/vendor/google.charts.js"></script>
+	        <script type="text/javascript" src="js/vendor/google.jsapi.js?v=<?php echo time(); ?>"></script>
+	        <!-- <script type="text/javascript" src="js/vendor/google.visualization.js?v=<?php echo time(); ?>"></script> -->
+	        <script type="text/javascript" src="js/vendor/google.charts.js?v=<?php echo time(); ?>"></script>
     	<?php else : ?>
 	        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 			<script type="text/javascript">
@@ -76,8 +76,8 @@ $runLocal = @$_GET['local'] == 'yes';
         </div>
 
         <!-- Vendor scripts -->
-        <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script> -->
-        <!-- <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js"><\/script>')</script> -->
+        <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js?v=<?php echo time(); ?>"></script> -->
+        <!-- <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.1.min.js?v=<?php echo time(); ?>"><\/script>')</script> -->
         <script defer src="js/vendor/jquery-1.8.1.min.js"></script>
         <script defer src="js/vendor/instagram.js"></script>
         <script defer src="js/vendor/Audiolet.min.js"></script>
@@ -87,63 +87,63 @@ $runLocal = @$_GET['local'] == 'yes';
         <script defer src="js/vendor/tween.min.js"></script>
 
         <!-- Audanism object initializer -->
-        <script defer src="js/src/Audanism.js"></script>
+        <script defer src="js/src/Audanism.js?v=<?php echo time(); ?>"></script>
 
         <!-- Global extensions -->
-        <script defer src="js/src/Object.js"></script>
-        <script defer src="js/src/Math.js"></script>
-        <script defer src="js/src/Array.js"></script>
+        <script defer src="js/src/Object.js?v=<?php echo time(); ?>"></script>
+        <script defer src="js/src/Math.js?v=<?php echo time(); ?>"></script>
+        <script defer src="js/src/Array.js?v=<?php echo time(); ?>"></script>
 
         <!-- Util -->
-        <script defer src="js/src/TextInterpreter.js"></script>
+        <script defer src="js/src/TextInterpreter.js?v=<?php echo time(); ?>"></script>
 
         <!-- Event -->
-        <script defer src="js/src/EventDispatcher.js"></script>
+        <script defer src="js/src/EventDispatcher.js?v=<?php echo time(); ?>"></script>
 
 		<!-- Node -->
-		<script defer src="js/src/Node.js"></script>
-		<script defer src="js/src/NodeCell.js"></script>
+		<script defer src="js/src/Node.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/NodeCell.js?v=<?php echo time(); ?>"></script>
 		
         <!-- Environment -->
-		<script defer src="js/src/Organism.js"></script>
-		<script defer src="js/src/Environment.js"></script>
-		<script defer src="js/src/Interpreter.js"></script>
+		<script defer src="js/src/Organism.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Environment.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Interpreter.js?v=<?php echo time(); ?>"></script>
 
         <!-- Factor -->
-		<script defer src="js/src/Factor.js"></script>
-        <script defer src="js/src/AgreeablenessFactor.js"></script>
-		<script defer src="js/src/ConscientiousnessFactor.js"></script>
-		<script defer src="js/src/ExtraversionFactor.js"></script>
-		<script defer src="js/src/NeuroticismFactor.js"></script>
-		<script defer src="js/src/OpennessFactor.js"></script>
+		<script defer src="js/src/Factor.js?v=<?php echo time(); ?>"></script>
+        <script defer src="js/src/AgreeablenessFactor.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/ConscientiousnessFactor.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/ExtraversionFactor.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/NeuroticismFactor.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/OpennessFactor.js?v=<?php echo time(); ?>"></script>
 
 		<!-- Calculator -->
-		<script defer src="js/src/DisharmonyCalculator.js"></script>
-		<!-- <script defer src="js/src/OrganismDisharmonyCalculator.js"></script> -->
-		<!-- <script defer src="js/src/FactorComparer.js"></script> -->
-		<!-- <script defer src="js/src/NodeComparer.js"></script> -->
+		<script defer src="js/src/DisharmonyCalculator.js?v=<?php echo time(); ?>"></script>
+		<!-- <script defer src="js/src/OrganismDisharmonyCalculator.js?v=<?php echo time(); ?>"></script> -->
+		<!-- <script defer src="js/src/FactorComparer.js?v=<?php echo time(); ?>"></script> -->
+		<!-- <script defer src="js/src/NodeComparer.js?v=<?php echo time(); ?>"></script> -->
 
 		<!-- Source adapters -->
-		<script defer src="js/src/SourceAdapter.js"></script>
-		<script defer src="js/src/RandomSourceAdapter.js"></script>
-		<!-- <script defer src="js/src/TwitterSourceAdapter.js"></script> -->
-		<script defer src="js/src/InstagramSourceAdapter.js"></script>
+		<script defer src="js/src/SourceAdapter.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/RandomSourceAdapter.js?v=<?php echo time(); ?>"></script>
+		<!-- <script defer src="js/src/TwitterSourceAdapter.js?v=<?php echo time(); ?>"></script> -->
+		<script defer src="js/src/InstagramSourceAdapter.js?v=<?php echo time(); ?>"></script>
 
 		<!-- Sound -->
-		<script defer src="js/src/Conductor.js"></script>
-		<script defer src="js/src/Noise.js"></script>
-		<script defer src="js/src/Synth.js"></script>
-		<script defer src="js/src/Synth2.js"></script>
-		<script defer src="js/src/Blip.js"></script>
-		<script defer src="src/sound/instrument/NodeInfluenceSound1.js"></script>
-		<script defer src="src/sound/instrument/NodeInfluenceSound2.js"></script>
-		<script defer src="src/sound/instrument/NodeComparisonSound1.js"></script>
-		<script defer src="src/sound/instrument/InfluenceActionSound1.js"></script>
+		<script defer src="js/src/Conductor.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Noise.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Synth.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Synth2.js?v=<?php echo time(); ?>"></script>
+		<script defer src="js/src/Blip.js?v=<?php echo time(); ?>"></script>
+		<script defer src="src/sound/instrument/NodeInfluenceSound1.js?v=<?php echo time(); ?>"></script>
+		<script defer src="src/sound/instrument/NodeInfluenceSound2.js?v=<?php echo time(); ?>"></script>
+		<script defer src="src/sound/instrument/NodeComparisonSound1.js?v=<?php echo time(); ?>"></script>
+		<script defer src="src/sound/instrument/InfluenceActionSound1.js?v=<?php echo time(); ?>"></script>
 
 		<!-- GUI -->
-		<script defer src="js/src/GUI.js"></script>
+		<script defer src="js/src/GUI.js?v=<?php echo time(); ?>"></script>
 
 		<!-- Visual -->
-		<script defer src="js/src/VisualOrganism.js"></script>
+		<script defer src="js/src/VisualOrganism.js?v=<?php echo time(); ?>"></script>
     </body>
 </html>

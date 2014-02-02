@@ -19,7 +19,8 @@
         'clusterSize': 500,
         'roomSize': 3000,
         'roomVertices': 100,
-        'roomColor': new THREE.Color(0x3AAB92),
+        'roomColor': new THREE.Color(0x4A6D8A),
+        'roomColor2': new THREE.Color(0x3D6D7D),
         'roomColorChaos': new THREE.Color(0x941950),
         'fogColorStart': new THREE.Color(0x999999),
         'ballSize': 10,
@@ -200,7 +201,7 @@
     };
 
     VisualOrganism.prototype.animate = function() {
-      var ball, colorDiff, cube, lineGeometry, lineMaterial, relRoomColor, rgbString, roomColor, _i, _j, _len, _len1, _ref, _ref1;
+      var ball, colorDiff, cube, lineGeometry, lineMaterial, relRoomColor, roomColor, _i, _j, _len, _len1, _ref, _ref1;
       requestAnimationFrame(Audanism.Graphic["public"].animate);
       this.frame++;
       this.camera.position.x = Math.sin(this.frame / 100) * this.opts.cameraDistance;
@@ -233,16 +234,15 @@
         }
         this.newCubes = [];
       }
-      colorDiff = Math.pow(1 - this.state.latestDisharmonyChange, 2);
-      rgbString = "rgb(" + (Math.round(20 + Math.sin(Math.PI / 2 + this.frame / 3000))) + ", " + (Math.round(150 + (Math.sin(Math.PI + this.frame / 3000) * 80))) + ", " + (Math.round(150 + (Math.sin(this.frame / 3000) * 80))) + ")";
-      roomColor = new THREE.Color(rgbString);
+      colorDiff = 1 - this.state.latestDisharmonyChange;
+      roomColor = this.opts.roomColor.clone();
+      roomColor.lerp(this.opts.roomColor2.clone(), 0.5 + Math.sin(this.frame / 20) / 2);
       relRoomColor = roomColor.clone();
       if (colorDiff <= 0) {
         relRoomColor.lerp(new THREE.Color(0x000000), Math.abs(colorDiff));
       } else {
         relRoomColor.lerp(new THREE.Color(0xffffff), Math.abs(colorDiff));
       }
-      this.room.material.ambient = relRoomColor;
       TWEEN.update();
       return this.renderer.render(this.scene, this.camera);
     };

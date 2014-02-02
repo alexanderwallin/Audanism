@@ -60,7 +60,7 @@ class Conductor
 		#console.log '... ---> freq =', disharmonyRatio * 1000
 
 		if @noise?
-			@noise.lpf.frequency.setValue disharmonyRatio * 1000
+			@noise.lpf.frequency.setValue disharmonyRatio * 100
 
 
 	handleNodeInfluence: (e, influenceData) ->

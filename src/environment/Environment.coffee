@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 550
+	@TIME_INTERVAL: 800
 
 	# Constructor
 	#
@@ -82,7 +82,8 @@ class Environment
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
 
-			@conductor.unmute()
+			if @conductor?
+				@conductor.unmute()
 
 			for organism in @_organisms
 				
@@ -98,7 +99,8 @@ class Environment
 				@_isSingleStep = false
 		else
 
-			@conductor.mute()
+			if @conductor?
+				@conductor.mute()
 
 	#
 	createInfluenceSources: () ->

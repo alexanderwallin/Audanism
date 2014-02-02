@@ -15,16 +15,22 @@
     __extends(InstagramSourceAdapter, _super);
 
     function InstagramSourceAdapter(listener) {
+      var _this = this;
       this.listener = listener;
       InstagramSourceAdapter.__super__.constructor.call(this, this.listener);
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
-      this.tag = window.location.anchro ? window.location.anchor.replace(/^(.*?)instatag=([^&]+)(.*)$/, "$1") || "belieber" : "belieber";
+      this.tag = window.location.hash.match(/instatag=\w+/) ? window.location.hash.replace(/^#instatag=([^&]+)$/, "$1") || "audanism" : "audanism";
+      console.log('insta tag:', this.tag, '(', window.location.hash, ')');
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
       this.jqxhr = null;
       this.igGui = $('<div />', {
         'id': 'ig-photo'
       }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'));
+      this.igGui.find('.ig-photo').on('load', function(e) {
+        console.log('image load', _this);
+        return $(e.currentTarget).fadeTo(100, 1);
+      });
     }
 
     InstagramSourceAdapter.prototype.activate = function() {
@@ -70,7 +76,7 @@
           continue;
         }
         caption = photo.caption.text;
-        this.igGui.find('.ig-photo').attr('src', photo.images.thumbnail.url);
+        this.igGui.find('.ig-photo').css('opacity', 0).attr('src', photo.images.thumbnail.url);
         this.igGui.find('.ig-caption').html(caption);
         this.igGui.fadeTo(50, 1);
         setTimeout(function() {
