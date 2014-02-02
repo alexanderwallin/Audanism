@@ -17,29 +17,41 @@
         'cameraDistanceStart': 1300,
         'cameraDistance': 1300,
         'clusterSize': 500,
-        'roomSize': 2000,
-        'roomVertices': 200,
+        'roomSize': 3000,
+        'roomVertices': 100,
         'roomColor': new THREE.Color(0x3AAB92),
         'roomColorChaos': new THREE.Color(0x941950),
         'fogColorStart': new THREE.Color(0x999999),
         'ballSize': 10,
         'ballColor': new THREE.Color(0xF2ED50),
-        'ballColorCompare': new THREE.Color(0xED8A34),
+        'ballColorCompare': new THREE.Color(0xF24900),
         'ballCompareTime': 1000,
         'ballColorInfluence': new THREE.Color(0xED34A0),
-        'ballInfluenceTime': 2000
+        'ballInfluenceTime': 2000,
+        'ballColorVeteran': new THREE.Color(0x1F36E0)
       };
+      this.state = {};
+      this.queue = [];
+      this.tweens = [];
+      this.cubes = [];
+      this.newCubes = [];
+      this.newBalls = [];
+      $(window).on('resize', this.onWindowResize.bind(this));
       EventDispatcher.listen('audanism/init/organism', this, this.onInitOrganism);
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
-      EventDispatcher.listen('audanism/influence/node', this, this.onInfluenceNode);
       EventDispatcher.listen('audanism/compare/nodes', this, this.onCompareNodes);
-      this.initControls();
+      EventDispatcher.listen('audanism/influence/node', this, this.onInfluenceNode);
     }
 
     VisualOrganism.prototype.onInitOrganism = function(organism) {
-      console.log('#onInitOrganism', organism, this);
       this.organism = organism;
       return this.init();
+    };
+
+    VisualOrganism.prototype.onWindowResize = function(e) {
+      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.camera.updateProjectionMatrix();
+      return this.renderer.setSize(window.innerWidth, window.innerHeight);
     };
 
     VisualOrganism.prototype.init = function() {
@@ -51,8 +63,7 @@
     };
 
     VisualOrganism.prototype.buildScene = function() {
-      var ball, ball3d, ballGeometry, ballMaterial, i, _i, _ref;
-      console.log('#buildScene');
+      var ball, ball3d, ballGeometry, ballGlowMaterial, ballGlowSprite, ballMaterials, i, _i, _ref;
       this.camera;
       this.scene;
       this.renderer;
@@ -74,108 +85,189 @@
       this.keyRight = false;
       this.keyUp = false;
       this.keyDown = false;
-      this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+      this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 20000);
       this.camera.position = new THREE.Vector3(1, 0.25, 1).multiplyScalar(this.opts.cameraDistanceStart);
       this.camera.target = new THREE.Vector3(0, 0, 0);
       this.camera.lookAt(this.camera.target);
       this.camera.setLens(35);
       this.scene = new THREE.Scene();
-      this.scene.fog = new THREE.Fog(0x999999, this.opts.clusterSize / 2, this.opts.clusterSize * 12);
-      this.room = new THREE.Mesh(new THREE.SphereGeometry(this.opts.roomSize, this.opts.roomVertices, this.opts.roomVertices), new THREE.MeshPhongMaterial({
-        'ambient': this.opts.roomColor,
+      this.room = new THREE.Mesh(new THREE.SphereGeometry(this.opts.roomSize, this.opts.roomVertices, this.opts.roomVertices / 2), new THREE.MeshPhongMaterial({
+        'ambient': this.opts.roomColor.clone(),
         'side': THREE.BackSide,
         'shading': THREE.FlatShading,
         'blending': THREE.AdditiveBlending,
         'vertexColors': THREE.VertexColors
       }));
       this.scene.add(this.room);
+      /* Skybox
+      		imagePrefix = "img/skybox2/"
+      		directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"]
+      		imageSuffix = ".jpg"
+      		skyGeometry = new THREE.CubeGeometry( @opts.roomSize, @opts.roomSize, @opts.roomSize );
+      		
+      		materialArray = []
+      		for i in [0..5]
+      			materialArray.push new THREE.MeshBasicMaterial {
+      				map: THREE.ImageUtils.loadTexture( imagePrefix + directions[i] + imageSuffix )
+      				side: THREE.BackSide
+      			}
+      		skyMaterial = new THREE.MeshFaceMaterial( materialArray )
+      		@room = new THREE.Mesh( skyGeometry, skyMaterial )
+      		@scene.add( @room )
+      */
+
       for (i = _i = 0, _ref = this.numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         ball = {
           ballId: i,
           hello: "hello. i am ball no " + i + ".",
           direction: new THREE.Vector3(2 * Math.random() - 1, 2 * Math.random() - 1, 2 * Math.random() - 1),
-          ballSize: this.opts.ballSize
+          ballSize: this.opts.ballSize,
+          hoverPhase: Math.random() * Math.PI * 2,
+          hoverSpeed: 1 / (50 + Math.random() * 100),
+          state: {
+            numInfluenced: 0,
+            hover: true
+          },
+          ref: {
+            numInfluenced: 0
+          }
         };
         ball.pos = new THREE.Vector3(ball.direction.x * Math.random() * this.opts.clusterSize, ball.direction.y * Math.random() * this.opts.clusterSize, ball.direction.z * Math.random() * this.opts.clusterSize);
-        if (i === 0) {
-          console.log('>> ball', ball);
-          console.log('>> ball start at', ball.pos);
-        }
-        ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 20);
-        ballMaterial = new THREE.MeshLambertMaterial({
-          'ambient': this.opts.ballColor,
-          'side': THREE.DoubleSide,
-          'shading': THREE.FlatShading,
-          'blending': THREE.AdditiveBlending,
-          'vertexColors': THREE.VertexColors
-        });
-        ball3d = new THREE.Mesh(ballGeometry, ballMaterial);
+        ball.currPos = ball.pos.clone();
+        ball.changes = {};
+        ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 10);
+        ballMaterials = [
+          new THREE.MeshLambertMaterial({
+            'ambient': this.opts.ballColor.clone(),
+            'side': THREE.DoubleSide,
+            'shading': THREE.FlatShading,
+            'blending': THREE.AdditiveBlending,
+            'vertexColors': THREE.VertexColors
+          }), new THREE.MeshPhongMaterial({
+            'color': 0xffffff,
+            'specular': 0xffaaaa
+          })
+        ];
+        ball3d = new THREE.Mesh(ballGeometry, ballMaterials[0]);
         ball3d.ballId = ball.ballId;
         ball.ball3d = ball3d;
         ball.ball3d.position = ball.pos.clone();
-        console.log(ball.pos);
         this.scene.add(ball.ball3d);
         this.balls[i] = ball;
+        /*
+        			# Ball glow
+        			ballGlowMaterial = new THREE.SpriteMaterial { 
+        				map: new THREE.ImageUtils.loadTexture( 'img/glow.png' )
+        				useScreenCoordinates: false
+        				#alignment: THREE.SpriteAlignment.center
+        				color: 0x111111 # @opts.ballColor.clone().multiplyScalar(0.1)
+        				transparent: false
+        				blending: THREE.AdditiveBlending
+        			}
+        			ballGlowSprite = new THREE.Sprite( ballGlowMaterial )
+        			ballGlowSprite.scale.set(50, 50, 1.0)
+        			ball.ball3d.add(ballGlowSprite) # this centers the glow at the mesh
+        */
+
       }
-      console.log(this.balls);
+      this.centerBall = new THREE.Mesh(new THREE.TetrahedronGeometry(10, 0), new THREE.MeshLambertMaterial({
+        'ambient': 0x331177,
+        'opacity': 0.1,
+        'side': THREE.DoubleSide
+      }));
+      ballGlowMaterial = new THREE.SpriteMaterial({
+        map: new THREE.ImageUtils.loadTexture('img/glow.png'),
+        useScreenCoordinates: false,
+        color: 0x222222,
+        transparent: false,
+        blending: THREE.AdditiveBlending
+      });
+      ballGlowSprite = new THREE.Sprite(ballGlowMaterial);
+      ballGlowSprite.scale.set(50, 50, 1.0);
+      this.centerBall.add(ballGlowSprite);
+      this.scene.add(this.centerBall);
       this.lightAmb = new THREE.AmbientLight(0xffffff);
       this.scene.add(this.lightAmb);
       this.lightSpot = new THREE.DirectionalLight(0xffffff, 0.2);
       this.lightSpot.position.set(0, 1, 1);
       this.scene.add(this.lightSpot);
-      this.axis = new THREE.AxisHelper(500);
-      this.scene.add(this.axis);
       this.renderer = new THREE.WebGLRenderer({
         'alpha': false,
         'antialias': true
       });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      console.log(this.scene);
       return $('#container').append(this.renderer.domElement);
     };
 
     VisualOrganism.prototype.animate = function() {
+      var ball, colorDiff, cube, lineGeometry, lineMaterial, relRoomColor, rgbString, roomColor, _i, _j, _len, _len1, _ref, _ref1;
       requestAnimationFrame(Audanism.Graphic["public"].animate);
       this.frame++;
-      this.camera.position.x = Math.sin(this.frame / 200) * this.opts.cameraDistance;
-      this.camera.position.z = Math.cos(this.frame / 200) * this.opts.cameraDistance;
+      this.camera.position.x = Math.sin(this.frame / 100) * this.opts.cameraDistance;
+      this.camera.position.z = Math.cos(this.frame / 100) * this.opts.cameraDistance;
       this.camera.lookAt(this.camera.target);
+      _ref = this.balls;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        ball = _ref[_i];
+        if (ball.state.hover) {
+          ball.ball3d.position.y = ball.currPos.y + Math.sin(ball.hoverPhase + this.frame * ball.hoverSpeed) * 15;
+        }
+      }
+      if (this.instaCubes != null) {
+        this._updateInstaCubes();
+      }
+      if (this.newCubes.length > 0) {
+        _ref1 = this.newCubes;
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          cube = _ref1[_j];
+          this.cubes.push(cube);
+          this.scene.add(cube);
+          lineGeometry = new THREE.Geometry();
+          lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
+          lineGeometry.vertices.push(cube.position.clone());
+          lineMaterial = new THREE.LineBasicMaterial({
+            'color': 0xE3105A,
+            'opacity': 0.3
+          });
+          this.scene.add(new THREE.Line(lineGeometry, lineMaterial));
+        }
+        this.newCubes = [];
+      }
+      colorDiff = Math.pow(1 - this.state.latestDisharmonyChange, 2);
+      rgbString = "rgb(" + (Math.round(20 + Math.sin(Math.PI / 2 + this.frame / 3000))) + ", " + (Math.round(150 + (Math.sin(Math.PI + this.frame / 3000) * 80))) + ", " + (Math.round(150 + (Math.sin(this.frame / 3000) * 80))) + ")";
+      roomColor = new THREE.Color(rgbString);
+      relRoomColor = roomColor.clone();
+      if (colorDiff <= 0) {
+        relRoomColor.lerp(new THREE.Color(0x000000), Math.abs(colorDiff));
+      } else {
+        relRoomColor.lerp(new THREE.Color(0xffffff), Math.abs(colorDiff));
+      }
+      this.room.material.ambient = relRoomColor;
       TWEEN.update();
       return this.renderer.render(this.scene, this.camera);
     };
 
-    VisualOrganism.prototype.initControls = function() {
-      var _this = this;
-      _this = this;
-      $(document).on('keydown', function(e) {
-        switch (e.which) {
-          case 37:
-            return _this.keyLeft = true;
-          case 38:
-            return _this.keyUp = true;
-          case 39:
-            return _this.keyRight = true;
-          case 40:
-            return _this.keyDown = true;
-        }
-      });
-      return $(document).on('keyup', function(e) {
-        switch (e.which) {
-          case 37:
-            return _this.keyLeft = false;
-          case 38:
-            return _this.keyUp = false;
-          case 39:
-            return _this.keyRight = false;
-          case 40:
-            return _this.keyDown = false;
-        }
+    VisualOrganism.prototype.addToQueue = function(fn, args) {
+      return this.queue.push({
+        'fn': fn,
+        'args': args
       });
     };
 
-    VisualOrganism.prototype.onIteration = function(organism) {
-      var allFactorsChangeAvg, allFactorsChangeSum, ball, ballScaleFrom, ballScaleTo, cell, cells, dish, disharmony, disharmonyAvg, disharmonySum, factor, factorDishCurr, factorDishStart, latestDisharmonyBlock, latestDisharmonyChange, newBallRelSize, newPos, node, relativeDisharmony, tweenFrom, tweenTo, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _results;
-      console.log('#onIteration');
+    VisualOrganism.prototype.runQueue = function() {
+      var action, _i, _len, _ref, _results;
+      _ref = this.queue;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        action = _ref[_i];
+        _results.push(action.fn.call(this, action.args));
+      }
+      return _results;
+    };
+
+    VisualOrganism.prototype.onIteration = function(influenceInfo) {
+      var allFactorsChangeAvg, allFactorsChangeSum, ball, ballScaleFrom, ballScaleTo, cell, cells, dish, disharmony, disharmonyAvg, disharmonySum, factor, factorDishCurr, factorDishStart, latestDisharmonyBlock, latestDisharmonyChange, newBallRelSize, newPos, node, organism, relativeDisharmony, tweenFrom, tweenTo, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _results;
+      organism = influenceInfo.organism;
       disharmony = organism.getDisharmonyHistoryData();
       if (disharmony.length === 0) {
         return;
@@ -183,7 +275,6 @@
       disharmony = disharmony[disharmony.length - 1];
       if (!(this.opts.initialDisharmonyData != null)) {
         this.opts.initialDisharmonyData = disharmony;
-        console.log('stored initial disharmony', disharmony);
       }
       relativeDisharmony = disharmony[2] / this.opts.initialDisharmonyData[2];
       this.largestDistance = 0;
@@ -197,11 +288,11 @@
           'y': newPos.y,
           'z': newPos.z
         };
-        this._tweenBall(ball, tweenFrom, tweenTo);
         if (ball.ball3d.position.length() > this.largestDistance) {
           this.largestDistance = ball.ball3d.position.length();
         }
       }
+      console.log('tween camera to', this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
       this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
       latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10);
       disharmonySum = 0;
@@ -211,6 +302,7 @@
       }
       disharmonyAvg = disharmonySum / latestDisharmonyBlock.length;
       latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg;
+      this.state.latestDisharmonyChange = latestDisharmonyChange;
       /*
       		console.log 'fog color start:', @opts.fogColorStart
       		console.log 'latestDisharmonyBlock', latestDisharmonyBlock
@@ -279,7 +371,7 @@
         }
         allFactorsChangeAvg = allFactorsChangeSum / cells.length;
         ball = this.balls[node.nodeId];
-        newBallRelSize = Math.pow(allFactorsChangeAvg, 3.5);
+        newBallRelSize = Math.pow(allFactorsChangeAvg, 2);
         ballScaleFrom = {
           'x': ball.ball3d.scale.clone().x,
           'y': ball.ball3d.scale.clone().y,
@@ -290,14 +382,158 @@
           'y': newBallRelSize,
           'z': newBallRelSize
         };
-        _results.push(this._tweenSomething(ball.ball3d.scale, ballScaleFrom, ballScaleTo, 300));
+        _results.push(ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize);
+        /*
+        			_tweenBack = () =>
+        				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
+        				console.log ball.ballId
+        				if ball.ballId is 1
+        					console.log 'original scale', origScale
+        				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
+        
+        			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
+        */
+
       }
       return _results;
     };
 
-    VisualOrganism.prototype._tweenBall = function(ball, from, to) {
+    VisualOrganism.prototype.onCompareNodes = function(compareData) {
+      var node, _i, _len, _ref, _results;
+      _ref = compareData.nodes;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        node = _ref[_i];
+        _results.push(this._animateComparingBall(this.balls[node.nodeId]));
+      }
+      return _results;
+    };
+
+    VisualOrganism.prototype._animateComparingBall = function(ball) {
+      var ballColor, ballColorCompare, newPos, target,
+        _this = this;
+      target = ball.ball3d.material.ambient;
+      ballColor = target.clone();
+      ballColorCompare = {
+        'r': this.opts.ballColorCompare.r,
+        'g': this.opts.ballColorCompare.g,
+        'b': this.opts.ballColorCompare.b
+      };
+      this._tweenBallColor(ball, ballColor.clone(), this.opts.ballColorCompare.clone(), 200, function() {
+        return _this._tweenBallColor(ball, _this.opts.ballColorCompare.clone(), ballColor.clone(), 500);
+      });
+      ball.state.hover = false;
+      newPos = {
+        'x': ball.ball3d.position.x + (Math.random() * 2 - 1) * 15,
+        'y': ball.ball3d.position.y + (Math.random() * 2 - 1) * 15,
+        'z': ball.ball3d.position.z + (Math.random() * 2 - 1) * 15
+      };
+      return this._tweenSomething(ball.ball3d.position, ball.ball3d.position.clone(), newPos, 30, function() {
+        ball.currPos = ball.ball3d.position.clone();
+        return ball.state.hover = true;
+      });
+    };
+
+    VisualOrganism.prototype.onInfluenceNode = function(influenceData) {
+      var _this = this;
+      this._animateInfluencedBall(this.balls[influenceData.node.node.nodeId]);
+      if (influenceData.meta.current === 1 && (influenceData.meta.source != null) && influenceData.meta.source === 'instagram') {
+        this._spawnInstaCube.bind(this);
+        return setTimeout(function() {
+          return _this._spawnInstaCube(influenceData);
+        }, 500);
+      }
+    };
+
+    VisualOrganism.prototype._animateInfluencedBall = function(ball) {
+      var ballColor, ballColorInfluence, newPos, target,
+        _this = this;
+      console.log('#_animateInfluencedBall', ball);
+      console.log('   new state', ball.state);
+      target = ball.ball3d.material.ambient;
+      ballColor = target.clone();
+      ballColorInfluence = {
+        'r': this.opts.ballColorInfluence.r,
+        'g': this.opts.ballColorInfluence.g,
+        'b': this.opts.ballColorInfluence.b
+      };
+      this._tweenBallColor(ball, ballColor.clone(), this.opts.ballColorInfluence.clone(), 200, function() {
+        return _this._tweenBallColor(ball, _this.opts.ballColorInfluence.clone(), ballColor.clone(), 2000, function() {
+          var nextColor, routine;
+          ball.state.numInfluenced += 1;
+          routine = ball.state.numInfluenced / 5;
+          if (routine > 1) {
+            routine = 1;
+          }
+          console.log('influenced ball finished tweeing', ball);
+          ball.currPos = ball.ball3d.position.clone();
+          ball.state.hover = true;
+          nextColor = ball.ball3d.material.ambient.clone();
+          nextColor.lerp(_this.opts.ballColorVeteran.clone(), routine);
+          return _this._tweenBallColor(ball, ball.ball3d.material.ambient.clone(), {
+            'r': nextColor.r,
+            'g': nextColor.g,
+            'b': nextColor.b
+          }, 10);
+        });
+      });
+      ball.state.hover = false;
+      newPos = {
+        'x': ball.ball3d.position.x + (Math.random() * 2 - 1) * 300,
+        'y': ball.ball3d.position.y + (Math.random() * 2 - 1) * 300,
+        'z': ball.ball3d.position.z + (Math.random() * 2 - 1) * 300
+      };
+      return this._tweenSomething(ball.ball3d.position, ball.ball3d.position.clone(), newPos, 900);
+    };
+
+    VisualOrganism.prototype._spawnInstaCube = function(influenceData) {
+      var cube, cubeGeometry, cubeMaterials;
+      cubeGeometry = new THREE.CubeGeometry(30, 30, 30);
+      cubeMaterials = [
+        new THREE.MeshLambertMaterial({
+          'ambient': 0x0E1B21,
+          'side': THREE.DoubleSide
+        })
+      ];
+      /*
+      		cubeMaterials [
+      			new THREE.MeshLambertMaterial { 'ambient':0x07325E, 'side':THREE.DoubleSide }
+      			new THREE.MeshPhongMaterial { 'ambient':0x07325E, 'side':THREE.DoubleSide }
+      		]
+      */
+
+      cube = new THREE.Mesh(cubeGeometry, cubeMaterials[0]);
+      cube.position.set((1 - 2 * Math.random()) * this.opts.clusterSize * 0.5 * (1.5 - Math.random()), (1 - 2 * Math.random()) * this.opts.clusterSize * (1.5 - Math.random()), (1 - 2 * Math.random()) * this.opts.clusterSize * (1.5 - Math.random()));
+      cube.rotation.set(Math.random(), Math.random(), Math.random());
+      if (!(this.instaCubes != null)) {
+        this.instaCubes = [];
+      }
+      this.instaCubes.push({
+        'cube': cube,
+        'posStart': cube.position.clone(),
+        'phase': Math.random() * Math.PI * 2,
+        'hoverSpeed': 1 / (0.01 + Math.random() * 80),
+        'rotateSpeed': 1 / (10 + Math.random() * 40)
+      });
+      return this.newCubes.push(cube);
+    };
+
+    VisualOrganism.prototype._updateInstaCubes = function() {
+      var cubeInfo, _i, _len, _ref, _results;
+      _ref = this.instaCubes;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        cubeInfo = _ref[_i];
+        _results.push(cubeInfo.cube.rotation.x += cubeInfo.rotateSpeed);
+      }
+      return _results;
+    };
+
+    VisualOrganism.prototype._tweenBall = function(ball, from, to, duration) {
       var tween;
-      tween = new TWEEN.Tween(from).to(to, 300);
+      duration = duration || 300;
+      tween = new TWEEN.Tween(from).to(to, duration);
+      this.tweens.push(tween);
       tween.easing(TWEEN.Easing.Quadratic.InOut);
       tween.onUpdate(function() {
         return ball.ball3d.position.set(this.x, this.y, this.z);
@@ -305,16 +541,15 @@
       return tween.start();
     };
 
-    VisualOrganism.prototype._tweenBallSize = function(ball, from, to) {
+    VisualOrganism.prototype._tweenBallSize = function(ball, from, to, duration, callback) {
       var tween;
       tween = new TWEEN.Tween({
-        'size': from
-      }).to({
-        'size': to
-      }, 100);
-      tween.easing(TWEEN.Easing.Quadratic.InOut);
+        from: from
+      }).to(to, duration);
+      this.tweens.push(tween);
+      tween.easing(TWEEN.Easing.Linear.None);
       tween.onUpdate(function() {
-        return ball.ball3d.radius = this.size;
+        return ball.ball3d.scale.set(this.x, this.y, this.z);
       });
       return tween.start();
     };
@@ -327,41 +562,12 @@
       }).to({
         'distance': to
       }, 400);
+      this.tweens.push(tween);
       tween.easing(TWEEN.Easing.Quadratic.InOut);
       tween.onUpdate(function() {
         return _this.opts.cameraDistance = this.distance;
       });
       return tween.start();
-    };
-
-    VisualOrganism.prototype.onCompareNodes = function(compareData) {
-      var ball, node, _i, _len, _ref, _results;
-      _ref = compareData.nodes;
-      _results = [];
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        node = _ref[_i];
-        ball = this.balls[node.nodeId];
-        _results.push(this._animateComparingBall(ball));
-      }
-      return _results;
-    };
-
-    VisualOrganism.prototype._animateComparingBall = function(ball) {
-      var _this = this;
-      return this._tweenBallColor(ball, this.opts.ballColor, this.opts.ballColorCompare, 200, function() {
-        return _this._tweenBallColor(ball, ball.ball3d.material.ambient, _this.opts.ballColor, 1000);
-      });
-    };
-
-    VisualOrganism.prototype.onInfluenceNode = function(influenceData) {
-      return this._animateInfluencedBall(this.balls[influenceData.node.node.nodeId]);
-    };
-
-    VisualOrganism.prototype._animateInfluencedBall = function(ball) {
-      var _this = this;
-      return this._tweenBallColor(ball, this.opts.ballColor, this.opts.ballColorInfluence, 200, function() {
-        return _this._tweenBallColor(ball, ball.ball3d.material.ambient, _this.opts.ballColor, 3000);
-      });
     };
 
     VisualOrganism.prototype._tweenBallColor = function(ball, fromColor, toColor, duration, callback) {
@@ -377,8 +583,13 @@
         'b': toColor.b
       };
       tween = new TWEEN.Tween(colorFrom).to(colorTo, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      this.tweens.push(tween);
       tween.onUpdate(function() {
-        return ball.ball3d.material.ambient.setRGB(this.r, this.g, this.b);
+        if (ball.ball3d.children.length > 0) {
+          return ball.ball3d.children[0].material.ambient.setRGB(this.r, this.g, this.b);
+        } else {
+          return ball.ball3d.material.ambient.setRGB(this.r, this.g, this.b);
+        }
       });
       if (callback) {
         tween.onComplete(callback);
@@ -399,6 +610,7 @@
         'b': toColor.b
       };
       tween = new TWEEN.Tween(colorFrom).to(colorTo, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      this.tweens.push(tween);
       tween.onUpdate(function() {
         return targetColor.setRGB(this.r, this.g, this.b);
       });
@@ -411,6 +623,7 @@
     VisualOrganism.prototype._tweenSomething = function(something, from, to, duration, callback) {
       var tween;
       tween = new TWEEN.Tween(from).to(to, duration).easing(TWEEN.Easing.Quadratic.InOut);
+      this.tweens.push(tween);
       tween.onUpdate(function() {
         var key, _i, _len, _ref, _results;
         _ref = Object.keys(to);

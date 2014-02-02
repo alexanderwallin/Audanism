@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 500
+	@TIME_INTERVAL: 550
 
 	# Constructor
 	#
@@ -34,6 +34,8 @@ class Environment
 		@createInfluenceSources()
 
 		@initConductor()
+
+		EventDispatcher.listen 'audanism/influence', @, @influence
 
 		@run()
 
@@ -87,14 +89,11 @@ class Environment
 				# Do comparison!
 				organism.performNodeComparison() 
 
-				# Update sound
-				@updateConductor()
-
 				# Update GUI
 				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
 
 				# Trigger event
-				EventDispatcher.trigger 'audanism/iteration', [organism]
+				EventDispatcher.trigger 'audanism/iteration', [{ 'count':@_iterationCount, 'organism':organism}]
 
 				@_isSingleStep = false
 		else
@@ -137,9 +136,10 @@ class Environment
 				#console.log '-- node', node
 
 				# Affect node
-				console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
-				EventDispatcher.trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
+				#console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
+
+				EventDispatcher.trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
 				
 				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')
 				setTimeout () =>
@@ -180,10 +180,10 @@ class Environment
 						else if valType is 'string' and argVal is 'rand' 
 							valueMod = Math.randomRange 5, -5
 
-						console.log "    --> influence: factor #{ factor.factorType } by #{ valueMod }"
-						console.log "        ... before: #{ factor }"
+						#console.log "    --> influence: factor #{ factor.factorType } by #{ valueMod }"
+						#console.log "        ... before: #{ factor }"
 						organism.getFactorOfType(factor.factorType).addValue valueMod
-						console.log "        ... after: #{ factor }"
+						#console.log "        ... after: #{ factor }"
 
 			else if type is 'node'
 				for organism in @_organisms
@@ -202,12 +202,12 @@ class Environment
 
 						cell = getRandomElements(node.getCells(), 1)[0]
 
-						console.log "    --> influence: node #{ node.nodeId }->#{ cell.factorType } by #{ valueMod }"
-						console.log "        ... before: #{ node }"
+						#console.log "    --> influence: node #{ node.nodeId }->#{ cell.factorType } by #{ valueMod }"
+						#console.log "        ... before: #{ node }"
 						cell.addFactorValue valueMod
-						console.log "        ... after: #{ node }"
+						#console.log "        ... after: #{ node }"
 
-		console.log "---"
+		#console.log "---"
 
 
 	initConductor: () ->
@@ -215,9 +215,6 @@ class Environment
 
 		@conductor.setOrganism @_organisms[0]
 		@conductor.mute()
-
-	updateConductor: () ->
-		@conductor.updateSounds()
 
 
 

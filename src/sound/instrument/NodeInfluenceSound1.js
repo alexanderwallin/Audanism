@@ -21,7 +21,7 @@ var NodeInfluenceSoundSynth1 = function(audiolet, frequency, pan) {
 
 	// Pan
 	pan = pan || 0.5;
-	console.log('	pan =', pan);
+	//console.log('	pan =', pan);
 	this.pan = new Pan(audiolet, pan);
 
 	// Main signal path

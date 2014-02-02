@@ -15,8 +15,8 @@ $runLocal = @$_GET['local'] == 'yes';
         <meta name="viewport" content="width=device-width">
 
         <link rel="shortcut icon" href="img/favicon.png">
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'>
+        <!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'> -->
+        <!-- <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'> -->
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
 
@@ -82,6 +82,7 @@ $runLocal = @$_GET['local'] == 'yes';
         <script defer src="js/vendor/instagram.js"></script>
         <script defer src="js/vendor/Audiolet.min.js"></script>
         <script defer src="js/vendor/three.min.js"></script>
+        <script defer src="js/vendor/three.orbitcontrols.js"></script>
         <script defer src="js/vendor/fonts/helvetiker_regular.typeface.js"></script>
         <script defer src="js/vendor/tween.min.js"></script>
 
@@ -137,6 +138,7 @@ $runLocal = @$_GET['local'] == 'yes';
 		<script defer src="src/sound/instrument/NodeInfluenceSound1.js"></script>
 		<script defer src="src/sound/instrument/NodeInfluenceSound2.js"></script>
 		<script defer src="src/sound/instrument/NodeComparisonSound1.js"></script>
+		<script defer src="src/sound/instrument/InfluenceActionSound1.js"></script>
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js"></script>

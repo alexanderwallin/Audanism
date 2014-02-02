@@ -8,7 +8,7 @@ class NodeComparer
 	# Compares the given nodes using the given comparison mode,
 	# and then alters them striving for reduced disharmony.
 	@alterNodesInComparisonMode: (nodes, comparisonMode) ->
-		console.log "NodeComparer.alterNodesInComparisonMode --- mode: #{ comparisonMode }, nodes:", nodes
+		#console.log "NodeComparer.alterNodesInComparisonMode --- mode: #{ comparisonMode }, nodes:", nodes
 
 		if comparisonMode == NodeComparer.COMPARISON_MODE_FACTOR_HARMONY
 			@_alterNodesUsingFactorHarmonyComparison nodes 
@@ -18,7 +18,7 @@ class NodeComparer
 	# Compares the given nodes striving for an alteration giving
 	# less factor disharmony.
 	@_alterNodesUsingFactorHarmonyComparison: (nodes) ->
-		console.log "   #_alterNodesUsingFactorHarmonyComparison"
+		#console.log "   #_alterNodesUsingFactorHarmonyComparison"
 
 		for node in nodes
 			$(".node[data-node-id=#{ node.nodeId }]").addClass('comparing')
@@ -37,7 +37,7 @@ class NodeComparer
 	# Compares the given nodes striving for an alteration giving
 	# less organism disharmony.
 	@_alterNodesUsingOrganismHarmonyComparison: (nodes) ->
-		console.log "   #_alterNodesUsingOrganismHarmonyComparison"
+		#console.log "   #_alterNodesUsingOrganismHarmonyComparison"
 
 
 window.NodeComparer = NodeComparer

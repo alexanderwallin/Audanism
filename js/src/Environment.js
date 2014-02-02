@@ -13,7 +13,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 500;
+    Environment.TIME_INTERVAL = 550;
 
     function Environment() {
       var i, organism, _i, _len, _ref;
@@ -39,6 +39,7 @@
       this.listenToControls();
       this.createInfluenceSources();
       this.initConductor();
+      EventDispatcher.listen('audanism/influence', this, this.influence);
       this.run();
     }
 
@@ -93,9 +94,13 @@
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           organism = _ref[_i];
           organism.performNodeComparison();
-          this.updateConductor();
           this._gui.update(organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData(200));
-          EventDispatcher.trigger('audanism/iteration', [organism]);
+          EventDispatcher.trigger('audanism/iteration', [
+            {
+              'count': this._iterationCount,
+              'organism': organism
+            }
+          ]);
           _results.push(this._isSingleStep = false);
         }
         return _results;
@@ -118,7 +123,7 @@
     };
 
     Environment.prototype.influence = function(influenceData) {
-      var $node, argNum, argVal, cell, factor, factors, node, nodes, num, numType, organism, type, valType, valueMod, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2,
+      var $node, argNum, argVal, cell, factor, factors, node, nodes, num, numType, organism, type, valType, valueMod, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results, _results1,
         _this = this;
       if (!this._isRunning) {
         return;
@@ -129,7 +134,7 @@
           organism = _ref[_i];
           factor = influenceData.node.factor === 'rand' ? getRandomElements(organism.getFactors()) : organism.getFactorOfType(influenceData.node.factor);
           node = influenceData.node.node === 'rand' ? organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] : organism.getNode(influenceData.node.node);
-          console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier);
+          node.addCellValue(factor.factorType, influenceData.node.valueModifier);
           EventDispatcher.trigger('audanism/influence/node', [
             {
               'node': {
@@ -140,7 +145,6 @@
               'meta': influenceData.meta
             }
           ]);
-          node.addCellValue(factor.factorType, influenceData.node.valueModifier);
           $node = $("[data-node-id='" + node.nodeId + "']").addClass('altered');
           setTimeout(function() {
             return $node.removeClass('altered');
@@ -163,60 +167,63 @@
         }
         if (type === 'factor') {
           _ref1 = this._organisms;
+          _results = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             organism = _ref1[_j];
             factors = getRandomElements(organism.getFactors(), num);
-            for (_k = 0, _len2 = factors.length; _k < _len2; _k++) {
-              factor = factors[_k];
-              valType = typeof argVal;
-              if (valType === 'integer') {
-                valueMod = argVal;
-              } else if (valType === 'array') {
-                valueMod = Math.randomRange(argVal[1], argVal[0]);
-              } else if (valType === 'string' && argVal === 'rand') {
-                valueMod = Math.randomRange(5, -5);
+            _results.push((function() {
+              var _k, _len2, _results1;
+              _results1 = [];
+              for (_k = 0, _len2 = factors.length; _k < _len2; _k++) {
+                factor = factors[_k];
+                valType = typeof argVal;
+                if (valType === 'integer') {
+                  valueMod = argVal;
+                } else if (valType === 'array') {
+                  valueMod = Math.randomRange(argVal[1], argVal[0]);
+                } else if (valType === 'string' && argVal === 'rand') {
+                  valueMod = Math.randomRange(5, -5);
+                }
+                _results1.push(organism.getFactorOfType(factor.factorType).addValue(valueMod));
               }
-              console.log("    --> influence: factor " + factor.factorType + " by " + valueMod);
-              console.log("        ... before: " + factor);
-              organism.getFactorOfType(factor.factorType).addValue(valueMod);
-              console.log("        ... after: " + factor);
-            }
+              return _results1;
+            })());
           }
+          return _results;
         } else if (type === 'node') {
           _ref2 = this._organisms;
-          for (_l = 0, _len3 = _ref2.length; _l < _len3; _l++) {
-            organism = _ref2[_l];
+          _results1 = [];
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            organism = _ref2[_k];
             nodes = getRandomElements(organism.getNodes(), num);
-            for (_m = 0, _len4 = nodes.length; _m < _len4; _m++) {
-              node = nodes[_m];
-              valType = typeof argVal;
-              if (valType === 'integer') {
-                valueMod = argVal;
-              } else if (valType === 'array') {
-                valueMod = Math.randomRange(argVal[1], argVal[0]);
-              } else if (valType === 'string' && argVal === 'rand') {
-                valueMod = Math.randomRange(50, -50);
+            _results1.push((function() {
+              var _l, _len3, _results2;
+              _results2 = [];
+              for (_l = 0, _len3 = nodes.length; _l < _len3; _l++) {
+                node = nodes[_l];
+                valType = typeof argVal;
+                if (valType === 'integer') {
+                  valueMod = argVal;
+                } else if (valType === 'array') {
+                  valueMod = Math.randomRange(argVal[1], argVal[0]);
+                } else if (valType === 'string' && argVal === 'rand') {
+                  valueMod = Math.randomRange(50, -50);
+                }
+                cell = getRandomElements(node.getCells(), 1)[0];
+                _results2.push(cell.addFactorValue(valueMod));
               }
-              cell = getRandomElements(node.getCells(), 1)[0];
-              console.log("    --> influence: node " + node.nodeId + "->" + cell.factorType + " by " + valueMod);
-              console.log("        ... before: " + node);
-              cell.addFactorValue(valueMod);
-              console.log("        ... after: " + node);
-            }
+              return _results2;
+            })());
           }
+          return _results1;
         }
       }
-      return console.log("---");
     };
 
     Environment.prototype.initConductor = function() {
       this.conductor = new Audanism.Sound.Conductor();
       this.conductor.setOrganism(this._organisms[0]);
       return this.conductor.mute();
-    };
-
-    Environment.prototype.updateConductor = function() {
-      return this.conductor.updateSounds();
     };
 
     return Environment;

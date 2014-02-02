@@ -13,7 +13,6 @@
     NodeComparer.COMPARISON_MODE_ORGANISM_HARMONY = 2;
 
     NodeComparer.alterNodesInComparisonMode = function(nodes, comparisonMode) {
-      console.log("NodeComparer.alterNodesInComparisonMode --- mode: " + comparisonMode + ", nodes:", nodes);
       if (comparisonMode === NodeComparer.COMPARISON_MODE_FACTOR_HARMONY) {
         return this._alterNodesUsingFactorHarmonyComparison(nodes);
       } else {
@@ -23,7 +22,6 @@
 
     NodeComparer._alterNodesUsingFactorHarmonyComparison = function(nodes) {
       var aCell, bCell, node, _i, _j, _len, _len1, _ref, _results;
-      console.log("   #_alterNodesUsingFactorHarmonyComparison");
       for (_i = 0, _len = nodes.length; _i < _len; _i++) {
         node = nodes[_i];
         $(".node[data-node-id=" + node.nodeId + "]").addClass('comparing');
@@ -51,9 +49,7 @@
       return _results;
     };
 
-    NodeComparer._alterNodesUsingOrganismHarmonyComparison = function(nodes) {
-      return console.log("   #_alterNodesUsingOrganismHarmonyComparison");
-    };
+    NodeComparer._alterNodesUsingOrganismHarmonyComparison = function(nodes) {};
 
     return NodeComparer;
 

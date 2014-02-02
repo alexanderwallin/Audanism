@@ -91,10 +91,12 @@
             },
             'meta': {
               'current': i + 1,
-              'total': captionVals.length
+              'total': captionVals.length,
+              'source': 'instagram',
+              'sourceData': photo
             }
           };
-          this.triggerInfluence(influenceData);
+          EventDispatcher.trigger('audanism/influence', influenceData);
         }
       }
       return this.jqxhr = null;

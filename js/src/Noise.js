@@ -14,10 +14,12 @@
       this.audiolet = audiolet;
       this.gen = new WhiteNoise(this.audiolet);
       this.lpf = new LowPassFilter(this.audiolet, 200);
-      this.gain = new Gain(this.audiolet, 0);
+      this.gain = new Gain(this.audiolet, 0.001);
+      this.limiter = new Limiter(this.audiolet, 0.1, 0.1, 0.8);
       this.gen.connect(this.lpf);
       this.lpf.connect(this.gain);
-      this.gain.connect(this.audiolet.output);
+      this.gain.connect(this.limiter);
+      this.limiter.connect(this.audiolet.output);
     }
 
     return Noise;

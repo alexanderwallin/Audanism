@@ -3,7 +3,7 @@
 var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 	AudioletGroup.call(this, audiolet, 0, 1);
 
-	console.log('#NodeInfluenceSoundSynth2', frequency, pan);
+	//console.log('#NodeInfluenceSoundSynth2', frequency, pan);
 	
 	// Basic wave
 	genType = Math.floor(Math.random() * 4)
@@ -31,11 +31,22 @@ var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 								0.2, // Attack
 								0.5,  // Decay
 								0.1,  // Sustain
-								2,  // Release
+								0.5,  // Release
 								function() {
+									console.log('NodeInfluenceSoundSynth2 :: envelope relase', this);
 									this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
 								}.bind(this)
 								);
+
+	// Low pass filter
+	this.lpf = new LowPassFilter(audiolet, 5000);
+
+	// Delay
+	//this.delay = new Delay(audiolet, 4, 1, 0.3, 0.02);
+	//this.delayVerb = new Reverb(audiolet, 0.5, 0.5, 0.1);
+
+	// Reverb
+	this.verb = new Reverb(audiolet, 0.6, 0.9, 0.4);
 
 	// Pan
 	pan = pan || 0.5;
@@ -44,8 +55,15 @@ var NodeInfluenceSoundSynth2 = function(audiolet, frequency, pan) {
 	// Main signal path
 	//this.modulator.connect(this.modulatorMulAdd);
 	//this.modulatorMulAdd.connect(this.gen);
-	this.gen.connect(this.gain);
-	this.gain.connect(this.pan);
+	this.gen.connect(this.lpf);
+	this.lpf.connect(this.gain)
+	this.gain.connect(this.verb);
+	this.verb.connect(this.pan);
+
+	//this.gain.connect(this.delay);
+	//this.delay.connect(this.delayVerb);
+	//this.delayVerb.connect(this.pan);
+	
 	this.pan.connect(this.outputs[0])
 
 	// Envelope
@@ -60,7 +78,7 @@ var NodeInfluenceSound2 = function() {
 };
 
 NodeInfluenceSound2.prototype.hit = function(freq, pan, length) {
-	console.log('#NodeInfluenceSound2.hit', freq, pan, length);
+	//console.log('#NodeInfluenceSound2.hit', freq, pan, length);
 	var synth = new NodeInfluenceSoundSynth2(this.audiolet, freq, pan);
 
 	//var freqPattern = new PSequence([freq]);
@@ -68,7 +86,7 @@ NodeInfluenceSound2.prototype.hit = function(freq, pan, length) {
 	var gatePattern = new PSequence([1, 0]);
 	
 	this.audiolet.scheduler.play([gatePattern], length, function(gate) {
-		console.log('influence synth callback ··· gate =', gate, this);
+		//console.log('influence synth callback ··· gate =', gate, this);
 		this.env.gate.setValue(gate);
 	}.bind(synth));
 

@@ -26,6 +26,7 @@
         }
         return _results;
       }).call(this);
+      this.influenceActionSounds = [];
       this.comparisonSounds = (function() {
         var _i, _results;
         _results = [];
@@ -34,6 +35,7 @@
         }
         return _results;
       }).call(this);
+      EventDispatcher.listen('audanism/iteration', this, this.updateSounds);
       $(document).on('audanism/influence/node', function(e, influenceData) {
         return self.handleNodeInfluence.call(self, e, influenceData);
       });
@@ -47,30 +49,39 @@
     };
 
     Conductor.prototype.mute = function() {
-      this.noise.gain.gain.setValue(0);
+      if (this.noise != null) {
+        this.noise.gain.gain.setValue(0);
+      }
       return this.muted = true;
     };
 
     Conductor.prototype.unmute = function() {
-      this.noise.gain.gain.setValue(1);
+      if (this.noise != null) {
+        this.noise.gain.gain.setValue(1);
+      }
       return this.muted = false;
     };
 
-    Conductor.prototype.updateSounds = function() {
+    Conductor.prototype.updateSounds = function(iterationInfo) {
       var disharmonyData, disharmonyNew, disharmonyOld, disharmonyRatio;
+      console.log('#updateSounds', iterationInfo);
+      if (iterationInfo.count % 10 === !0) {
+        return;
+      }
       disharmonyData = this.organism.getDisharmonyHistoryData(200);
       disharmonyNew = disharmonyData[disharmonyData.length - 1][2];
       disharmonyOld = disharmonyData[0][2];
       disharmonyRatio = disharmonyNew / disharmonyOld;
-      return this.noise.lpf.frequency.setValue(disharmonyRatio * 1000);
+      if (this.noise != null) {
+        return this.noise.lpf.frequency.setValue(disharmonyRatio * 1000);
+      }
     };
 
     Conductor.prototype.handleNodeInfluence = function(e, influenceData) {
-      var length, nodeFreq, nodeId, nodePan;
+      var influenceActionSound, length, nodeFreq, nodeId, nodePan;
       if (this.muted) {
         return;
       }
-      console.log('perform hit on', influenceData, this.organism);
       console.log('   has meta:', influenceData.meta);
       if (!this.organism || !influenceData.meta) {
         return;
@@ -78,10 +89,14 @@
       nodeId = influenceData.node.node.nodeId;
       nodeFreq = 80 + (nodeId * 40);
       nodePan = nodeId / this.organism.getNodes().length;
-      length = 1;
-      console.log('--- hit synth', influenceData.meta.current - 1, ', s =', this.influenceSounds[influenceData.meta.current - 1]);
-      console.log('--- values:', nodeFreq, nodePan, length);
-      return this.influenceSounds[influenceData.meta.current - 1].hit(nodeFreq, nodePan, length);
+      length = 0.4;
+      this.influenceSounds[influenceData.meta.current - 1].hit(nodeFreq, nodePan, length);
+      if (influenceData.meta.source === 'instagram' && influenceData.meta.current === influenceData.meta.total && this.influenceActionSounds.length < 3) {
+        influenceActionSound = new Audanism.Sound.Instrument.InfluenceActionSound1();
+        influenceActionSound.hit();
+        this.influenceActionSounds.push(influenceActionSound);
+        return console.log('add influence action sound', influenceActionSound);
+      }
     };
 
     Conductor.prototype.handleNodeComparison = function(e, comparisonData) {
@@ -94,13 +109,7 @@
         node = comparisonData.nodes[i];
         freq = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1);
         pan = node.nodeId / this.organism.getNodes().length;
-        if ((comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 && i === 0) || (comparisonData.action === DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2 && i === 1)) {
-          length = 0.1;
-        } else {
-          length = 1;
-        }
-        console.log('compnode -- val:', node.getCell(comparisonData.factorType).factorValue, ' => freq:', freq);
-        console.log('         -- action:', comparisonData.action, ' => length:', length);
+        length = 0.1;
         _results.push(this.comparisonSounds[i].hit(freq, pan, length));
       }
       return _results;

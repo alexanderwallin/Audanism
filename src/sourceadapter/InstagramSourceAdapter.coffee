@@ -108,18 +108,22 @@ class InstagramSourceAdapter extends SourceAdapter
 
 				influenceData = {
 					'node': {
-						'node': 'rand'
-						'factor': i+1
+						'node':          'rand'
+						'factor':        i+1
 						'valueModifier': modVal
 					},
 					'meta': {
-						'current': i + 1,
-						'total': captionVals.length
+						'current':       i + 1,
+						'total':         captionVals.length
+						'source':        'instagram',
+						'sourceData':    photo
 					}
 				}
 				#console.log('....... influence data', influenceData)
 
-				@triggerInfluence influenceData
+				#@triggerInfluence influenceData
+
+				EventDispatcher.trigger 'audanism/influence', influenceData
 
 		@jqxhr = null
 
