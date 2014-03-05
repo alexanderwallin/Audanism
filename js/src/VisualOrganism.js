@@ -125,12 +125,12 @@
       this.stats = new Stats();
       $(this.stats.domElement).attr('id', 'fps-stats');
       container.appendChild(this.stats.domElement);
-      this.lightAmb = new THREE.AmbientLight(0xffffff);
+      this.lightAmb = new THREE.AmbientLight(0xaaaaaa);
       this.scene.add(this.lightAmb);
-      this.lightSpot = new THREE.DirectionalLight(0xaaffff, 0.2);
+      this.lightSpot = new THREE.DirectionalLight(0xaaaaaa, 0.7);
       this.lightSpot.position.set(0, 1, 1);
       this.scene.add(this.lightSpot);
-      this.lightSpot2 = new THREE.DirectionalLight(0xffffaa, 0.2);
+      this.lightSpot2 = new THREE.DirectionalLight(0xaaaaaa, 0.5);
       this.lightSpot2.position.set(0.3, 1, -1);
       this.scene.add(this.lightSpot2);
       roomColor = this.opts.roomColor.clone();
@@ -385,12 +385,14 @@
     };
 
     VisualOrganism.prototype.setDaylight = function() {
-      var darken, minutesFromDark, minutesOfDay, now, roomColor;
+      var darken, minutesFromMidday, minutesOfDay, now, roomColor;
       now = new Date();
       roomColor = this.opts.roomColor.clone();
-      minutesOfDay = now.getHours() + now.getMinutes();
-      minutesFromDark = now.getHours() > 12 ? 1440 - minutesOfDay : minutesOfDay;
-      darken = 0.4 * (720 - minutesFromDark) / 720;
+      minutesOfDay = now.getHours() * 60 + now.getMinutes();
+      minutesFromMidday = minutesOfDay > 720 ? minutesOfDay - 720 : 720 - minutesOfDay;
+      darken = 0.5 * minutesFromMidday / 720;
+      console.log('darken', darken);
+      console.log('minutes from midday', minutesFromMidday);
       roomColor.offsetHSL(0, 0, -darken);
       return this.room.material.ambient = roomColor;
     };

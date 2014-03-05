@@ -175,14 +175,14 @@ class VisualOrganism
 		container.appendChild( @stats.domElement );
 
 		# Add lights
-		@lightAmb = new THREE.AmbientLight 0xffffff
+		@lightAmb = new THREE.AmbientLight 0xaaaaaa
 		@scene.add @lightAmb
 
-		@lightSpot = new THREE.DirectionalLight 0xaaffff, 0.2
+		@lightSpot = new THREE.DirectionalLight 0xaaaaaa, 0.7
 		@lightSpot.position.set 0, 1, 1
 		@scene.add @lightSpot
 
-		@lightSpot2 = new THREE.DirectionalLight 0xffffaa, 0.2
+		@lightSpot2 = new THREE.DirectionalLight 0xaaaaaa, 0.5
 		@lightSpot2.position.set 0.3, 1, -1
 		@scene.add @lightSpot2
 
@@ -466,9 +466,11 @@ class VisualOrganism
 		now = new Date()
 
 		roomColor = @opts.roomColor.clone()
-		minutesOfDay = now.getHours() + now.getMinutes()
-		minutesFromDark = if now.getHours() > 12 then 1440 - minutesOfDay else minutesOfDay
-		darken = 0.4 * (720 - minutesFromDark) / 720
+		minutesOfDay = now.getHours() * 60 + now.getMinutes()
+		minutesFromMidday = if minutesOfDay > 720 then minutesOfDay - 720 else 720 - minutesOfDay
+		darken = 0.5 * minutesFromMidday / 720
+		console.log 'darken', darken
+		console.log 'minutes from midday', minutesFromMidday
 		roomColor.offsetHSL( 0, 0, -darken )
 
 		@room.material.ambient = roomColor

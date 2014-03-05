@@ -71,15 +71,15 @@ class GUI
 		switch hour
 			when 23, 0, 1, 2, 3, 4, 5
 				showSelector = 'night'
-			when 6, 7, 8
+			when 5, 6, 7
 				showSelector = 'early-morning'
-			when 9, 10, 11
+			when 8, 9, 10
 				showSelector = 'morning'
-			when 12, 13, 14, 15
+			when 11, 12, 13
 				showSelector = 'midday'
-			when 16, 17, 18, 19
+			when 14, 15, 16, 17
 				showSelector = 'afternoon'
-			when 20, 21, 22
+			when 18, 19, 20, 21, 22
 				showSelector = 'evening'
 
 		#console.log(showSelector)
