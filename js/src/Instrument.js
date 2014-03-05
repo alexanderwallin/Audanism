@@ -102,7 +102,6 @@
         note = voice.note;
         voice.noteOff();
         _results.push(setTimeout(function() {
-          console.log('  --- KILL VOICE!', note, voice, _this.voices[note]);
           _this.voices[note] = null;
           clearTimeout(_this.noteTimers[note]);
           _this.noteTimers[note] = null;

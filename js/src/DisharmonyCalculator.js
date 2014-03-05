@@ -114,37 +114,28 @@
 
 
     DisharmonyCalculator.prototype.alterNodesInComparisonMode = function(nodes, comparisonMode) {
-      var aCell, bCell, cell, cellsToCompare, comparisonFn, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, smallestNewDisharmony, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1;
+      var aCell, bCell, cell, cellsToCompare, comparisonFn, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, smallestNewDisharmony, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1;
       comparisonFn = comparisonMode === Audanism.Calculator.NODE_COMPARISON_MODE_FACTOR_HARMONY ? 'getFactorDisharmonyForNodes' : 'getActualOrganismDisharmony';
-      $(".node.comparing").removeClass('comparing');
-      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
-        node = nodes[_i];
-        $(".node[data-node-id=" + node.nodeId + "]").addClass('comparing');
-      }
       cellsToCompare = [];
       _ref = nodes[0].getCells();
-      for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-        aCell = _ref[_j];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        aCell = _ref[_i];
         _ref1 = nodes[1].getCells();
-        for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-          bCell = _ref1[_k];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          bCell = _ref1[_j];
           if (aCell.factorType === bCell.factorType) {
             cellsToCompare.push(aCell.factorType);
           }
         }
       }
-      for (_l = 0, _len3 = cellsToCompare.length; _l < _len3; _l++) {
-        factorType = cellsToCompare[_l];
+      for (_k = 0, _len2 = cellsToCompare.length; _k < _len2; _k++) {
+        factorType = cellsToCompare[_k];
         testNodes = nodes;
-        for (_m = 0, _len4 = nodes.length; _m < _len4; _m++) {
-          node = nodes[_m];
-          Node._idCounter--;
-        }
         nodeAction;
 
         neededSaveNode = false;
-        for (_n = 0, _len5 = nodes.length; _n < _len5; _n++) {
-          node = nodes[_n];
+        for (_l = 0, _len3 = nodes.length; _l < _len3; _l++) {
+          node = nodes[_l];
           cell = node.getCell(factorType);
           if (cell.factorValue === 0) {
             node.addCellValue(factorType, 1);
@@ -155,7 +146,6 @@
             neededSaveNode = true;
           }
           if (neededSaveNode) {
-            console.log(" >>> ABRUPT: Needed to rescue nodes <<<");
             return;
           }
         }

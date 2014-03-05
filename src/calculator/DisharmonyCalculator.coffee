@@ -44,9 +44,9 @@ class DisharmonyCalculator
 		correlations = Audanism.Factor.Factor.FACTOR_CORRELATIONS
 		#correlationsArray[factor.factorType] = Factor.FACTOR_CORRELATIONS[factor.factorType] for factor in @_organism.getFactors()
 		#for factorCorrelations, factorType in correlationsArray
-		#	console.log "  #{ factorType }: #{ factorCorrelations }"
+		#	#console.log "  #{ factorType }: #{ factorCorrelations }"
 		#	for correlatingFactorType in factorCorrelations
-		#		console.log "--- adjust for correlation #{ factorType } <---> #{ correlatingFactorType }"
+		#		#console.log "--- adjust for correlation #{ factorType } <---> #{ correlatingFactorType }"
 
 		for factorType in [1..Audanism.Environment.Organism.NUM_FACTORS]
 			for correlatingFactorType in [1..Audanism.Environment.Organism.NUM_FACTORS]
@@ -120,10 +120,6 @@ class DisharmonyCalculator
 		#else if comparisonMode is DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
 		#	@_alterNodesUsingOrganismHarmonyComparison nodes
 
-		$(".node.comparing").removeClass('comparing')
-		for node in nodes
-			$(".node[data-node-id=#{ node.nodeId }]").addClass('comparing')
-
 		# Check which cells should be subjects for alteration
 		cellsToCompare = []
 		for aCell in nodes[0].getCells()
@@ -139,7 +135,7 @@ class DisharmonyCalculator
 
 			# Make a copy of the nodes
 			testNodes = nodes #(node.clone() for node in nodes)
-			Node._idCounter-- for node in nodes
+			#Node._idCounter-- for node in nodes
 			#console.log testNodes
 			#continue
 
@@ -157,7 +153,7 @@ class DisharmonyCalculator
 					node.addCellValue factorType, -1
 					neededSaveNode = true
 				if neededSaveNode
-					console.log " >>> ABRUPT: Needed to rescue nodes <<<"
+					#console.log " >>> ABRUPT: Needed to rescue nodes <<<"
 					return
 
 			# Start by storing the current disharmony

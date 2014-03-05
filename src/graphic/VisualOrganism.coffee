@@ -30,8 +30,8 @@ class VisualOrganism
 			'ballInfluenceTime':   2000
 			'ballColorVeteran':    new THREE.Color(0x1F36E0)
 
-			'groupCubesEvery':     3
-			'cubesPerGroup':       2
+			'groupCubesEvery':     6
+			'cubesPerGroup':       4
 		}
 
 		@state = {}
@@ -50,6 +50,7 @@ class VisualOrganism
 		$(window).on 'resize', @onWindowResize.bind(@)
 
 		# Init handlers
+		EventDispatcher.listen 'audanism/controls/start', @, @onStart
 		EventDispatcher.listen 'audanism/init/organism',  @, @onInitOrganism
 
 		# Real-time handlers
@@ -61,6 +62,14 @@ class VisualOrganism
 			@createBalls info.numNodes
 
 		#$('html').addClass 'canvas-only'
+
+
+	# App start
+	onStart: () ->
+
+		# Make balls
+		if @balls.length is 0
+			@createBalls @numBalls
 
 
 	# Handles organism init
@@ -253,9 +262,6 @@ class VisualOrganism
 			@factors[factor.factorType] = factor3d
 			@scene.add factor3d
 
-		# Make balls
-		@createBalls @numBalls
-
 		#console.log @balls
 
 		# Orbin control
@@ -263,7 +269,7 @@ class VisualOrganism
 		@orbitControls.autoRotate = true
 		@orbitControls.autoRotateSpeed = -1
 
-		$('#container').append @renderer.domElement
+		$('#canvas-wrap').css('opacity', 0).append(@renderer.domElement).fadeTo(1000, 1.0)
 
 
 	# Animate
@@ -288,7 +294,7 @@ class VisualOrganism
 			EventDispatcher.trigger( 'audanism/performance/goodfps', @fps )
 
 		if @numBadFps >= 5
-			console.log( '!!!!!!!!!!!!!!!!!! KILL EVERYTHING !!!!!!!!!!!!!!!!!!!!' )
+			#console.log( '!!!!!!!!!!!!!!!!!! KILL EVERYTHING !!!!!!!!!!!!!!!!!!!!' )
 			EventDispatcher.trigger( 'audanism/performance/bad', @fps )
 
 		# Increment frame
@@ -456,7 +462,7 @@ class VisualOrganism
 
 	# Darkens the room depending on the time of day
 	setDaylight: () ->
-		console.log ' -------------- #setDaylight() ----------------'
+		#console.log ' -------------- #setDaylight() ----------------'
 		now = new Date()
 
 		roomColor = @opts.roomColor.clone()
@@ -470,7 +476,7 @@ class VisualOrganism
 
 	# Creates balls
 	createBalls: (numBalls) ->
-		console.log('VisualOrganism #createBalls', numBalls)
+		#console.log('VisualOrganism #createBalls', numBalls)
 		for i in [0..numBalls-1]
 
 			# Make ball info object
@@ -574,7 +580,7 @@ class VisualOrganism
 
 	# Handles factor influence
 	onInfluenceFactorAfter: (influenceData) ->
-		console.log('#onInfluenceFactorAfter', influenceData)
+		#console.log('#onInfluenceFactorAfter', influenceData)
 
 		# Get factor
 		factor = influenceData.factor.factor
@@ -632,7 +638,7 @@ class VisualOrganism
 		factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue
 
 		# For wind: rotate according to the modified value
-		console.log 'influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value
+		#console.log 'influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value
 		if influenceData.meta.sourceAttr is 'wind'
 			@_tweenSomething factor3d.rotation, { 'z':factor3d.rotation.z }, { 'z':influenceData.factor.value }, 300, _afterFactorAnimation
 
@@ -756,7 +762,7 @@ class VisualOrganism
 
 	_replaceCubesWithMegaCube: () ->
 
-		console.log('num cubes', @instaCubes.length)
+		#console.log('num cubes', @instaCubes.length)
 
 
 		# Create a mega cube
@@ -803,7 +809,9 @@ class VisualOrganism
 		cubeTo = cubePos.clone()
 		cubeTo.multiplyScalar 100
 		@_tweenSomething cubePos, cubePos.clone(), destination, 1000, () =>
+			cubeInfo.cube.userData.cubeLine.material.color = 0x000000
 			megaCube.add cubeInfo.cube.userData.cubeLine
+
 			@scene.remove cubeInfo.cube
 
 

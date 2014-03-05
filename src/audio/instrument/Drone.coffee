@@ -22,7 +22,7 @@ class Drone extends Audanism.Audio.Instrument.Instrument
 				voice.setUnison( @unison )
 
 	setUnison: (@unison) ->
-		console.log 'Drone #setUnison', @unison
+		#console.log 'Drone #setUnison', @unison
 		for voice in @voices
 			if voice
 				voice.setUnison @unison

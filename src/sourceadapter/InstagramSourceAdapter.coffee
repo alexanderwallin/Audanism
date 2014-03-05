@@ -113,7 +113,7 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 					continue
 
 				modVal = Math.round captionVals[i] * 20
-				modVal = if Math.random() >= 0.5 then modVal * -1 else modVal
+				modVal = if Math.random() >= 0.5 then -modVal else modVal
 
 				influenceData = {
 					'node': {

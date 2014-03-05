@@ -30,8 +30,8 @@
         'ballColorInfluence': new THREE.Color(0xED34A0),
         'ballInfluenceTime': 2000,
         'ballColorVeteran': new THREE.Color(0x1F36E0),
-        'groupCubesEvery': 3,
-        'cubesPerGroup': 2
+        'groupCubesEvery': 6,
+        'cubesPerGroup': 4
       };
       this.state = {};
       this.queue = [];
@@ -43,6 +43,7 @@
       this.cubesGrouped = 0;
       this.newBalls = [];
       $(window).on('resize', this.onWindowResize.bind(this));
+      EventDispatcher.listen('audanism/controls/start', this, this.onStart);
       EventDispatcher.listen('audanism/init/organism', this, this.onInitOrganism);
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/compare/nodes', this, this.onCompareNodes);
@@ -52,6 +53,12 @@
         return _this.createBalls(info.numNodes);
       });
     }
+
+    VisualOrganism.prototype.onStart = function() {
+      if (this.balls.length === 0) {
+        return this.createBalls(this.numBalls);
+      }
+    };
 
     VisualOrganism.prototype.onInitOrganism = function(organism) {
       this.organism = organism;
@@ -193,11 +200,10 @@
         this.factors[factor.factorType] = factor3d;
         this.scene.add(factor3d);
       }
-      this.createBalls(this.numBalls);
       this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.orbitControls.autoRotate = true;
       this.orbitControls.autoRotateSpeed = -1;
-      return $('#container').append(this.renderer.domElement);
+      return $('#canvas-wrap').css('opacity', 0).append(this.renderer.domElement).fadeTo(1000, 1.0);
     };
 
     VisualOrganism.prototype.animate = function() {
@@ -219,7 +225,6 @@
         EventDispatcher.trigger('audanism/performance/goodfps', this.fps);
       }
       if (this.numBadFps >= 5) {
-        console.log('!!!!!!!!!!!!!!!!!! KILL EVERYTHING !!!!!!!!!!!!!!!!!!!!');
         EventDispatcher.trigger('audanism/performance/bad', this.fps);
       }
       this.frame++;
@@ -381,7 +386,6 @@
 
     VisualOrganism.prototype.setDaylight = function() {
       var darken, minutesFromDark, minutesOfDay, now, roomColor;
-      console.log(' -------------- #setDaylight() ----------------');
       now = new Date();
       roomColor = this.opts.roomColor.clone();
       minutesOfDay = now.getHours() + now.getMinutes();
@@ -393,7 +397,6 @@
 
     VisualOrganism.prototype.createBalls = function(numBalls) {
       var ball, ball3d, ballGeometry, ballMaterials, i, _i, _ref, _results;
-      console.log('VisualOrganism #createBalls', numBalls);
       _results = [];
       for (i = _i = 0, _ref = numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         ball = {
@@ -504,7 +507,6 @@
     VisualOrganism.prototype.onInfluenceFactorAfter = function(influenceData) {
       var factor, factor3d, newColor, _afterFactorAnimation,
         _this = this;
-      console.log('#onInfluenceFactorAfter', influenceData);
       factor = influenceData.factor.factor;
       factor3d = this.factors[factor.factorType];
       factor3d.userData.hover = false;
@@ -551,7 +553,6 @@
         return factor3d.userData.isModifying;
       };
       factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue;
-      console.log('influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value);
       if (influenceData.meta.sourceAttr === 'wind') {
         this._tweenSomething(factor3d.rotation, {
           'z': factor3d.rotation.z
@@ -661,7 +662,6 @@
 
     VisualOrganism.prototype._replaceCubesWithMegaCube = function() {
       var cubeColor, cubeEndIndex, cubeGeometry, cubeInfo, cubeMaterial, cubeStartIndex, megaCube, megaCubePos, oldCubes, _i, _len;
-      console.log('num cubes', this.instaCubes.length);
       cubeColor = new THREE.Color();
       cubeColor.setHSL(Math.random(), 0.2, 0.2);
       cubeGeometry = new THREE.IcosahedronGeometry(200);
@@ -698,6 +698,7 @@
       cubeTo = cubePos.clone();
       cubeTo.multiplyScalar(100);
       return this._tweenSomething(cubePos, cubePos.clone(), destination, 1000, function() {
+        cubeInfo.cube.userData.cubeLine.material.color = 0x000000;
         megaCube.add(cubeInfo.cube.userData.cubeLine);
         return _this.scene.remove(cubeInfo.cube);
       });

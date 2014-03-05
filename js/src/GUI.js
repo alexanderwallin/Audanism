@@ -16,9 +16,9 @@
       this.$influences = $('#influences');
       this.$influenceTemplate = this.$influences.find('.template').clone(true).removeClass('template');
       this.$influences.find('.template').hide();
-      this._renderedFactors = false;
-      this._renderedNodes = false;
+      this.$introPage = $('#intro-page');
       this._setupControls();
+      this._setupIntroPage();
       this._showCozyInfo();
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/influence/node/done', this, this.onInfluenceNodeDone);
@@ -38,13 +38,23 @@
       var _this = this;
       $('#controls .btn').click(function(e) {
         e.preventDefault();
-        return $(document).trigger("dm" + ($(e.currentTarget).attr('href').replace("#", "")));
+        return EventDispatcher.trigger('audanism/controls/' + $(e.currentTarget).attr('href').replace("#", ""));
       });
-      $(document).on('dmstart', function(e) {
+      EventDispatcher.listen('audanism/controls/start', this, function() {
         return $('body').removeClass('paused').addClass('running');
       });
-      return $(document).on('dmpause', function(e) {
+      return EventDispatcher.listen('audanism/controls/pause audanism/controls/stop', this, function() {
         return $('body').removeClass('running').addClass('paused');
+      });
+    };
+
+    GUI.prototype._setupIntroPage = function() {
+      var _this = this;
+      $('#intro-content').fadeTo(2000, 1.0);
+      return $(document).on('click', '#intro-btn-start', function(e) {
+        e.preventDefault();
+        EventDispatcher.trigger('audanism/controls/start');
+        return _this.$introPage.fadeOut(500);
       });
     };
 
@@ -89,7 +99,6 @@
         case 22:
           showSelector = 'evening';
       }
-      console.log(showSelector);
       return $('.time-of-day').filter('.' + showSelector).show();
     };
 

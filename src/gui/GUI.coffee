@@ -5,20 +5,27 @@ class GUI
 
 	# Constructor
 	constructor: () ->
-		@$organismStats   = $('#organism-stats')
-		@$factorStats     = $('#factor-stats')
+
+		# Cached jQuery objects
+		@$organismStats     = $('#organism-stats')
+		@$factorStats       = $('#factor-stats')
 		
-		@$influences      = $('#influences')
+		@$influences        = $('#influences')
 		@$influenceTemplate = @$influences.find('.template').clone(true).removeClass('template')
 		@$influences.find('.template').hide()
-		
-		@_renderedFactors = false
-		@_renderedNodes   = false
 
+		@$introPage         = $('#intro-page')
+
+		# Controls
 		@_setupControls()
 
+		# Intro page
+		@_setupIntroPage()
+
+		# Some coziness in the stats sidebar
 		@_showCozyInfo()
 
+		# Event listeners
 		EventDispatcher.listen 'audanism/iteration',              @, @onIteration
 		EventDispatcher.listen 'audanism/influence/node/done',    @, @onInfluenceNodeDone
 		EventDispatcher.listen 'audanism/influence/factor/after', @, @onInfluenceFactorAfter
@@ -35,12 +42,26 @@ class GUI
 	_setupControls: () ->
 		$('#controls .btn').click (e) =>
 			e.preventDefault()
-			$(document).trigger "dm#{ $(e.currentTarget).attr('href').replace("#", "") }"
+			EventDispatcher.trigger 'audanism/controls/' + $(e.currentTarget).attr('href').replace("#", "")
+			#$(document).trigger "dm#{ $(e.currentTarget).attr('href').replace("#", "") }"
 
-		$(document).on 'dmstart', (e) =>
+		EventDispatcher.listen 'audanism/controls/start', @, () =>
+		#$(document).on 'dmstart', (e) =>
 			$('body').removeClass('paused').addClass('running')
-		$(document).on 'dmpause', (e) =>
+
+		EventDispatcher.listen 'audanism/controls/pause audanism/controls/stop', @, () =>
+		#$(document).on 'dmpause', (e) =>
 			$('body').removeClass('running').addClass('paused')
+
+
+	_setupIntroPage: () ->
+		#console.log(@$introPage)
+		$('#intro-content').fadeTo(2000, 1.0)
+
+		$(document).on 'click', '#intro-btn-start', (e) =>
+			e.preventDefault()
+			EventDispatcher.trigger 'audanism/controls/start'
+			@$introPage.fadeOut 500
 
 
 	_showCozyInfo: () ->
@@ -61,7 +82,7 @@ class GUI
 			when 20, 21, 22
 				showSelector = 'evening'
 
-		console.log(showSelector)
+		#console.log(showSelector)
 		$('.time-of-day').filter('.' + showSelector).show()
 
 

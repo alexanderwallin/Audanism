@@ -62,7 +62,6 @@
     Drone.prototype.setUnison = function(unison) {
       var voice, _i, _len, _ref, _results;
       this.unison = unison;
-      console.log('Drone #setUnison', this.unison);
       _ref = this.voices;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {

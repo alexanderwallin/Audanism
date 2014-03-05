@@ -18,9 +18,10 @@
       } catch (e) {
         alert('Sorry, your browser does not support AudioContext, try Chrome!');
       }
-      this.isMuted = false;
+      this.isMuted = true;
       this.createEndChain();
       this.noise = new Audanism.Audio.Instrument.NoisePink(this.instrumentsIn);
+      this.noise.setLpfFrequency(1000);
       this.factorDrones = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -32,7 +33,6 @@
       this.compareInstr = new Audanism.Audio.Instrument.TestInstrument(this.instrumentsIn);
       this.influencePad = new Audanism.Audio.Instrument.Pad(this.instrumentsIn);
       this.arpeggiator = new Audanism.Audio.Instrument.PercArpeggiator(this.instrumentsIn, 4, 0);
-      this.arpeggiator.start();
       EventDispatcher.listen('audanism/iteration', this, this.updateSounds);
       EventDispatcher.listen('audanism/influence/node', this, this.handleNodeInfluence);
       EventDispatcher.listen('audanism/alternodes', this, this.handleNodeComparison);
@@ -76,8 +76,8 @@
 
     Conductor.prototype.mute = function() {
       var drone, _i, _j, _len, _len1, _ref, _ref1, _results;
-      console.log('Conductor #mute()');
       this.isMuted = true;
+      this.arpeggiator.stop();
       _ref = this.factorDrones;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         drone = _ref[_i];
@@ -94,8 +94,8 @@
 
     Conductor.prototype.unmute = function() {
       var drone, _i, _len, _ref, _results;
-      console.log('Conductor #unmute()');
       this.isMuted = false;
+      this.arpeggiator.start();
       _ref = this.factorDrones;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -175,7 +175,6 @@
 
     Conductor.prototype.onStressModeChange = function(inStressMode) {
       var drone, _i, _len, _ref, _results;
-      console.log('Conductor #onStressModeChange', 'tell drons to go out of unison?', inStressMode);
       _ref = this.factorDrones;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -192,11 +191,9 @@
         return;
       }
       this.mute();
-      console.log(' ··············· pause conductor');
       arpFreq = this.arpeggiator.frequency;
       this.arpeggiator.setFrequency(0.2);
       return setTimeout(function() {
-        console.log(' ··············· resume conductor');
         _this.unmute();
         return _this.arpeggiator.setFrequency(arpFreq);
       }, 10000);

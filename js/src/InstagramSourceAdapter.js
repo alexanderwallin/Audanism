@@ -76,7 +76,7 @@
             continue;
           }
           modVal = Math.round(captionVals[i] * 20);
-          modVal = Math.random() >= 0.5 ? modVal * -1 : modVal;
+          modVal = Math.random() >= 0.5 ? -modVal : modVal;
           influenceData = {
             'node': {
               'node': 'rand',

@@ -122,23 +122,23 @@ class Organism
 
 		if @isInitialComparison
 			@stress.thresholdEnter = @_actualDisharmony * 1.2
-			console.log 'initial stress threshold enter': @stress.thresholdEnter
+			#console.log 'initial stress threshold enter': @stress.thresholdEnter
 
 		#console.log '@_actualDisharmony', Math.round(@_actualDisharmony), Math.round(@stress.thresholdEnter), Math.round(@stress.thresholdLeave)
 
 		# Check if it should enter or leave stress mode
 		if not @_inStressMode and @_actualDisharmony > @stress.thresholdEnter
-			console.log ' -----------------------------------------'
-			console.log ' #=#=#=#=#=#==# STRESS MODE =#=#=#=#=#=#=#'
-			console.log ' -----------------------------------------'
+			#console.log ' -----------------------------------------'
+			#console.log ' #=#=#=#=#=#==# STRESS MODE =#=#=#=#=#=#=#'
+			#console.log ' -----------------------------------------'
 
 			@_inStressMode = true
 			@stress.thresholdLeave = @stress.thresholdEnter * 1
 			EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
 		else if @_inStressMode and @_actualDisharmony < @stress.thresholdLeave
-			console.log ' -----------------------------------------'
-			console.log ' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#'
-			console.log ' -----------------------------------------'
+			#console.log ' -----------------------------------------'
+			#console.log ' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#'
+			#console.log ' -----------------------------------------'
 
 			@_inStressMode = false
 			@stress.thresholdEnter = @stress.thresholdLeave * 1.2

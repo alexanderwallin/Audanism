@@ -121,21 +121,12 @@
       }
       if (this.isInitialComparison) {
         this.stress.thresholdEnter = this._actualDisharmony * 1.2;
-        console.log({
-          'initial stress threshold enter': this.stress.thresholdEnter
-        });
       }
       if (!this._inStressMode && this._actualDisharmony > this.stress.thresholdEnter) {
-        console.log(' -----------------------------------------');
-        console.log(' #=#=#=#=#=#==# STRESS MODE =#=#=#=#=#=#=#');
-        console.log(' -----------------------------------------');
         this._inStressMode = true;
         this.stress.thresholdLeave = this.stress.thresholdEnter * 1;
         return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
       } else if (this._inStressMode && this._actualDisharmony < this.stress.thresholdLeave) {
-        console.log(' -----------------------------------------');
-        console.log(' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#');
-        console.log(' -----------------------------------------');
         this._inStressMode = false;
         this.stress.thresholdEnter = this.stress.thresholdLeave * 1.2;
         return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);

@@ -17,8 +17,8 @@ class Environment
 		
 		# Running state variables
 		@_iterationCount = 0
-		@_isRunning      = true
-		@_isSingleStep   = true
+		@_isRunning      = false
+		@_isSingleStep   = false
 		
 		# Visualizer
 		@visualOrganism  = new Audanism.Graphic.VisualOrganism()
@@ -42,16 +42,20 @@ class Environment
 
 		# Go.
 		@run()
+		EventDispatcher.listen 'audanism/controls/start', @, @start
+		EventDispatcher.listen 'audanism/controls/pause', @, @pause
+		EventDispatcher.listen 'audanism/controls/stop',  @, @stop
+		EventDispatcher.listen 'audanism/controls/step',  @, @step
 
 	# Initializes the loop
 	run: () ->
-		@start()
+		#@start()
 
 		@_intervalId = setInterval =>
 			@handleIteration()
 		, Environment.TIME_INTERVAL
 
-		@handleIteration()
+		#@handleIteration()
 
 	# Starts/resumes the loop
 	start: () ->
@@ -78,13 +82,13 @@ class Environment
 
 	listenToControls: () ->
 		$(document).on 'dmstart', (e) =>
-			@start()
+			EventDispatcher.trigger 'audanism/controls/start' #@start()
 		$(document).on 'dmpause', (e) =>
-			@pause()
+			EventDispatcher.trigger 'audanism/controls/pause' #@pause()
 		$(document).on 'dmstop', (e) =>
-			@stop()
+			EventDispatcher.trigger 'audanism/controls/stop' #@stop()
 		$(document).on 'dmstep', (e) =>
-			@step()
+			EventDispatcher.trigger 'audanism/controls/step' #@step()
 
 	# Handles the current iteration by listening to 
 	handleIteration: () ->

@@ -110,7 +110,7 @@ textarea {
 
 * 									{ box-sizing: border-box; }
 
-body 								{ background: #1A5061; font-family: 'Lato', 'Helvetica Neue', sans-serif, Helvetica; background: #eee; color: #444; }
+body 								{ background: #111; font-family: 'Lato', 'Helvetica Neue', sans-serif, Helvetica; color: #eee; }
 
 ul, li 								{ list-style: none; padding: 0; margin: 0; }
 
@@ -119,48 +119,38 @@ ul, li 								{ list-style: none; padding: 0; margin: 0; }
 /*h1									{ margin: 0; padding: 0 20px; line-height: 40px; font-size: 1em; font-weight: 200; letter-spacing: 20px; text-transform: lowercase; text-align: center; background: rgba(255,255,255,0.3); border-bottom: 1px solid #ddd; }*/
 
 #header 							{ position: absolute; top: 10px; left: 10px; }
-h1									{ font-size: 12px; font-weight: normal; color: #fff; letter-spacing: 4px; opacity: 0.8; margin: 0; text-transform: uppercase; font-style: normal; }
 
+#title								{ opacity: 0.8; margin: 0; font-size: 12px; font-weight: normal; color: #fff; letter-spacing: 4px; text-transform: uppercase; font-style: normal; }
 h3 									{ font-size: 10px; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; }
 
-/* Organism area */
-#main 								{ position: absolute; left: 0; top: 40px; right: 30%; bottom: 30px; overflow-y: auto; padding: 20px; }
 
-.block 								{ margin-bottom: 40px; }
+/*
+ * Intro page
+ */
+#intro-page							{ position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 3000; background: rgba(20,20,20,0.8); color: #eee; }
 
-.node, .factor 						{ position: relative; float: left; background: #fcfcfc; border-radius: 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.2); margin-right: 10px; }
+/* Table of contents */
+#table-of-contents					{ position: absolute; left: 0; top: 0; bottom: 0; width: 300px; }
 
-.factor 							{ margin-top: 20px; padding: 0 40px 0 55px; font-size: 1.2em; line-height: 30px; }
-.factor::before						{ content: attr(data-factor-type); position: absolute; left: 0; top: 0; bottom: 0; width: 15px; line-height: 30px; background: #ddd; border-right: 1px solid #ccc; font-size: 12px; text-align: center; }
-.factor::after 						{ content: attr(data-factor-disharmony); position: absolute; right: 0; top: 100%; left: 15px; padding: 0 10px 0 10px; border-radius: 0 0 3px 3px; box-shadow: 0 1px 0 rgba(0,0,0,0.2); background: darkred; color: #eee; font-size: 10px; line-height: 12px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.factor-name 						{ position: absolute; bottom: 100%; left: 18px; font-size: 11px; line-height: 20px; color: #666; font-style: italic; }
+/* Contents */
+#intro-content						{ position: absolute; overflow-y: auto; opacity: 0; width: 100%; height: 100%; padding: 0 40px; }
 
-.node 								{ margin-bottom: 5px; }
-.node.comparing						{ background: #efefef; }
-.node.altered						{ background: #e8c; }
-.node-cells li 						{ position: relative; float: left; padding: 0 5px 12px; font-size: 12px; line-height: 22px; border-right: 1px solid rgba(0,0,0,0.1); width: 30px; text-align: center; }
-/*.node::before 						{ content: attr(data-sound); display: block; position: absolute; top: -6px; left: -6px; width: 12px; height: 12px; font-size: 9px; line-height: 12px; text-align: center; background: yellow; color: black; border-radius: 6px; }*/
-.node-cell::after 					{ position: absolute; content: attr(data-cell-factor); bottom: 0; left: 0; right: 0; font-size: 10px; line-height: 12px; z-index: 0; background: #d5d5d5; color: #fff; }
+h1									{ font-size: 3rem; font-style: italic; font-weight: 300; letter-spacing: 0.3em; text-transform: uppercase; }
 
+.tab-content 						{ display: none; }
+.tab-content[data-tab="1"]			{ display: block; }
 
-/* Meta */
-#meta								{ position: absolute; left: 70%; right: 0; top: 40px; bottom: 30px; overflow-y: auto; padding: 20px; }
+/* Intro */
+#intro 								{ width: 90%; max-width: 600px; margin: 80px auto 40px; }
 
-#disharmony-chart					{ display: none; position: absolute; top: 0; right: 0; width: 100%; height: 300px; background: #ccc; }
+#intro p 							{ line-height: 1.5; font-weight: 300; }
+#intro p.note						{ color: #aaa; font-style: italic; }
 
-#disharmony-meter					{ position: fixed; top: 14px; right: 28px; float: right; text-align: right; }
-#disharmony-meter .value span		{ display: block; font-size: 12px; letter-spacing: 1px; text-align: right; }
-#disharmony-meter .sum				{ font-weight: bold; }
-#disharmony-meter .actual			{ font-size: 10px; }
-
-#ig-photo							{ position: absolute; bottom: 45px; right: 15px; width: 360px; height: 100px; background: #fff; box-shadow: 1px 1px 1px rgba(0,0,0,0.1); }
-#ig-photo::before					{ content: 'Source: Instagram'; display: block; position: absolute; bottom: 100%; right: 4px; float: right; padding: 4px 8px; background: #666; color: #eee; text-align: right; text-transform: uppercase; font-size: 9px; font-weight: bold; letter-spacing: 1px; }
-#ig-photo::after 					{ content: ''; display: block; position: absolute; left: 100px; right: 0; bottom: 0; height: 25px; background-image: -webkit-linear-gradient(top, rgba(255,255,255,0), rgba(255,255,255,1) 5px); }
-.ig-photo							{ float: left; width: 100px; height: 100px; }
-.ig-caption							{ float: left; width: 260px; height: 100%; overflow: hidden; padding: 10px; font-size: 11px; color: #aaa; }
-
-body.paused #ig-photo 				{ display: none !important; }
-
+#intro-actions 						{ margin-top: 2em; }
+#intro-actions a 					{ float: left; width: 49%; margin-bottom: 0.5rem; padding: 2em 0; background: rgba(255,255,255,0.6); border: 1px solid #111; color: #333; font-size: 0.75rem; font-style: italic; font-weight: normal; letter-spacing: 0.1em; text-align: center; text-decoration: none; text-transform: uppercase; transition: all 0.5s ease-in-out; }
+#intro-actions a:hover				{ background: rgba(0,200,255,0.8); color: #fefefe; }
+#intro-actions #intro-btn-start		{ width: 100%; font-size: 1.25rem; }
+#intro-actions #intro-btn-wiki		{ margin-right: 2%; }
 
 
 /* Controls */
@@ -233,6 +223,22 @@ a.btn 								{ text-decoration: none !important; }
 /* Instagram */
 .influence-summary img 				{ float: left; width: 20px; height: auto; margin: 4px 4px 4px 0; }
 .influence-summary .caption 		{}
+
+
+
+
+/**
+ * Scrollbars
+ */
+::-webkit-scrollbar              { /* 1 */ width: 6px; }
+::-webkit-scrollbar-button       { /* 2 */ }
+::-webkit-scrollbar-track        { /* 3 */ background: none; }
+::-webkit-scrollbar-track-piece  { /* 4 */ background: none; }
+::-webkit-scrollbar-thumb        { /* 5 */ background: rgba(255,255,255,0.5); border-radius: 10px; }
+::-webkit-scrollbar-corner       { /* 6 */ }
+::-webkit-resizer                { /* 7 */ }
+
+
 
 
 /* ==========================================================================

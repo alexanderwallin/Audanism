@@ -25,9 +25,6 @@
     WheatherSourceAdapter.prototype.activate = function() {
       var _this = this;
       this.active = true;
-      if (!this.towns) {
-        this.fetchTowns();
-      }
       return this.queryInterval = setInterval(function() {
         return _this.queryWeather();
       }, 7000);
@@ -61,7 +58,6 @@
 
     WheatherSourceAdapter.prototype.queryWeather = function() {
       var _this = this;
-      console.log('••• query wheather •••', this.jqxhr);
       if (this.jqxhr || !this.active) {
         return;
       }
@@ -75,7 +71,6 @@
           return _this.jqxhr = null;
         },
         error: function(error) {
-          console.log('An error occurred while fetching weather data:', error);
           return _this.jqxhr = null;
         }
       });
@@ -83,7 +78,6 @@
 
     WheatherSourceAdapter.prototype.processWeather = function(townWeather) {
       var $nextForecast, $xml, influenceData, temperature, windSpeed;
-      console.log('••• parse wheather •••', townWeather);
       $xml = $(townWeather);
       $nextForecast = $xml.find('tabular time[period="0"]');
       influenceData = {

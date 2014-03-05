@@ -24,8 +24,8 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 	activate: () ->
 		@active = true
 
-		if not @towns
-			@fetchTowns()
+		#if not @towns
+		#	@fetchTowns()
 
 		@queryInterval = setInterval () =>
 			@queryWeather()
@@ -61,7 +61,7 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 	# Performs a query for photos
 	queryWeather: () ->
-		console.log('••• query wheather •••', @jqxhr)
+		#console.log('••• query wheather •••', @jqxhr)
 
 		# Abort if an ongoing request is not ready
 		if @jqxhr or not @active
@@ -86,14 +86,14 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 				@processWeather response
 				@jqxhr = null
 			error: (error) =>
-				console.log('An error occurred while fetching weather data:', error)
+				#console.log('An error occurred while fetching weather data:', error)
 				@jqxhr = null
 		}
 	
 
 	# Process photos
 	processWeather: (townWeather) ->
-		console.log('••• parse wheather •••', townWeather)
+		#console.log('••• parse wheather •••', townWeather)
 		#return
 
 		# Parse XML

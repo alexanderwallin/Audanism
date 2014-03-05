@@ -95,7 +95,7 @@ class Instrument
 			voice.noteOff()
 
 			setTimeout () =>
-				console.log('  --- KILL VOICE!', note, voice, @voices[note])
+				#console.log('  --- KILL VOICE!', note, voice, @voices[note])
 				#voice.stop()
 				#voice.masterVol.disconnect( 0 )
 				@voices[note] = null

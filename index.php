@@ -40,7 +40,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 		<div id="container">
 			<header id="header">
-				<h1>Audanism</h1>
+				<div id="title">Audanism</div>
 			</header>
 
 			<?php /*
@@ -66,6 +66,54 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 				</div>
 			</aside>
 			*/ ?>
+
+			<div id="intro-page">
+
+				<?php /*
+				<nav id="table-of-contents">
+				</nav>
+				*/ ?>
+
+				<div id="intro-content">
+					<div id="intro" class="tab-content" data-tab="1">
+						<h1>Audanism</h1>
+
+						<p>Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism. It is a way of studying views on life and data simultaneously through philosophical, psychological and technical approaches and analysis.</p>
+
+						<p>Here you may spawn a tiny piece of online, computerized life. <?php /*Once the audanism has started its lifecycle, you can affect it via its environment (the Internet) following the guidelines on the page.*/ ?></p>
+
+						<p class="note">Note: This site is developed using modern web technologies (WebGL and Web Audio API) for the Google Chrome desktop web browser and needs a lot of computer juice to run. <?php /*If you are experiencing problems you watch the video from the link below.*/ ?></p>
+
+						<div id="intro-actions">
+							<a id="intro-btn-start" href="#start">Initiate life</a>
+							<!-- <a id="intro-btn-wiki" href="#wiki">Read the project outline</a> -->
+							<!-- <a id="intro-btn-video" href="#video">Watch an Audanism screencast</a> -->
+						</div>
+					</div>
+
+					<?php /*
+					<div id="project-outline" class="tab-content" data-tab="2">
+						<h1>Audanism</h1>
+
+						<!-- ## Summary -->
+
+						<p>Audanism is an experimet striving to create an, in some way, alive and self-aware audiovisual organism. It is a way of studying views on life and data simultaneously using philosophical, psychological and technical approaches and analysis.</p>
+
+						<!-- ## What is an organism? -->
+
+						<p>In contrast to reconstruation of physiological organisms, f.i. in development of artificial intelligense, this project aims to invent a lifeform that meets criteria similar to that of the physiological organism (metabolism, evolutionary reproduction etc.), but from a more general philosophical entry point, centered upon self-development and the programmatical environment.</p>
+
+						<p>An audanism has to meet the following criteria:</p>
+
+						<ol>
+							<li>it is affected, directly or indirectly, by a surrounding environment;</li>
+							<li>it has at least on purpose of living (raison d'être); and</li>
+							<li>it alters its structure or its structure's components in quest to attain its purpose of living (decision making/self-development).</li>
+						</ol>
+					</div>
+					*/ ?>
+				</div>
+			</div>
 
 			<aside id="stats-wrap">
 				<div id="cozy-stats" class="stats-block">
@@ -96,13 +144,13 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 						<tbody class="stats-block-content">
 							<tr id="summed-disharmony">
-								<td class="label" title="Summed organism disharmony">SUM</td>
-								<td class="value">12381</td>
+								<td class="label" title="Summed organism disharmony">EST</td>
+								<td class="value">0</td>
 							</tr>
 
 							<tr id="actual-disharmony">
 								<td class="label" title="Real organism disharmony, depending on state">REAL</td>
-								<td class="value">12381</td>
+								<td class="value">0</td>
 							</tr>
 						</tbody>
 					</table>
@@ -117,21 +165,21 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 						<tbody class="stats-block-content">
 							<tr id="factor-values">
-								<td class="label">F</td>
-								<td class="value" data-factor="1">10</td>
-								<td class="value" data-factor="2">23</td>
-								<td class="value" data-factor="3">23</td>
-								<td class="value" data-factor="4">23</td>
-								<td class="value" data-factor="5">23</td>
+								<td class="label">FV</td>
+								<td class="value" data-factor="1">0</td>
+								<td class="value" data-factor="2">0</td>
+								<td class="value" data-factor="3">0</td>
+								<td class="value" data-factor="4">0</td>
+								<td class="value" data-factor="5">0</td>
 							</tr>
 
 							<tr id="factor-disharmonies">
 								<td class="label">FD</td>
-								<td class="value" data-factor="1">34k</td>
-								<td class="value" data-factor="2">12k</td>
-								<td class="value" data-factor="3">1m</td>
-								<td class="value" data-factor="4">499</td>
-								<td class="value" data-factor="5">1k</td>
+								<td class="value" data-factor="1">0</td>
+								<td class="value" data-factor="2">0</td>
+								<td class="value" data-factor="3">0</td>
+								<td class="value" data-factor="4">0</td>
+								<td class="value" data-factor="5">0</td>
 							</tr>
 						</tbody>
 					</table>
@@ -143,11 +191,11 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 					<div class="stats-block-content">
 						<div class="influence template">
-							<div class="influence-type">Node</div>
-							<div class="influence-source stats-label">Instagram</div>
-							<div class="influence-summary">A summary that will be shortened</div>
-							<div class="influence-link"><a href="#">Link</a></div>
-							<div class="influence-value">5.5</div>
+							<div class="influence-type"></div>
+							<div class="influence-source stats-label"></div>
+							<div class="influence-summary"></div>
+							<div class="influence-link"></div>
+							<div class="influence-value"></div>
 						</div>
 					</div>
 				</div>
@@ -158,12 +206,14 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 				<a class="btn" href="#pause">Pause</a>
 				<!-- <a class="btn" href="#stop">Stop</a> -->
 				<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
-				<a class="btn" href="#step">Step ></a>
+				<a class="btn" href="#step" style="display: none;">Step ></a>
 				<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
 				<!-- <input id="stressmode" type="checkbox" name="stressmode" /> -->
 				<!-- <label for="stressmode">Stress mode</label> -->
 			</div>
 		</div>
+
+		<div id="canvas-wrap"></div>
 
 		<!-- Vendor scripts -->
 		<script src="js/vendor/jquery-1.8.1.min.js"></script>

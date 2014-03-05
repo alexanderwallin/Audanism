@@ -14,7 +14,7 @@ class Conductor
 			alert('Sorry, your browser does not support AudioContext, try Chrome!')
 
 		# State
-		@isMuted = false
+		@isMuted = true
 
 		# Create the end audio chain
 		@createEndChain()
@@ -25,6 +25,7 @@ class Conductor
 
 		# Noise
 		@noise = new Audanism.Audio.Instrument.NoisePink( @instrumentsIn )
+		@noise.setLpfFrequency( 1000 )
 
 		# Factor drones
 		@factorDrones = (new Audanism.Audio.Instrument.Drone( @instrumentsIn ) for i in [0..Audanism.Environment.Organism.NUM_FACTORS-1])
@@ -33,7 +34,6 @@ class Conductor
 		@influencePad = new Audanism.Audio.Instrument.Pad( @instrumentsIn )
 
 		@arpeggiator = new Audanism.Audio.Instrument.PercArpeggiator( @instrumentsIn, 4, 0 )
-		@arpeggiator.start()
 
 		# Listenings
 		EventDispatcher.listen 'audanism/iteration',           @, @updateSounds
@@ -87,16 +87,18 @@ class Conductor
 	setOrganism: (@organism) ->
 
 	mute: () ->
-		console.log('Conductor #mute()')
+		#console.log('Conductor #mute()')
 		@isMuted = true
 
+		@arpeggiator.stop()
 		(drone.notesOff() for drone in @factorDrones)
 		(drone.kill() for drone in @factorDrones)
 
 	unmute: () ->
-		console.log('Conductor #unmute()')
+		#console.log('Conductor #unmute()')
 		@isMuted = false
 
+		@arpeggiator.start()
 		(drone.noteOn( drone.droneNote ) for drone in @factorDrones)
 
 	updateSounds: (iterationInfo) ->
@@ -175,11 +177,11 @@ class Conductor
 		#	influenceActionSound = new Audanism.Sound.Instrument.InfluenceActionSound1()
 		#	influenceActionSound.hit()
 		#	@influenceActionSounds.push influenceActionSound
-		#	console.log 'add influence action sound', influenceActionSound
+		#	#console.log 'add influence action sound', influenceActionSound
 
 
 	onStressModeChange: (inStressMode) ->
-		console.log 'Conductor #onStressModeChange', 'tell drons to go out of unison?', inStressMode
+		#console.log 'Conductor #onStressModeChange', 'tell drons to go out of unison?', inStressMode
 		for drone in @factorDrones
 			drone.setUnison !inStressMode
 
@@ -189,13 +191,13 @@ class Conductor
 
 		@mute()
 
-		console.log(' ··············· pause conductor')
+		#console.log(' ··············· pause conductor')
 
 		arpFreq = @arpeggiator.frequency
 		@arpeggiator.setFrequency( 0.2 )
 
 		setTimeout () =>
-			console.log(' ··············· resume conductor')
+			#console.log(' ··············· resume conductor')
 			@unmute()
 			@arpeggiator.setFrequency( arpFreq )
 		, 10000

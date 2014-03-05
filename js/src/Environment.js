@@ -17,8 +17,8 @@
     function Environment() {
       var i;
       this._iterationCount = 0;
-      this._isRunning = true;
-      this._isSingleStep = true;
+      this._isRunning = false;
+      this._isSingleStep = false;
       this.visualOrganism = new Audanism.Graphic.VisualOrganism();
       this._organisms = (function() {
         var _i, _ref, _results;
@@ -35,15 +35,17 @@
       EventDispatcher.listen('audanism/influence', this, this.influence);
       this.initConductor();
       this.run();
+      EventDispatcher.listen('audanism/controls/start', this, this.start);
+      EventDispatcher.listen('audanism/controls/pause', this, this.pause);
+      EventDispatcher.listen('audanism/controls/stop', this, this.stop);
+      EventDispatcher.listen('audanism/controls/step', this, this.step);
     }
 
     Environment.prototype.run = function() {
       var _this = this;
-      this.start();
-      this._intervalId = setInterval(function() {
+      return this._intervalId = setInterval(function() {
         return _this.handleIteration();
       }, Environment.TIME_INTERVAL);
-      return this.handleIteration();
     };
 
     Environment.prototype.start = function() {
@@ -82,16 +84,16 @@
     Environment.prototype.listenToControls = function() {
       var _this = this;
       $(document).on('dmstart', function(e) {
-        return _this.start();
+        return EventDispatcher.trigger('audanism/controls/start');
       });
       $(document).on('dmpause', function(e) {
-        return _this.pause();
+        return EventDispatcher.trigger('audanism/controls/pause');
       });
       $(document).on('dmstop', function(e) {
-        return _this.stop();
+        return EventDispatcher.trigger('audanism/controls/stop');
       });
       return $(document).on('dmstep', function(e) {
-        return _this.step();
+        return EventDispatcher.trigger('audanism/controls/step');
       });
     };
 
