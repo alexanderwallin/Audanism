@@ -35,8 +35,8 @@
 
     return TwitterSourceAdapter;
 
-  })(SourceAdapter);
+  })(Audanism.SourceAdapter.SourceAdapter);
 
-  window.TwitterSourceAdapter = TwitterSourceAdapter;
+  window.Audanism.SourceAdapter.TwitterSourceAdapter = TwitterSourceAdapter;
 
 }).call(this);

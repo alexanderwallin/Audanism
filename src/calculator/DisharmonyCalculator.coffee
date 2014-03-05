@@ -41,15 +41,15 @@ class DisharmonyCalculator
 		#console.log "      ... before:", disharmonies
 
 		# Adjust disharmonies according to correlations
-		correlations = Factor.FACTOR_CORRELATIONS
+		correlations = Audanism.Factor.Factor.FACTOR_CORRELATIONS
 		#correlationsArray[factor.factorType] = Factor.FACTOR_CORRELATIONS[factor.factorType] for factor in @_organism.getFactors()
 		#for factorCorrelations, factorType in correlationsArray
 		#	console.log "  #{ factorType }: #{ factorCorrelations }"
 		#	for correlatingFactorType in factorCorrelations
 		#		console.log "--- adjust for correlation #{ factorType } <---> #{ correlatingFactorType }"
 
-		for factorType in [1..Organism.NUM_FACTORS]
-			for correlatingFactorType in [1..Organism.NUM_FACTORS]
+		for factorType in [1..Audanism.Environment.Organism.NUM_FACTORS]
+			for correlatingFactorType in [1..Audanism.Environment.Organism.NUM_FACTORS]
 				if correlations[factorType]? and correlations[factorType][correlatingFactorType]?
 					correlationValue = correlations[factorType][correlatingFactorType]
 
@@ -112,7 +112,7 @@ class DisharmonyCalculator
 	alterNodesInComparisonMode: (nodes, comparisonMode) ->
 		#console.log "DisharmonyCalculator.alterNodesInComparisonMode --- mode: #{ comparisonMode }, nodes:", nodes
 
-		comparisonFn = if comparisonMode is DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY then 'getFactorDisharmonyForNodes' else 'getActualOrganismDisharmony'
+		comparisonFn = if comparisonMode is Audanism.Calculator.NODE_COMPARISON_MODE_FACTOR_HARMONY then 'getFactorDisharmonyForNodes' else 'getActualOrganismDisharmony'
 		#console.log "   comparisonFn = #{ comparisonFn }"
 
 		#if comparisonMode is DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY
@@ -179,7 +179,7 @@ class DisharmonyCalculator
 			testNodes[1].addCellValue factorType, 1
 
 			smallestNewDisharmony = if newDisharmony1 < newDisharmony2 then newDisharmony1 else newDisharmony2
-			nodeAction = if newDisharmony1 < newDisharmony2 then DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 else DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2
+			nodeAction = if newDisharmony1 < newDisharmony2 then Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 else Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2
 
 			#console.log "         disharmony for step // 0:#{ currentDisharmony }, 1:#{ newDisharmony1 }, 2:#{ newDisharmony2 }"
 			#console.log "             node action: #{ nodeAction }"
@@ -193,10 +193,10 @@ class DisharmonyCalculator
 		#console.log "#_performAction #{ action } on factor #{ factorType }", nodes
 		#console.log "   before: #{ nodes[0].getString() }   #{ nodes[1].getString() }"
 		switch action
-			when DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1
+			when Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1
 				nodes[0].addCellValue factorType, -1
 				nodes[1].addCellValue factorType, 1
-			when DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2
+			when Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2
 				nodes[0].addCellValue factorType, 1
 				nodes[1].addCellValue factorType, -1
 		#console.log "   after: #{ nodes[0].getString() }   #{ nodes[1].getString() }"
@@ -219,4 +219,4 @@ class DisharmonyCalculator
 		result
 
 
-window.DisharmonyCalculator = DisharmonyCalculator
+window.Audanism.Calculator.DisharmonyCalculator = DisharmonyCalculator

@@ -11,10 +11,10 @@
   VisualOrganism = (function() {
 
     function VisualOrganism() {
-      var _this;
+      var _this = this;
       _this = this;
       this.opts = {
-        'cameraDistanceStart': 1300,
+        'cameraDistanceStart': 1600,
         'cameraDistance': 1300,
         'clusterSize': 500,
         'roomSize': 3000,
@@ -29,19 +29,28 @@
         'ballCompareTime': 1000,
         'ballColorInfluence': new THREE.Color(0xED34A0),
         'ballInfluenceTime': 2000,
-        'ballColorVeteran': new THREE.Color(0x1F36E0)
+        'ballColorVeteran': new THREE.Color(0x1F36E0),
+        'groupCubesEvery': 3,
+        'cubesPerGroup': 2
       };
       this.state = {};
       this.queue = [];
       this.tweens = [];
       this.cubes = [];
       this.newCubes = [];
+      this.cubeLines = [];
+      this.megaCubes = [];
+      this.cubesGrouped = 0;
       this.newBalls = [];
       $(window).on('resize', this.onWindowResize.bind(this));
       EventDispatcher.listen('audanism/init/organism', this, this.onInitOrganism);
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/compare/nodes', this, this.onCompareNodes);
       EventDispatcher.listen('audanism/influence/node', this, this.onInfluenceNode);
+      EventDispatcher.listen('audanism/influence/factor/after', this, this.onInfluenceFactorAfter);
+      EventDispatcher.listen('audanism/node/add', this, function(info) {
+        return _this.createBalls(info.numNodes);
+      });
     }
 
     VisualOrganism.prototype.onInitOrganism = function(organism) {
@@ -64,12 +73,20 @@
     };
 
     VisualOrganism.prototype.buildScene = function() {
-      var ball, ball3d, ballGeometry, ballGlowMaterial, ballGlowSprite, ballMaterials, i, _i, _ref;
+      var ballGlowMaterial, ballGlowSprite, factor, factor3d, factorColor, now, roomColor, _i, _len, _ref,
+        _this = this;
+      now = new Date();
+      this.lastLoop = 0;
+      this.thisLoop = 0;
+      this.fps = 0;
+      this.numBadFps = 0;
       this.camera;
       this.scene;
       this.renderer;
+      this.stats;
       this.lightAmb;
       this.lightSpot;
+      this.factors = [];
       this.balls = [];
       this.balls3d = [];
       this.numBalls = this.organism.getNodes().length;
@@ -86,20 +103,42 @@
       this.keyRight = false;
       this.keyUp = false;
       this.keyDown = false;
+      this.renderer = new THREE.WebGLRenderer({
+        'alpha': false,
+        'antialias': true
+      });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.clearColor = 0xff1190;
+      this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 20000);
       this.camera.position = new THREE.Vector3(1, 0.25, 1).multiplyScalar(this.opts.cameraDistanceStart);
       this.camera.target = new THREE.Vector3(0, 0, 0);
       this.camera.lookAt(this.camera.target);
       this.camera.setLens(35);
-      this.scene = new THREE.Scene();
+      this.stats = new Stats();
+      $(this.stats.domElement).attr('id', 'fps-stats');
+      container.appendChild(this.stats.domElement);
+      this.lightAmb = new THREE.AmbientLight(0xffffff);
+      this.scene.add(this.lightAmb);
+      this.lightSpot = new THREE.DirectionalLight(0xaaffff, 0.2);
+      this.lightSpot.position.set(0, 1, 1);
+      this.scene.add(this.lightSpot);
+      this.lightSpot2 = new THREE.DirectionalLight(0xffffaa, 0.2);
+      this.lightSpot2.position.set(0.3, 1, -1);
+      this.scene.add(this.lightSpot2);
+      roomColor = this.opts.roomColor.clone();
       this.room = new THREE.Mesh(new THREE.SphereGeometry(this.opts.roomSize, this.opts.roomVertices, this.opts.roomVertices / 2), new THREE.MeshPhongMaterial({
-        'ambient': this.opts.roomColor.clone(),
+        'ambient': roomColor,
         'side': THREE.BackSide,
         'shading': THREE.FlatShading,
         'blending': THREE.AdditiveBlending,
         'vertexColors': THREE.VertexColors
       }));
+      this.setDaylight();
       this.scene.add(this.room);
+      setInterval(function() {
+        return _this.state.shouldSetDaylight = true;
+      }, 60000);
       /* Skybox
       		imagePrefix = "img/skybox2/"
       		directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"]
@@ -117,63 +156,8 @@
       		@scene.add( @room )
       */
 
-      for (i = _i = 0, _ref = this.numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        ball = {
-          ballId: i,
-          hello: "hello. i am ball no " + i + ".",
-          direction: new THREE.Vector3(2 * Math.random() - 1, 2 * Math.random() - 1, 2 * Math.random() - 1),
-          ballSize: this.opts.ballSize,
-          hoverPhase: Math.random() * Math.PI * 2,
-          hoverSpeed: 1 / (50 + Math.random() * 100),
-          state: {
-            numInfluenced: 0,
-            hover: true
-          },
-          ref: {
-            numInfluenced: 0
-          }
-        };
-        ball.pos = new THREE.Vector3(ball.direction.x * Math.random() * this.opts.clusterSize, ball.direction.y * Math.random() * this.opts.clusterSize, ball.direction.z * Math.random() * this.opts.clusterSize);
-        ball.currPos = ball.pos.clone();
-        ball.changes = {};
-        ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 10);
-        ballMaterials = [
-          new THREE.MeshLambertMaterial({
-            'ambient': this.opts.ballColor.clone(),
-            'side': THREE.DoubleSide,
-            'shading': THREE.FlatShading,
-            'blending': THREE.AdditiveBlending,
-            'vertexColors': THREE.VertexColors
-          }), new THREE.MeshPhongMaterial({
-            'color': 0xffffff,
-            'specular': 0xffaaaa
-          })
-        ];
-        ball3d = new THREE.Mesh(ballGeometry, ballMaterials[0]);
-        ball3d.ballId = ball.ballId;
-        ball.ball3d = ball3d;
-        ball.ball3d.position = ball.pos.clone();
-        this.scene.add(ball.ball3d);
-        this.balls[i] = ball;
-        /*
-        			# Ball glow
-        			ballGlowMaterial = new THREE.SpriteMaterial { 
-        				map: new THREE.ImageUtils.loadTexture( 'img/glow.png' )
-        				useScreenCoordinates: false
-        				#alignment: THREE.SpriteAlignment.center
-        				color: 0x111111 # @opts.ballColor.clone().multiplyScalar(0.1)
-        				transparent: false
-        				blending: THREE.AdditiveBlending
-        			}
-        			ballGlowSprite = new THREE.Sprite( ballGlowMaterial )
-        			ballGlowSprite.scale.set(50, 50, 1.0)
-        			ball.ball3d.add(ballGlowSprite) # this centers the glow at the mesh
-        */
-
-      }
       this.centerBall = new THREE.Mesh(new THREE.TetrahedronGeometry(10, 0), new THREE.MeshLambertMaterial({
         'ambient': 0x331177,
-        'opacity': 0.1,
         'side': THREE.DoubleSide
       }));
       ballGlowMaterial = new THREE.SpriteMaterial({
@@ -187,40 +171,83 @@
       ballGlowSprite.scale.set(50, 50, 1.0);
       this.centerBall.add(ballGlowSprite);
       this.scene.add(this.centerBall);
-      this.lightAmb = new THREE.AmbientLight(0xffffff);
-      this.scene.add(this.lightAmb);
-      this.lightSpot = new THREE.DirectionalLight(0xffffff, 0.2);
-      this.lightSpot.position.set(0, 1, 1);
-      this.scene.add(this.lightSpot);
-      this.renderer = new THREE.WebGLRenderer({
-        'alpha': false,
-        'antialias': true
-      });
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      _ref = this.organism.getFactors();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        factor = _ref[_i];
+        factorColor = new THREE.Color();
+        factorColor.setHSL(factor.factorType / this.organism.getFactors().length, 0.6, 0.7);
+        factor3d = new THREE.Mesh(new THREE.CylinderGeometry(50, 0, factor.factorValue * 3), new THREE.MeshLambertMaterial({
+          'ambient': factorColor,
+          'side': THREE.FrontSide
+        }));
+        factor3d.position.set(randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800), randomInt(-40, 40), randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800));
+        factor3d.userData = {
+          'startPosition': factor3d.position.clone(),
+          'hover': true,
+          'hoverStartFrame': 0,
+          'initialValue': factor.factorValue,
+          'baseColor': factor3d.material.ambient.clone()
+        };
+        factor3d.dynamic = true;
+        this.factors[factor.factorType] = factor3d;
+        this.scene.add(factor3d);
+      }
+      this.createBalls(this.numBalls);
+      this.orbitControls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+      this.orbitControls.autoRotate = true;
+      this.orbitControls.autoRotateSpeed = -1;
       return $('#container').append(this.renderer.domElement);
     };
 
     VisualOrganism.prototype.animate = function() {
-      var ball, colorDiff, cube, lineGeometry, lineMaterial, relRoomColor, roomColor, _i, _j, _len, _len1, _ref, _ref1;
+      var ball, cube, factor, factor3d, line, lineGeometry, lineMaterial, megaCube, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
       requestAnimationFrame(Audanism.Graphic["public"].animate);
+      this.thisLoop = new Date();
+      if (this.lastLoop > 0) {
+        this.fps = 1000 / (this.thisLoop - this.lastLoop);
+      } else {
+        this.fps = 60;
+      }
+      this.lastLoop = this.thisLoop;
+      if (this.fps < 20) {
+        this.numBadFps++;
+        EventDispatcher.trigger('audanism/performance/badfps', this.fps);
+      } else {
+        this.numBadFps = 0;
+        EventDispatcher.trigger('audanism/performance/goodfps', this.fps);
+      }
+      if (this.numBadFps >= 5) {
+        console.log('!!!!!!!!!!!!!!!!!! KILL EVERYTHING !!!!!!!!!!!!!!!!!!!!');
+        EventDispatcher.trigger('audanism/performance/bad', this.fps);
+      }
       this.frame++;
-      this.camera.position.x = Math.sin(this.frame / 100) * this.opts.cameraDistance;
-      this.camera.position.z = Math.cos(this.frame / 100) * this.opts.cameraDistance;
-      this.camera.lookAt(this.camera.target);
-      _ref = this.balls;
+      EventDispatcher.trigger('audanism/graphic/update', this.frame);
+      if (this.state.shouldSetDaylight) {
+        this.setDaylight();
+        this.state.shouldSetDaylight = false;
+      }
+      _ref = this.organism.getFactors();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        ball = _ref[_i];
-        if (ball.state.hover) {
-          ball.ball3d.position.y = ball.currPos.y + Math.sin(ball.hoverPhase + this.frame * ball.hoverSpeed) * 15;
+        factor = _ref[_i];
+        factor3d = this.factors[factor.factorType];
+        if (factor3d.userData.hover) {
+          factor3d.position.y = factor3d.userData.startPosition.y + 200 * Math.sin((this.frame - factor3d.userData.hoverStartFrame) / (10 * factor.factorValue));
+        }
+      }
+      _ref1 = this.balls;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        ball = _ref1[_j];
+        if (ball.ball3d.userData.hover) {
+          ball.ball3d.position.y = ball.ball3d.userData.startPosition.y + Math.sin(ball.hoverPhase + (this.frame - ball.ball3d.userData.hoverStartFrame) * ball.hoverSpeed) * 15;
         }
       }
       if (this.instaCubes != null) {
         this._updateInstaCubes();
       }
       if (this.newCubes.length > 0) {
-        _ref1 = this.newCubes;
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          cube = _ref1[_j];
+        _ref2 = this.newCubes;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          cube = _ref2[_k];
           this.cubes.push(cube);
           this.scene.add(cube);
           lineGeometry = new THREE.Geometry();
@@ -230,20 +257,24 @@
             'color': 0xE3105A,
             'opacity': 0.3
           });
-          this.scene.add(new THREE.Line(lineGeometry, lineMaterial));
+          line = new THREE.Line(lineGeometry, lineMaterial);
+          this.scene.add(line);
+          cube.userData.cubeLine = line;
         }
         this.newCubes = [];
       }
-      colorDiff = 1 - this.state.latestDisharmonyChange;
-      roomColor = this.opts.roomColor.clone();
-      roomColor.lerp(this.opts.roomColor2.clone(), 0.5 + Math.sin(this.frame / 20) / 2);
-      relRoomColor = roomColor.clone();
-      if (colorDiff <= 0) {
-        relRoomColor.lerp(new THREE.Color(0x000000), Math.abs(colorDiff));
-      } else {
-        relRoomColor.lerp(new THREE.Color(0xffffff), Math.abs(colorDiff));
+      _ref3 = this.megaCubes;
+      for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+        megaCube = _ref3[_l];
+        megaCube.rotation.x += 0.003;
+        megaCube.rotation.z += 0.0007;
+      }
+      if (this.frame % 10 === 1) {
+        this.room.material.ambient.offsetHSL(0.0001, 0, 0);
       }
       TWEEN.update();
+      this.stats.update();
+      this.orbitControls.update();
       return this.renderer.render(this.scene, this.camera);
     };
 
@@ -292,7 +323,6 @@
           this.largestDistance = ball.ball3d.position.length();
         }
       }
-      console.log('tween camera to', this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
       this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
       latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10);
       disharmonySum = 0;
@@ -304,12 +334,12 @@
       latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg;
       this.state.latestDisharmonyChange = latestDisharmonyChange;
       /*
-      		console.log 'fog color start:', @opts.fogColorStart
-      		console.log 'latestDisharmonyBlock', latestDisharmonyBlock
-      		console.log 'latestDisharmonyChange', latestDisharmonyChange
-      		console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
+      		#console.log 'fog color start:', @opts.fogColorStart
+      		#console.log 'latestDisharmonyBlock', latestDisharmonyBlock
+      		#console.log 'latestDisharmonyChange', latestDisharmonyChange
+      		#console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
       		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
-      		console.log 'new fog color', newFogColor
+      		#console.log 'new fog color', newFogColor
       		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
       */
 
@@ -330,19 +360,19 @@
         				# Get the cell's factor's latest history
         				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
         				factorLatestHistory = factorDisharmonyHistory.slice(-10)
-        				console.log '··· factor history', factorLatestHistory
+        				#console.log '··· factor history', factorLatestHistory
         
         				# Total disharmony over this period
         				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
-        				console.log('··· factorDisharmonySum', factorDisharmonySum)
+        				#console.log('··· factorDisharmonySum', factorDisharmonySum)
         
         				# Calculate the factor's average dishamonry over this period
         				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
-        				console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
+        				#console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
         
         				# Calculate the factor's current condition relative the average disharmony
         				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
-        				console.log '··· factorCurrCondition', factorCurrCondition
+        				#console.log '··· factorCurrCondition', factorCurrCondition
         
         				# Add it to the sum of current conditions
         				factorsRelConditionSum += factorCurrCondition
@@ -350,10 +380,10 @@
         
         			#factorConditionAvg = factorConditionsSum / cells.length
         			factorsCurrCondition = factorsRelConditionSum / cells.length
-        			console.log 'factor condition sum', factorsConditionSum
-        			console.log 'factor condition cur', factorsCurrCondition
-        			console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
-        			console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
+        			#console.log 'factor condition sum', factorsConditionSum
+        			#console.log 'factor condition cur', factorsCurrCondition
+        			#console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
+        			#console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
         
         			# Tween size
         			ball = @balls[node.nodeId]
@@ -371,7 +401,7 @@
         }
         allFactorsChangeAvg = allFactorsChangeSum / cells.length;
         ball = this.balls[node.nodeId];
-        newBallRelSize = Math.pow(allFactorsChangeAvg, 2);
+        newBallRelSize = Math.pow(allFactorsChangeAvg, 1.4);
         ballScaleFrom = {
           'x': ball.ball3d.scale.clone().x,
           'y': ball.ball3d.scale.clone().y,
@@ -382,18 +412,89 @@
           'y': newBallRelSize,
           'z': newBallRelSize
         };
-        _results.push(ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize);
+        _results.push(this._tweenSomething(ball, ballScaleFrom, ballScaleTo, 200));
         /*
         			_tweenBack = () =>
         				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
-        				console.log ball.ballId
+        				#console.log ball.ballId
         				if ball.ballId is 1
-        					console.log 'original scale', origScale
+        					#console.log 'original scale', origScale
         				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
         
         			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
         */
 
+      }
+      return _results;
+    };
+
+    VisualOrganism.prototype.setDaylight = function() {
+      var darken, minutesFromDark, minutesOfDay, now, roomColor;
+      console.log(' -------------- #setDaylight() ----------------');
+      now = new Date();
+      roomColor = this.opts.roomColor.clone();
+      minutesOfDay = now.getHours() + now.getMinutes();
+      minutesFromDark = now.getHours() > 12 ? 1440 - minutesOfDay : minutesOfDay;
+      darken = 0.4 * (720 - minutesFromDark) / 720;
+      roomColor.offsetHSL(0, 0, -darken);
+      return this.room.material.ambient = roomColor;
+    };
+
+    VisualOrganism.prototype.createBalls = function(numBalls) {
+      var ball, ball3d, ballGeometry, ballMaterials, i, _i, _ref, _results;
+      console.log('VisualOrganism #createBalls', numBalls);
+      _results = [];
+      for (i = _i = 0, _ref = numBalls - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        ball = {
+          ballId: this.balls.length,
+          hello: "hello. i am ball no " + i + ".",
+          direction: new THREE.Vector3(2 * Math.random() - 1, 2 * Math.random() - 1, 2 * Math.random() - 1),
+          ballSize: this.opts.ballSize,
+          hoverPhase: Math.random() * Math.PI * 2,
+          hoverSpeed: 1 / (50 + Math.random() * 100),
+          state: {
+            numInfluenced: 0,
+            hover: true
+          },
+          ref: {
+            numInfluenced: 0
+          }
+        };
+        ball.pos = new THREE.Vector3(ball.direction.x * Math.random() * this.opts.clusterSize, ball.direction.y * Math.random() * this.opts.clusterSize, ball.direction.z * Math.random() * this.opts.clusterSize);
+        ball.currPos = ball.pos.clone();
+        ball.changes = {};
+        ballGeometry = new THREE.SphereGeometry(ball.ballSize, 20, 10);
+        ballMaterials = [
+          new THREE.MeshLambertMaterial({
+            'ambient': this.opts.ballColor.clone(),
+            'side': THREE.DoubleSide,
+            'shading': THREE.FlatShading,
+            'blending': THREE.AdditiveBlending,
+            'vertexColors': THREE.VertexColors
+          }), new THREE.MeshPhongMaterial({
+            'color': 0xffffff,
+            'specular': 0xffaaaa
+          })
+        ];
+        ball3d = new THREE.Mesh(ballGeometry, ballMaterials[0]);
+        ball3d.ballId = ball.ballId;
+        ball3d.position = ball.pos.clone();
+        ball3d.userData.hover = true;
+        ball3d.userData.startPosition = ball3d.position.clone();
+        ball3d.userData.hoverStartFrame = 0;
+        ball3d.scale.set(0, 0, 0);
+        this.scene.add(ball3d);
+        this._tweenSomething(ball3d.scale, {
+          'x': 0,
+          'y': 0,
+          'z': 0
+        }, {
+          'x': 1,
+          'y': 1,
+          'z': 1
+        }, 1000);
+        this.balls[ball.ballId] = ball;
+        _results.push(ball.ball3d = ball3d);
       }
       return _results;
     };
@@ -445,11 +546,80 @@
       }
     };
 
+    VisualOrganism.prototype.onInfluenceFactorAfter = function(influenceData) {
+      var factor, factor3d, newColor, _afterFactorAnimation,
+        _this = this;
+      console.log('#onInfluenceFactorAfter', influenceData);
+      factor = influenceData.factor.factor;
+      factor3d = this.factors[factor.factorType];
+      factor3d.userData.hover = false;
+      _afterFactorAnimation = function() {
+        var existingToruses, lastTorus, torus, torusColor, torusMargin, torusRadius, torusSize;
+        if (!factor3d.userData.toruses) {
+          factor3d.userData.toruses = [];
+        }
+        existingToruses = factor3d.userData.toruses;
+        torusMargin = 10;
+        torusSize = 10;
+        if (existingToruses.length > 0) {
+          lastTorus = existingToruses[existingToruses.length - 1];
+          torusColor = lastTorus.material.ambient.clone();
+          torusRadius = lastTorus.geometry.radius;
+          torusSize = lastTorus.geometry.tube;
+        } else {
+          torusColor = factor3d.material.ambient.clone();
+          torusRadius = factor3d.geometry.radiusTop;
+          torusSize = torusSize;
+        }
+        torusColor.offsetHSL(0.05, -0.1, 0);
+        torusRadius *= 0.96;
+        torusSize *= 0.9;
+        torus = new THREE.Mesh(new THREE.TorusGeometry(torusRadius, torusSize), new THREE.MeshLambertMaterial({
+          'ambient': torusColor,
+          'side': THREE.FrontSide
+        }));
+        torus.position.y = (factor3d.geometry.height / 2) + (torusMargin + existingToruses.length * (torusMargin + torusSize));
+        torus.rotation.x = Math.PI / 2;
+        torus.scale.set(0, 0, 0);
+        factor3d.userData.toruses.push(torus);
+        factor3d.add(torus);
+        return _this._tweenSomething(torus.scale, {
+          'x': 0,
+          'y': 0,
+          'z': 0
+        }, {
+          'x': 1,
+          'y': 1,
+          'z': 1
+        }, 1000);
+      };
+      factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue;
+      console.log('influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value);
+      if (influenceData.meta.sourceAttr === 'wind') {
+        this._tweenSomething(factor3d.rotation, {
+          'z': factor3d.rotation.z
+        }, {
+          'z': influenceData.factor.value
+        }, 300, _afterFactorAnimation);
+      } else if (influenceData.meta.sourceAttr === 'temperature') {
+        newColor = factor3d.userData.baseColor.clone();
+        newColor.offsetHSL(0, influenceData.factor.value / 5, 0);
+        this._tweenSomething(factor3d.material.ambient, factor3d.material.ambient.clone(), newColor, 300, _afterFactorAnimation);
+      }
+      return this._tweenSomething(factor3d.position, {
+        'x': factor3d.position.x
+      }, {
+        'x': (randomInt(0, 1) === 1 ? -100 : 100)
+      }, 300, function() {
+        factor3d.userData.startPosition = factor3d.position.clone();
+        factor3d.userData.hoverStartFrame = _this.frame;
+        return factor3d.userData.hover = true;
+      });
+    };
+
     VisualOrganism.prototype._animateInfluencedBall = function(ball) {
       var ballColor, ballColorInfluence, newPos, target,
         _this = this;
-      console.log('#_animateInfluencedBall', ball);
-      console.log('   new state', ball.state);
       target = ball.ball3d.material.ambient;
       ballColor = target.clone();
       ballColorInfluence = {
@@ -457,37 +627,48 @@
         'g': this.opts.ballColorInfluence.g,
         'b': this.opts.ballColorInfluence.b
       };
-      this._tweenBallColor(ball, ballColor.clone(), this.opts.ballColorInfluence.clone(), 200, function() {
-        return _this._tweenBallColor(ball, _this.opts.ballColorInfluence.clone(), ballColor.clone(), 2000, function() {
-          var nextColor, routine;
+      this._tweenSomething(target, target.clone(), this.opts.ballColorInfluence.clone(), 200, function() {
+        return _this._tweenSomething(target, _this.opts.ballColorInfluence.clone(), target.clone(), 200, function() {
+          var nextColor, ring, ringRadius, routine;
           ball.state.numInfluenced += 1;
-          routine = ball.state.numInfluenced / 5;
-          if (routine > 1) {
-            routine = 1;
-          }
-          console.log('influenced ball finished tweeing', ball);
+          routine = (ball.state.numInfluenced % 5) / 5;
           ball.currPos = ball.ball3d.position.clone();
           ball.state.hover = true;
-          nextColor = ball.ball3d.material.ambient.clone();
+          nextColor = _this.opts.ballColor.clone();
           nextColor.lerp(_this.opts.ballColorVeteran.clone(), routine);
-          return _this._tweenBallColor(ball, ball.ball3d.material.ambient.clone(), {
+          _this._tweenSomething(ball.ball3d.material.ambient, ball.ball3d.material.ambient.clone(), {
             'r': nextColor.r,
             'g': nextColor.g,
             'b': nextColor.b
           }, 10);
+          if (routine === 0) {
+            ringRadius = 3 * ball.ball3d.geometry.radius;
+            ring = new THREE.Mesh(new THREE.CylinderGeometry(ringRadius, ringRadius, 1), new THREE.MeshLambertMaterial({
+              'ambient': ball.ball3d.material.ambient.clone(),
+              'transparent': true,
+              'opacity': 0.3,
+              'side': THREE.DoubleSide
+            }));
+            ring.rotation.x = (ball.state.numInfluenced / 5) * (Math.PI / 4);
+            return ball.ball3d.add(ring);
+          }
         });
       });
-      ball.state.hover = false;
+      ball.ball3d.userData.hover = false;
       newPos = {
         'x': ball.ball3d.position.x + (Math.random() * 2 - 1) * 300,
         'y': ball.ball3d.position.y + (Math.random() * 2 - 1) * 300,
         'z': ball.ball3d.position.z + (Math.random() * 2 - 1) * 300
       };
-      return this._tweenSomething(ball.ball3d.position, ball.ball3d.position.clone(), newPos, 900);
+      return this._tweenSomething(ball.ball3d.position, ball.ball3d.position.clone(), newPos, 200, function() {
+        ball.ball3d.userData.hoverStartFrame = _this.frame;
+        ball.ball3d.userData.startPosition = ball.ball3d.position.clone();
+        return ball.ball3d.userData.hover = true;
+      });
     };
 
     VisualOrganism.prototype._spawnInstaCube = function(influenceData) {
-      var cube, cubeGeometry, cubeMaterials;
+      var cube, cubeGeometry, cubeInfo, cubeMaterials;
       cubeGeometry = new THREE.CubeGeometry(30, 30, 30);
       cubeMaterials = [
         new THREE.MeshLambertMaterial({
@@ -508,14 +689,62 @@
       if (!(this.instaCubes != null)) {
         this.instaCubes = [];
       }
-      this.instaCubes.push({
+      cubeInfo = {
         'cube': cube,
         'posStart': cube.position.clone(),
         'phase': Math.random() * Math.PI * 2,
         'hoverSpeed': 1 / (0.01 + Math.random() * 80),
         'rotateSpeed': 1 / (10 + Math.random() * 40)
+      };
+      this.instaCubes.push(cubeInfo);
+      this.newCubes.push(cube);
+      if (this.instaCubes.length > this.opts.groupCubesEvery && this.instaCubes.length % this.opts.groupCubesEvery === 1) {
+        return this._replaceCubesWithMegaCube();
+      }
+    };
+
+    VisualOrganism.prototype._replaceCubesWithMegaCube = function() {
+      var cubeColor, cubeEndIndex, cubeGeometry, cubeInfo, cubeMaterial, cubeStartIndex, megaCube, megaCubePos, oldCubes, _i, _len;
+      console.log('num cubes', this.instaCubes.length);
+      cubeColor = new THREE.Color();
+      cubeColor.setHSL(Math.random(), 0.2, 0.2);
+      cubeGeometry = new THREE.IcosahedronGeometry(200);
+      cubeMaterial = new THREE.MeshLambertMaterial({
+        'ambient': cubeColor,
+        'side': THREE.DoubleSide
       });
-      return this.newCubes.push(cube);
+      megaCube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      megaCubePos = new THREE.Vector3(this.opts.roomSize / 2 - 200, this.opts.roomSize / 2 - 200, this.opts.roomSize / 2 - 200);
+      megaCubePos.applyAxisAngle(new THREE.Vector3(1, 0, 0), Math.random() * 2 * Math.PI);
+      megaCubePos.applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 2 * Math.PI);
+      megaCubePos.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.random() * 2 * Math.PI);
+      megaCube.position = megaCubePos;
+      if (!(this.megaCubes != null)) {
+        this.megaCubes = [];
+      }
+      this.megaCubes.push(megaCube);
+      this.scene.add(megaCube);
+      cubeStartIndex = this.cubesGrouped;
+      cubeEndIndex = this.cubesGrouped + this.opts.cubesPerGroup;
+      oldCubes = this.instaCubes.slice(cubeStartIndex, cubeEndIndex);
+      for (_i = 0, _len = oldCubes.length; _i < _len; _i++) {
+        cubeInfo = oldCubes[_i];
+        this._removeCube(cubeInfo, megaCubePos.clone(), megaCube);
+      }
+      return this.cubesGrouped += cubeEndIndex - cubeStartIndex;
+    };
+
+    VisualOrganism.prototype._removeCube = function(cubeInfo, destination, megaCube) {
+      var cubePos, cubeTo,
+        _this = this;
+      cubeInfo.cube.add(cubeInfo.cube.userData.cubeLine);
+      cubePos = cubeInfo.cube.position;
+      cubeTo = cubePos.clone();
+      cubeTo.multiplyScalar(100);
+      return this._tweenSomething(cubePos, cubePos.clone(), destination, 1000, function() {
+        megaCube.add(cubeInfo.cube.userData.cubeLine);
+        return _this.scene.remove(cubeInfo.cube);
+      });
     };
 
     VisualOrganism.prototype._updateInstaCubes = function() {
@@ -626,11 +855,11 @@
       this.tweens.push(tween);
       tween.onUpdate(function() {
         var key, _i, _len, _ref, _results;
-        _ref = Object.keys(to);
+        _ref = Object.keys(this);
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           key = _ref[_i];
-          _results.push(something[key] = to[key]);
+          _results.push(something[key] = this[key]);
         }
         return _results;
       });

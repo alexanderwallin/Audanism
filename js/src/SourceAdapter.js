@@ -15,9 +15,16 @@
 
     function SourceAdapter(listener) {
       this.listener = listener;
+      this.active = false;
     }
 
-    SourceAdapter.prototype.activate = function() {};
+    SourceAdapter.prototype.activate = function() {
+      return this.active = true;
+    };
+
+    SourceAdapter.prototype.deactivate = function() {
+      return this.active = false;
+    };
 
     SourceAdapter.prototype.getAdaptedSourceData = function(sourceData) {
       var influenceData;
@@ -55,6 +62,6 @@
 
   })();
 
-  window.SourceAdapter = SourceAdapter;
+  window.Audanism.SourceAdapter.SourceAdapter = SourceAdapter;
 
 }).call(this);

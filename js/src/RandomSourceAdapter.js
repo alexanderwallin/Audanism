@@ -67,8 +67,8 @@
 
     return RandomSourceAdapter;
 
-  })(SourceAdapter);
+  })(Audanism.SourceAdapter.SourceAdapter);
 
-  window.RandomSourceAdapter = RandomSourceAdapter;
+  window.Audanism.SourceAdapter.RandomSourceAdapter = RandomSourceAdapter;
 
 }).call(this);

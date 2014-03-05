@@ -9,8 +9,15 @@ class SourceAdapter
 	constructor: (@listener) ->
 		#console.log "(SourceAdapter) #constructor", @listener
 
+		@active = false
+
 	# Activates the source adapter. 
 	activate: () ->
+		@active = true
+
+	# Deactivates/pauses the source adapter.
+	deactivate: () ->
+		@active = false
 
 	# Adapts/translates the source data into data that the environment
 	# understands.
@@ -40,4 +47,4 @@ class SourceAdapter
 		#console.log "!!!  Trigger influence:", influenceData, "on", @listener
 		@listener.influence influenceData if @listener.influence?
 
-window.SourceAdapter = SourceAdapter
+window.Audanism.SourceAdapter.SourceAdapter = SourceAdapter

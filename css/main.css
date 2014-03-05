@@ -7,14 +7,16 @@
  */
 
 
+/*
 @font-face {
   font-family: 'Dosis';
   font-style: normal;
   font-weight: 400;
   src: local('Dosis Regular'), local('Dosis-Regular'), url(fonts/dosis-normal.woff) format('woff');
 }
+*/
 
-
+@import "http://fonts.googleapis.com/css?family=Lato:300,400,900,300italic";
 
 
 
@@ -108,7 +110,7 @@ textarea {
 
 * 									{ box-sizing: border-box; }
 
-body 								{ font-family: 'Dosis', 'Open Sans', 'Helvetica Neue', sans-serif, Helvetica; background: #eee; color: #444; }
+body 								{ font-family: 'Lato', 'Helvetica Neue', sans-serif, Helvetica; background: #eee; color: #444; }
 
 ul, li 								{ list-style: none; padding: 0; margin: 0; }
 
@@ -116,7 +118,8 @@ ul, li 								{ list-style: none; padding: 0; margin: 0; }
 
 /*h1									{ margin: 0; padding: 0 20px; line-height: 40px; font-size: 1em; font-weight: 200; letter-spacing: 20px; text-transform: lowercase; text-align: center; background: rgba(255,255,255,0.3); border-bottom: 1px solid #ddd; }*/
 
-h1									{ position: absolute; top: 14px; left: 28px; font-size: 12px; font-weight: normal; color: #fff; letter-spacing: 2px; opacity: 0.8; }
+#header 							{ position: absolute; top: 10px; left: 10px; }
+h1									{ font-size: 12px; font-weight: normal; color: #fff; letter-spacing: 4px; opacity: 0.8; margin: 0; text-transform: uppercase; font-style: normal; }
 
 h3 									{ font-size: 10px; text-transform: uppercase; margin-top: 0; margin-bottom: 10px; }
 
@@ -169,10 +172,63 @@ a.btn 								{ text-decoration: none !important; }
 .btn:hover 							{ background: #ccc; }
 */
 
-#controls 							{ position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 10px 20px; background: rgba(51,145,124, 0.2); /*border-top: 1px solid rgba(0,0,0,0.1)*/ }
+/*
+#controls 							{ position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 10px 20px; background: rgba(51,145,124, 0.2); }
 #controls .btn 						{ display: inline-block; padding: 4px 8px; color: rgba(255,255,255,0.8); font-size: 12px; font-weight: 200; letter-spacing: 1px; text-decoration: none; transition: color 0.1s ease-in-out; }
 #controls .btn:hover				{ color: #fff; }
+*/
 
+#controls 								{ position: absolute; left: 8px; top: 30px; margin: 0; }
+#controls .btn 							{ position: relative; float: left; width: 16px; height: 16px; margin-right: 4px; opacity: 0.5; text-indent: -999em; transition: opacity 0.15s ease-in-out; }
+#controls .btn::after					{ content: ''; display: block; position: absolute; }
+#controls .btn[href="#start"]::after	{ top: 2px; left: 3px; width: 0; height: 0; border-left: 10px solid white; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+#controls .btn[href="#pause"]::after 	{ top: 2px; bottom: 2px; left: 50%; width: 4px; margin-left: -5px; border: 2px solid #fff; border-width: 0 3px; }
+#controls .btn:hover					{ opacity: 1; }
+
+
+/* FPS Stats */
+#fps-stats								{ position: absolute; left: 10px; bottom: 10px; }
+
+
+/*
+ * Stats sidebar 
+ */
+#stats-wrap							{ position: absolute; top: 10px; right: 10px; width: 200px; font-size: 10px; color: #fefefe; }
+
+.stats-block						{ margin-bottom: 2px; font-size: 10px; }
+.stats-title						{ margin-bottom: 2px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.2); }
+.stats-block-content				{ opacity: 0.8; }
+.stats-label						{ text-transform: uppercase; font-style: italic; }
+.stats-block p 						{ display: none; margin: 2px 0; }
+
+/* Stats tables */
+.stats-table						{ width: 100%; margin-bottom: 10px; text-transform: uppercase; }
+.stats-table thead 					{ border-bottom: 1px solid rgba(255,255,255,0.2); }
+.stats-table th,
+.stats-table td,
+.stats-table .title					{ text-align: left; }
+.stats-table th 					{ font-weight: bold; }
+.stats-table td.label 				{ font-style: italic; }
+.stats-table td 					{  }
+
+#organism-stats td.value			{ text-align: right }
+
+#factor-stats th:not(.title),
+#factor-stats td.value 				{ text-align: center; }
+
+
+/* Influences */
+.influence 							{ float: left; width: 100%; margin-bottom: 5px; padding: 4px 8px 4px 4px; background: rgba(0,0,0,0.2); }
+/*.influence > div					{ float: left; padding-right: 2px; }*/
+
+.influence-source					{ width: 100%; text-transform: uppercase; font-style: italic; }
+.influence-type						{ float: right; opacity: 0.8; padding-top: 1px; font-size: 9px; font-style: italic; }
+.influence-summary					{ width: 100%; }
+.influence a 						{ color: #DBF1FF; text-decoration: none; border-bottom: 1px dotted #DBF1FF; }
+
+/* Instagram */
+.influence-summary img 				{ float: left; width: 20px; height: auto; margin: 4px 4px 4px 0; }
+.influence-summary .caption 		{}
 
 
 /* ==========================================================================

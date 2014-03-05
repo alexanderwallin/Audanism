@@ -32,15 +32,17 @@ class Factor
 
 	@createFactor: (factorType, factorValue = 0) ->
 		switch factorType
-			when Factor.TYPE_OPENNESS then new OpennessFactor()
-			when Factor.TYPE_CONSCIENTIOUSNESS then new ConscientiousnessFactor()
-			when Factor.TYPE_EXTRAVERSION then new ExtraversionFactor()
-			when Factor.TYPE_AGREEABLENESS then new AgreeablenessFactor()
-			when Factor.TYPE_NEUROTICISM then new NeuroticismFactor()
+			when Factor.TYPE_OPENNESS then new Audanism.Factor.OpennessFactor()
+			when Factor.TYPE_CONSCIENTIOUSNESS then new Audanism.Factor.ConscientiousnessFactor()
+			when Factor.TYPE_EXTRAVERSION then new Audanism.Factor.ExtraversionFactor()
+			when Factor.TYPE_AGREEABLENESS then new Audanism.Factor.AgreeablenessFactor()
+			when Factor.TYPE_NEUROTICISM then new Audanism.Factor.NeuroticismFactor()
 			else null
 
 	# Constructor
-	constructor: (@factorType, @factorValue = 0) ->
+	constructor: (@factorType, @factorValue) ->
+
+		@factorValue = randomInt(10, 90) if not @factorValue
 
 		# Meta
 		@name = @constructor.name.replace /^(\w+)Factor$/, "$1"
@@ -62,4 +64,4 @@ class Factor
 	toString: () ->
 		"<Factor ##{ @factorType } (#{ @name }); factorValue = #{ @factorValue }>"
 
-window.Factor = Factor;
+window.Audanism.Factor.Factor = Factor;

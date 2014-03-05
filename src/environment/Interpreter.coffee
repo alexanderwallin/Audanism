@@ -15,4 +15,4 @@ class Interpreter
 	startListenToSources: () ->
 
 
-window.Interpreter = Interpreter
+window.Audanism.Environment.Interpreter = Interpreter

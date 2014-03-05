@@ -1,7 +1,7 @@
-class NeuroticismFactor extends Factor
+class NeuroticismFactor extends Audanism.Factor.Factor
 
 	constructor: () ->
-		super(Factor.TYPE_NEUROTICISM, 10);
+		super(Audanism.Factor.Factor.TYPE_NEUROTICISM)
 
 
-window.NeuroticismFactor = NeuroticismFactor
+window.Audanism.Factor.NeuroticismFactor = NeuroticismFactor

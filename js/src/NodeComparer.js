@@ -55,6 +55,6 @@
 
   })();
 
-  window.NodeComparer = NodeComparer;
+  window.Audanism.Calculator.NodeComparer = NodeComparer;
 
 }).call(this);

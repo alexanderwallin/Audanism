@@ -2,7 +2,7 @@
 	Listens for mouse actions and adapts them into data interpretable
 	by the environment.
 ###
-class MouseSourceAdapter
+class MouseSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 	# Constructor
 	constructor: () ->
@@ -14,4 +14,4 @@ class MouseSourceAdapter
 	adaptSourceData: () ->
 
 
-window.MouseSourceAdapter = MouseSourceAdapter
+window.Audanism.SourceAdapter.MouseSourceAdapter = MouseSourceAdapter

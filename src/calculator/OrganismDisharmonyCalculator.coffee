@@ -10,4 +10,4 @@ class OrganismDisarmonyCalculator
 	@getActualOrganismDisharmony: (organism) ->
 
 
-window.OrganismDisarmonyCalculator = OrganismDisarmonyCalculator
+window.Audanism.Calculator.OrganismDisarmonyCalculator = OrganismDisarmonyCalculator

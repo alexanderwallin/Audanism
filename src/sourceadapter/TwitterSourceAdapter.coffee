@@ -1,7 +1,7 @@
 ###
 	Listens for tweets.
 ###
-class TwitterSourceAdapter extends SourceAdapter
+class TwitterSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 	# Constructor
 	constructor: (@listener) ->
@@ -26,4 +26,4 @@ class TwitterSourceAdapter extends SourceAdapter
 	adaptSourceData: () ->
 
 
-window.TwitterSourceAdapter = TwitterSourceAdapter 
+window.Audanism.SourceAdapter.TwitterSourceAdapter = TwitterSourceAdapter 

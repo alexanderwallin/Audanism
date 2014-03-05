@@ -44,15 +44,15 @@
       }
       switch (factorType) {
         case Factor.TYPE_OPENNESS:
-          return new OpennessFactor();
+          return new Audanism.Factor.OpennessFactor();
         case Factor.TYPE_CONSCIENTIOUSNESS:
-          return new ConscientiousnessFactor();
+          return new Audanism.Factor.ConscientiousnessFactor();
         case Factor.TYPE_EXTRAVERSION:
-          return new ExtraversionFactor();
+          return new Audanism.Factor.ExtraversionFactor();
         case Factor.TYPE_AGREEABLENESS:
-          return new AgreeablenessFactor();
+          return new Audanism.Factor.AgreeablenessFactor();
         case Factor.TYPE_NEUROTICISM:
-          return new NeuroticismFactor();
+          return new Audanism.Factor.NeuroticismFactor();
         default:
           return null;
       }
@@ -60,7 +60,10 @@
 
     function Factor(factorType, factorValue) {
       this.factorType = factorType;
-      this.factorValue = factorValue != null ? factorValue : 0;
+      this.factorValue = factorValue;
+      if (!this.factorValue) {
+        this.factorValue = randomInt(10, 90);
+      }
       this.name = this.constructor.name.replace(/^(\w+)Factor$/, "$1");
       this.disharmony = 0;
       this.relativeDisharmony = [];
@@ -90,6 +93,6 @@
 
   })();
 
-  window.Factor = Factor;
+  window.Audanism.Factor.Factor = Factor;
 
 }).call(this);

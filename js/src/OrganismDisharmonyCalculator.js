@@ -14,6 +14,6 @@
 
   })();
 
-  window.OrganismDisarmonyCalculator = OrganismDisarmonyCalculator;
+  window.Audanism.Calculator.OrganismDisarmonyCalculator = OrganismDisarmonyCalculator;
 
 }).call(this);

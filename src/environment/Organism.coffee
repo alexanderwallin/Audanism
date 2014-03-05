@@ -5,7 +5,7 @@ class Organism
 
 	# Options
 	@NUM_FACTORS: 5
-	@DEFAULT_NUM_NODES: 33
+	@DEFAULT_NUM_NODES: 10
 	@DISTRIBUTE_FACTOR_VALUES: false
 
 	# Stress thresholds - the thresholds for when the organism enters
@@ -26,22 +26,21 @@ class Organism
 			@_inStressMode = $(e.currentTarget).attr('checked') is 'checked'
 
 		# Create factors
-		@_factors = (Factor.createFactor i, 0 for i in [1..Organism.NUM_FACTORS])
+		@_factors = (Audanism.Factor.Factor.createFactor i, 0 for i in [1..Audanism.Environment.Organism.NUM_FACTORS])
 		EventDispatcher.trigger 'audanism/init/factors', [@_factors]
 
 		# Create nodes
-		numNodes = Organism.DEFAULT_NUM_NODES if numNodes <= 0
+		numNodes = Audanism.Environment.Organism.DEFAULT_NUM_NODES if numNodes <= 0
 		@_createNodes numNodes
 		EventDispatcher.trigger 'audanism/init/nodes', [@_nodes]
+		EventDispatcher.listen 'audanism/node/add', @, (info) =>
+			@_createNodes info.numNodes
 
 		# Disharmony calculator
-		@disharmonyCalculator = new DisharmonyCalculator @
+		@disharmonyCalculator = new Audanism.Calculator.DisharmonyCalculator @
 
 		# Disharmony history
 		@disharmonyHistory = []
-
-		# GUI
-		@_gui = new GUI
 
 	#
 	# Returns the node with the given id.
@@ -93,7 +92,7 @@ class Organism
 			nodes = @_getRandomNodes 2
 
 			# Trigger alteration of nodes
-			comparisonMode = if @_inStressMode and false then DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
+			comparisonMode = if @_inStressMode and false then Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
 
 			# Notify observes
 			EventDispatcher.trigger 'audanism/compare/nodes', [{ 'nodes':nodes, 'comparisonMode':comparisonMode }]
@@ -111,9 +110,9 @@ class Organism
 		factor.setDisharmony @disharmonyCalculator.getFactorDisharmonyForNodes factor, @_nodes for factor in @_factors
 
 		# Check if it should enter or leave stress mode
-		if not @_inStressMode and @_actualDisharmony < Organism.STRESS_THRESHOLD_ENTER
+		if not @_inStressMode and @_actualDisharmony < Audanism.Environment.Organism.STRESS_THRESHOLD_ENTER
 			@_inStressMode = true
-		else if @_inStressMode and @_actualDisharmony > Organism.STRESS_THRESHOLD_LEAVE
+		else if @_inStressMode and @_actualDisharmony > Audanism.Environment.Organism.STRESS_THRESHOLD_LEAVE
 			@_inStressMode = false
 
 	# Returns the disharmony history data, reduced to the
@@ -126,12 +125,14 @@ class Organism
 	_createNodes: (numNodes) ->
 
 		# Create indexes
-		@_nodeCellIndex = []
-		@_nodeCellIndex[factor.factorType] = [] for factor in @_factors
+		if not @_nodeCellIndex
+			@_nodeCellIndex = []
+			@_nodeCellIndex[factor.factorType] = [] for factor in @_factors
 
 		# Create nodes array with node IDs as key
-		nodes = (new Node() for i in [1..numNodes])
-		@_nodes = []
+		if not @_nodes
+			@_nodes = []
+		nodes = (new Audanism.Node.Node() for i in [1..numNodes])
 		@_nodes[node.nodeId] = node for node in nodes
 		
 		# Add nodes to indexes
@@ -170,4 +171,4 @@ class Organism
 
 
 
-window.Organism = Organism
+window.Audanism.Environment.Organism = Organism

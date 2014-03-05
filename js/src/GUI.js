@@ -11,19 +11,26 @@
   GUI = (function() {
 
     function GUI() {
-      var _this = this;
-      this.$factorsWrap = $('#factors');
-      this.$nodesWrap = $('#nodes');
-      this.$meter = $('#disharmony-meter .value');
+      this.$organismStats = $('#organism-stats');
+      this.$factorStats = $('#factor-stats');
+      this.$influences = $('#influences');
+      this.$influenceTemplate = this.$influences.find('.template').clone(true).removeClass('template');
+      this.$influences.find('.template').hide();
       this._renderedFactors = false;
       this._renderedNodes = false;
       this._setupControls();
-      if (typeof google !== "undefined" && google !== null) {
-        google.setOnLoadCallback(function() {
-          _this.$disharmonyChart = $("#disharmony-chart");
-          return _this.disharmonyChart = new google.visualization.LineChart(_this.$disharmonyChart.get(0));
-        });
-      }
+      this._showCozyInfo();
+      EventDispatcher.listen('audanism/iteration', this, this.onIteration);
+      EventDispatcher.listen('audanism/influence/node/done', this, this.onInfluenceNodeDone);
+      EventDispatcher.listen('audanism/influence/factor/after', this, this.onInfluenceFactorAfter);
+      /*
+      		if google?
+      			google.setOnLoadCallback =>
+      				@$disharmonyChart = $("#disharmony-chart")
+      				@disharmonyChart = new google.visualization.LineChart @$disharmonyChart.get 0;
+      				#console.log 'google.setOnLoadCallback', @disharmonyChart
+      */
+
     }
 
     GUI.prototype._setupControls = function() {
@@ -40,110 +47,129 @@
       });
     };
 
-    GUI.prototype.update = function(factors, nodes, tableData) {
-      if (tableData.length > 0) {
-        return this.$meter.find('.sum').html(Math.round(tableData[tableData.length - 1][2])).end().find('.actual').html(Math.round(tableData[tableData.length - 1][1]));
+    GUI.prototype._showCozyInfo = function() {
+      var hour, showSelector;
+      hour = new Date().getHours();
+      showSelector = '';
+      switch (hour) {
+        case 23:
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+          showSelector = 'night';
+          break;
+        case 6:
+        case 7:
+        case 8:
+          showSelector = 'early-morning';
+          break;
+        case 9:
+        case 10:
+        case 11:
+          showSelector = 'morning';
+          break;
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+          showSelector = 'midday';
+          break;
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+          showSelector = 'afternoon';
+          break;
+        case 20:
+        case 21:
+        case 22:
+          showSelector = 'evening';
+      }
+      console.log(showSelector);
+      return $('.time-of-day').filter('.' + showSelector).show();
+    };
+
+    GUI.prototype.onIteration = function(iterationInfo) {
+      var $factorDish, $factorValues, disharmony, factor, organism, _i, _len, _ref, _results;
+      organism = iterationInfo.organism;
+      disharmony = organism.getDisharmonyHistoryData(1);
+      this.$organismStats.find('#summed-disharmony .value').html(Math.round(organism._sumDisharmony)).end().find('#actual-disharmony .value').html(Math.round(organism._actualDisharmony)).end();
+      $factorValues = this.$factorStats.find('#factor-values');
+      $factorDish = this.$factorStats.find('#factor-disharmonies');
+      _ref = organism.getFactors();
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        factor = _ref[_i];
+        $factorValues.find('[data-factor="' + factor.factorType + '"]').html(decimalAdjust('round', factor.factorValue, -1));
+        _results.push($factorDish.find('[data-factor="' + factor.factorType + '"]').html(numberSuffixed(factor.disharmony, -1)));
+      }
+      return _results;
+    };
+
+    GUI.prototype.onInfluenceNodeDone = function(influenceInfoList) {
+      influenceBoxInfo;
+
+      var influenceBoxInfo, influenceEntry, photo;
+      influenceEntry = influenceInfoList[0];
+      if (influenceEntry.meta.source === 'instagram') {
+        photo = influenceEntry.meta.sourceData;
+        influenceBoxInfo = {
+          'source': influenceEntry.meta.source,
+          'summary': '<img src="' + photo.images.thumbnail.url + '" /><span class="caption">' + photo.caption.text.substring(0, 30) + '</span>',
+          'url': photo.link,
+          'type': 'Nodes',
+          'value': null
+        };
+      }
+      if (influenceBoxInfo) {
+        return this.appendInfluenceBox(influenceBoxInfo);
       }
     };
 
-    GUI.prototype._drawCharts = function(tableData) {
-      var data, options;
-      return;
-      if (!(this.disharmonyChart != null)) {
-        return;
-      }
-      tableData.unshift(['Iteration', 'Sum dish.', 'Actual dish.']);
-      data = google.visualization.arrayToDataTable(tableData);
-      options = {
-        title: 'Disharmony chart',
-        vAxis: {
-          viewWindowMode: 'explicit',
-          viewWindow: {
-            min: 0
-          }
-        }
-      };
-      return this.disharmonyChart.draw(data, options);
-    };
+    GUI.prototype.onInfluenceFactorAfter = function(influenceInfo) {
+      influenceBoxInfo;
 
-    GUI.prototype._updateFactors = function(factors) {
-      var factor, _i, _len, _results;
-      if (!this._renderedFactors) {
-        return this._buildFactors(factors);
-      } else {
-        _results = [];
-        for (_i = 0, _len = factors.length; _i < _len; _i++) {
-          factor = factors[_i];
-          _results.push($(".factor[data-factor-type='" + factor.factorType + "']").attr('data-factor-disharmony', factor.disharmony).attr('data-factor-name', factor.name).find('.factor-value').html(factor.factorValue));
-        }
-        return _results;
+      var influenceBoxInfo;
+      if (influenceInfo.meta.source = 'yr.no') {
+        influenceBoxInfo = {
+          'source': influenceInfo.meta.source,
+          'summary': influenceInfo.meta.summary,
+          'type': 'Factor ' + influenceInfo.factor.factor.factorType
+        };
+      }
+      if (influenceBoxInfo) {
+        return this.appendInfluenceBox(influenceBoxInfo);
       }
     };
 
-    GUI.prototype._buildFactors = function(factors) {
-      var factor, factorsHtml;
-      factorsHtml = ((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = factors.length; _i < _len; _i++) {
-          factor = factors[_i];
-          _results.push("<div class=\"factor\" data-factor-type=\"" + factor.factorType + "\"><span class=\"factor-name\">" + factor.name + "</span> <span class=\"factor-value\">" + factor.factorValue + "</span></div>");
-        }
-        return _results;
-      })()).join("");
-      this.$factorsWrap.html(factorsHtml);
-      return this._renderedFactors = true;
-    };
-
-    GUI.prototype._updateNodes = function(nodes) {
-      var $node, cell, node, _i, _len, _results;
-      if (!this._renderedNodes) {
-        return this._buildNodes(nodes);
-      } else {
-        _results = [];
-        for (_i = 0, _len = nodes.length; _i < _len; _i++) {
-          node = nodes[_i];
-          $node = this.$nodesWrap.find(".node[data-node-id=" + node.nodeId + "]");
-          _results.push((function() {
-            var _j, _len1, _ref, _results1;
-            _ref = node.getCells();
-            _results1 = [];
-            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-              cell = _ref[_j];
-              _results1.push($node.find(".node-cell[data-cell-factor='" + cell.factorType + "']").html(cell.factorValue));
-            }
-            return _results1;
-          })());
-        }
-        return _results;
+    GUI.prototype.appendInfluenceBox = function(influenceBoxInfo) {
+      var $box, $boxes, numBoxes;
+      $box = this.$influenceTemplate.clone();
+      $box.find('.influence-source').html(influenceBoxInfo.source);
+      $box.find('.influence-summary').html(influenceBoxInfo.summary);
+      $box.find('.influence-link').html($('<a />', {
+        'href': influenceBoxInfo.url
+      }).html('Link'));
+      $box.find('.influence-type').html(influenceBoxInfo.type);
+      $box.find('.influence-value').html(influenceBoxInfo.value || '');
+      this.$influences.append($box);
+      $box.show();
+      $boxes = this.$influences.find('.influence');
+      numBoxes = $boxes.size();
+      if (numBoxes > 3) {
+        return this.$influences.find('.influence').filter(function() {
+          return $boxes.index(this) < numBoxes - 3;
+        }).hide();
       }
-    };
-
-    GUI.prototype._buildNodes = function(nodes) {
-      var cell, cellsHtml, node, nodeHtml, _i, _len;
-      for (_i = 0, _len = nodes.length; _i < _len; _i++) {
-        node = nodes[_i];
-        cellsHtml = ((function() {
-          var _j, _len1, _ref, _results;
-          _ref = node.getCells();
-          _results = [];
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            cell = _ref[_j];
-            _results.push("<li class=\"node-cell\" data-cell-factor=\"" + cell.factorType + "\">" + cell.factorValue + "</li>");
-          }
-          return _results;
-        })()).join("");
-        cellsHtml = "<ul class=\"node-cells\">" + cellsHtml + "</ul>";
-        nodeHtml = "<div class=\"node\" data-node-id=\"" + node.nodeId + "\">" + cellsHtml + "</div>";
-        this.$nodesWrap.append(nodeHtml);
-      }
-      return this._renderedNodes = true;
     };
 
     return GUI;
 
   })();
 
-  window.GUI = GUI;
+  window.Audanism.GUI.GUI = GUI;
 
 }).call(this);

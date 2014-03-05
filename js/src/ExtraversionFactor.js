@@ -9,13 +9,13 @@
     __extends(ExtraversionFactor, _super);
 
     function ExtraversionFactor() {
-      ExtraversionFactor.__super__.constructor.call(this, Factor.TYPE_EXTRAVERSION, 50);
+      ExtraversionFactor.__super__.constructor.call(this, Audanism.Factor.Factor.TYPE_EXTRAVERSION);
     }
 
     return ExtraversionFactor;
 
-  })(Factor);
+  })(Audanism.Factor.Factor);
 
-  window.ExtraversionFactor = ExtraversionFactor;
+  window.Audanism.Factor.ExtraversionFactor = ExtraversionFactor;
 
 }).call(this);

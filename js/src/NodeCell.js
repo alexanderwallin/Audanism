@@ -11,7 +11,7 @@
   NodeCell = (function() {
 
     NodeCell.prototype.clone = function() {
-      return new NodeCell(this.factorType, this.factorValue);
+      return new Audanism.Node.NodeCell(this.factorType, this.factorValue);
     };
 
     function NodeCell(factorType, factorValue) {
@@ -33,6 +33,6 @@
 
   })();
 
-  window.NodeCell = NodeCell;
+  window.Audanism.Node.NodeCell = NodeCell;
 
 }).call(this);

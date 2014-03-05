@@ -1,7 +1,7 @@
-class ConscientiousnessFactor extends Factor
+class ConscientiousnessFactor extends Audanism.Factor.Factor
 
 	constructor: () ->
-		super(Factor.TYPE_CONSCIENTIOUSNESS, 70);
+		super(Audanism.Factor.Factor.TYPE_CONSCIENTIOUSNESS)
 
 
-window.ConscientiousnessFactor = ConscientiousnessFactor
+window.Audanism.Factor.ConscientiousnessFactor = ConscientiousnessFactor

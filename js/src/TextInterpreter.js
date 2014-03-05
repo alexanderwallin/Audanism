@@ -73,6 +73,6 @@
 
   })();
 
-  window.TextInterpreter = TextInterpreter;
+  window.Audanism.Util.TextInterpreter = TextInterpreter;
 
 }).call(this);

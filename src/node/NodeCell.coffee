@@ -4,7 +4,7 @@
 class NodeCell
 
 	clone: () ->
-		new NodeCell @factorType, @factorValue
+		new Audanism.Node.NodeCell @factorType, @factorValue
 
 	constructor: (@factorType, @factorValue) ->
 
@@ -14,4 +14,4 @@ class NodeCell
 		@factorValue = 100 if @factorValue > 100
 
 
-window.NodeCell = NodeCell
+window.Audanism.Node.NodeCell = NodeCell

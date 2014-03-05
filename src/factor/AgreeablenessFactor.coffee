@@ -1,6 +1,6 @@
-class AgreeablenessFactor extends Factor
+class AgreeablenessFactor extends Audanism.Factor.Factor
 
 	constructor: () ->
-		super(Factor.TYPE_AGREEABLENESS, 30);
+		super(Audanism.Factor.Factor.TYPE_AGREEABLENESS)
 
-window.AgreeablenessFactor = AgreeablenessFactor
+window.Audanism.Factor.AgreeablenessFactor = AgreeablenessFactor

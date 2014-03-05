@@ -9,13 +9,13 @@
     __extends(OpennessFactor, _super);
 
     function OpennessFactor() {
-      OpennessFactor.__super__.constructor.call(this, Factor.TYPE_OPENNESS, 90);
+      OpennessFactor.__super__.constructor.call(this, Audanism.Factor.Factor.TYPE_OPENNESS);
     }
 
     return OpennessFactor;
 
-  })(Factor);
+  })(Audanism.Factor.Factor);
 
-  window.OpennessFactor = OpennessFactor;
+  window.Audanism.Factor.OpennessFactor = OpennessFactor;
 
 }).call(this);

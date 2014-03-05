@@ -10,7 +10,7 @@ class VisualOrganism
 
 		# Options
 		@opts = {
-			'cameraDistanceStart': 1300
+			'cameraDistanceStart': 1600
 			'cameraDistance':      1300
 			'clusterSize':         500
 
@@ -29,15 +29,22 @@ class VisualOrganism
 			'ballColorInfluence':  new THREE.Color(0xED34A0)
 			'ballInfluenceTime':   2000
 			'ballColorVeteran':    new THREE.Color(0x1F36E0)
+
+			'groupCubesEvery':     3
+			'cubesPerGroup':       2
 		}
 
 		@state = {}
 
-		@queue    = []
-		@tweens   = []
-		@cubes    = []
-		@newCubes = []
-		@newBalls = []
+		@queue        = []
+		@tweens       = []
+		@cubes        = []
+		@newCubes     = []
+		@cubeLines    = []
+		@megaCubes    = []
+		@cubesGrouped = 0
+		
+		@newBalls     = []
 
 		# Resize handler
 		$(window).on 'resize', @onWindowResize.bind(@)
@@ -46,9 +53,12 @@ class VisualOrganism
 		EventDispatcher.listen 'audanism/init/organism',  @, @onInitOrganism
 
 		# Real-time handlers
-		EventDispatcher.listen 'audanism/iteration',      @, @onIteration
-		EventDispatcher.listen 'audanism/compare/nodes',  @, @onCompareNodes
-		EventDispatcher.listen 'audanism/influence/node', @, @onInfluenceNode
+		EventDispatcher.listen 'audanism/iteration',              @, @onIteration
+		EventDispatcher.listen 'audanism/compare/nodes',          @, @onCompareNodes
+		EventDispatcher.listen 'audanism/influence/node',         @, @onInfluenceNode
+		EventDispatcher.listen 'audanism/influence/factor/after', @, @onInfluenceFactorAfter
+		EventDispatcher.listen 'audanism/node/add',               @, (info) =>
+			@createBalls info.numNodes
 
 		#$('html').addClass 'canvas-only'
 
@@ -85,14 +95,26 @@ class VisualOrganism
 	buildScene: () ->
 		#console.log '#buildScene'
 
-		# Essentials
+		now = new Date()
+
+		# Performance
+		@lastLoop    = 0
+		@thisLoop    = 0
+		@fps         = 0
+		@numBadFps   = 0
+
+		# Scene
 		@camera
 		@scene
 		@renderer
+		@stats
 		
 		# Lights
 		@lightAmb
 		@lightSpot
+
+		# Factors
+		@factors     = []
 		
 		# Balls
 		@balls       = []
@@ -119,22 +141,56 @@ class VisualOrganism
 		@keyDown     = false
 
 
-		# --- Start creating --- #
+		# --- Start buildin' --- #
 
 
-		# Camera && scene
+		# Renderer
+		@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':true }
+		@renderer.setSize window.innerWidth, window.innerHeight
+		@renderer.clearColor = 0xff1190
+
+		# Scene
+		@scene = new THREE.Scene()
+		#@scene.fog = new THREE.Fog( 0x999999, @opts.clusterSize / 2, @opts.clusterSize * 12 )
+
+		# Camera
 		@camera = new THREE.PerspectiveCamera 50, window.innerWidth / window.innerHeight, 1, 20000
 		@camera.position = new THREE.Vector3( 1, 0.25, 1 ).multiplyScalar( @opts.cameraDistanceStart )
 		@camera.target = new THREE.Vector3 0, 0, 0
 		@camera.lookAt @camera.target
 		@camera.setLens 35
 
-		@scene = new THREE.Scene()
-		#@scene.fog = new THREE.Fog( 0x999999, @opts.clusterSize / 2, @opts.clusterSize * 12 )
+		# Stats
+		@stats = new Stats()
+		$(@stats.domElement).attr('id', 'fps-stats');
+		container.appendChild( @stats.domElement );
+
+		# Add lights
+		@lightAmb = new THREE.AmbientLight 0xffffff
+		@scene.add @lightAmb
+
+		@lightSpot = new THREE.DirectionalLight 0xaaffff, 0.2
+		@lightSpot.position.set 0, 1, 1
+		@scene.add @lightSpot
+
+		@lightSpot2 = new THREE.DirectionalLight 0xffffaa, 0.2
+		@lightSpot2.position.set 0.3, 1, -1
+		@scene.add @lightSpot2
+
+		# Add axises
+		#@axis = new THREE.AxisHelper( 500 )
+		#@scene.add @axis
 
 		# Container sphere
-		@room = new THREE.Mesh( new THREE.SphereGeometry(@opts.roomSize, @opts.roomVertices, @opts.roomVertices / 2), new THREE.MeshPhongMaterial({ 'ambient': @opts.roomColor.clone(), 'side': THREE.BackSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors }) )
+		roomColor = @opts.roomColor.clone()
+		@room = new THREE.Mesh( new THREE.SphereGeometry(@opts.roomSize, @opts.roomVertices, @opts.roomVertices / 2), new THREE.MeshPhongMaterial({ 'ambient': roomColor, 'side': THREE.BackSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors }) )
+		@setDaylight()
 		@scene.add @room
+
+		# Update daylight once per minute
+		setInterval () =>
+			@state.shouldSetDaylight = true
+		, 60000
 
 		### Skybox
 		imagePrefix = "img/skybox2/"
@@ -153,12 +209,349 @@ class VisualOrganism
 		@scene.add( @room )
 		###
 
+		# Add mother point
+		@centerBall = new THREE.Mesh new THREE.TetrahedronGeometry( 10, 0 ), new THREE.MeshLambertMaterial( { 'ambient':0x331177, 'side':THREE.DoubleSide } )
+		ballGlowMaterial = new THREE.SpriteMaterial { 
+			map: new THREE.ImageUtils.loadTexture( 'img/glow.png' )
+			useScreenCoordinates: false
+			#alignment: THREE.SpriteAlignment.center
+			color: 0x222222 # @opts.ballColor.clone().multiplyScalar(0.1)
+			transparent: false
+			blending: THREE.AdditiveBlending
+		}
+		ballGlowSprite = new THREE.Sprite( ballGlowMaterial )
+		ballGlowSprite.scale.set(50, 50, 1.0)
+		@centerBall.add(ballGlowSprite)
+		@scene.add @centerBall
+
+		# Make factor cones
+		for factor in @organism.getFactors()
+
+			factorColor = new THREE.Color()
+			factorColor.setHSL( factor.factorType / @organism.getFactors().length, 0.6, 0.7 )
+
+			factor3d = new THREE.Mesh(
+				new THREE.CylinderGeometry( 50, 0, factor.factorValue * 3 )
+				new THREE.MeshLambertMaterial({ 'ambient':factorColor, 'side':THREE.FrontSide } )
+			)
+			factor3d.position.set(
+				if randomInt(0, 1) is 1 then randomInt(-800, -600) else randomInt(600, 800)
+				randomInt(-40, 40)
+				if randomInt(0, 1) is 1 then randomInt(-800, -600) else randomInt(600, 800)
+			)
+
+			factor3d.userData = {
+				'startPosition':  factor3d.position.clone()
+				'hover':          true
+				'hoverStartFrame': 0
+				'initialValue':    factor.factorValue
+				'baseColor':       factor3d.material.ambient.clone()
+			}
+			factor3d.dynamic = true
+
+			@factors[factor.factorType] = factor3d
+			@scene.add factor3d
+
 		# Make balls
-		for i in [0..@numBalls-1]
+		@createBalls @numBalls
+
+		#console.log @balls
+
+		# Orbin control
+		@orbitControls = new THREE.OrbitControls @camera, @renderer.domElement
+		@orbitControls.autoRotate = true
+		@orbitControls.autoRotateSpeed = -1
+
+		$('#container').append @renderer.domElement
+
+
+	# Animate
+	animate: () ->
+
+		requestAnimationFrame( Audanism.Graphic.public.animate )
+
+		# FPS
+		@thisLoop = new Date()
+		if @lastLoop > 0
+			@fps = 1000 / (@thisLoop - @lastLoop)
+		else
+			@fps = 60
+		@lastLoop = @thisLoop
+
+		if @fps < 20
+			#console.log( 'BAD FPS!!!', @fps )
+			@numBadFps++
+			EventDispatcher.trigger( 'audanism/performance/badfps', @fps )
+		else
+			@numBadFps = 0
+			EventDispatcher.trigger( 'audanism/performance/goodfps', @fps )
+
+		if @numBadFps >= 5
+			console.log( '!!!!!!!!!!!!!!!!!! KILL EVERYTHING !!!!!!!!!!!!!!!!!!!!' )
+			EventDispatcher.trigger( 'audanism/performance/bad', @fps )
+
+		# Increment frame
+		@frame++
+		EventDispatcher.trigger( 'audanism/graphic/update', @frame )
+
+		# Daylight
+		if @state.shouldSetDaylight
+			@setDaylight()
+			@state.shouldSetDaylight = false
+
+		# Factors
+		for factor in @organism.getFactors()
+			factor3d = @factors[factor.factorType]
+
+			# Factor hovering
+			if factor3d.userData.hover
+				factor3d.position.y = factor3d.userData.startPosition.y + 200 * Math.sin( (@frame - factor3d.userData.hoverStartFrame) / (10 * factor.factorValue) )
+
+		# Hovering balls
+		for ball in @balls
+			if ball.ball3d.userData.hover
+				ball.ball3d.position.y = ball.ball3d.userData.startPosition.y + Math.sin( ball.hoverPhase + (@frame - ball.ball3d.userData.hoverStartFrame) * ball.hoverSpeed ) * 15
+
+		# Update cubes
+		if @instaCubes?
+			@_updateInstaCubes()
+
+		# Add possible new cubes
+		if @newCubes.length > 0
+			for cube in @newCubes
+
+				# Add cube to scene
+				@cubes.push cube
+				@scene.add cube
+
+				# Add line to mothership
+				lineGeometry = new THREE.Geometry()
+				lineGeometry.vertices.push new THREE.Vector3 0, 0, 0
+				lineGeometry.vertices.push cube.position.clone()
+				lineMaterial = new THREE.LineBasicMaterial { 'color':0xE3105A, 'opacity':0.3 }
+				line = new THREE.Line lineGeometry, lineMaterial
+				@scene.add line
+
+				cube.userData.cubeLine = line
+
+			@newCubes = []
+
+		# Rotate mega cubes
+		for megaCube in @megaCubes
+			megaCube.rotation.x += 0.003
+			megaCube.rotation.z += 0.0007
+
+		# Offset room color hue
+		if @frame % 10 is 1
+			@room.material.ambient.offsetHSL 0.0001, 0, 0
+
+		# Update external stuff
+		TWEEN.update()
+		@stats.update()
+		@orbitControls.update()
+
+		# Render
+		@renderer.render( @scene, @camera )
+
+
+	addToQueue: (fn, args) ->
+		@queue.push { 'fn':fn, 'args':args }
+
+	runQueue: () ->
+		for action in @queue
+			action.fn.call @, action.args
+
+
+	# Handles an organism iteration
+	onIteration: (influenceInfo) ->
+		#console.log '#onIteration'
+
+		organism = influenceInfo.organism
+
+		# Get disharmony data
+		disharmony = organism.getDisharmonyHistoryData()
+		if disharmony.length == 0
+			return
+
+		# Just get the latest
+		disharmony = disharmony[disharmony.length - 1]
+
+		# Store initial data if not set
+		if not @opts.initialDisharmonyData?
+			@opts.initialDisharmonyData = disharmony
+
+		# Calculate disharmony relatively the initial disharmony
+		relativeDisharmony = disharmony[2] / @opts.initialDisharmonyData[2]
+
+		# Float keeping track how far away the furthers away ball is
+		@largestDistance = 0
+
+		# Set balls distance from center depending on the organism's state
+		for ball in @balls
+
+			# Tween the ball
+			newPos = ball.pos.clone().multiplyScalar relativeDisharmony
+			tweenFrom = ball.ball3d.position.clone()
+			tweenTo   = { 'x':newPos.x, 'y':newPos.y, 'z':newPos.z } # newPos.clone()
+
+			#@_tweenBall ball, tweenFrom, tweenTo
+
+			# Store furthest position if this is that
+			if (ball.ball3d.position.length() > @largestDistance)
+				@largestDistance = ball.ball3d.position.length()
+
+		# Move camera according to the ball furthest out
+		@_tweenCameraDistance @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
+
+		# Tween fog
+		latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10)
+
+		disharmonySum = 0
+		(disharmonySum += dish[2] for dish in latestDisharmonyBlock)
+		disharmonyAvg = disharmonySum / latestDisharmonyBlock.length
+
+		#latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / latestDisharmonyBlock[0][2]
+		latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg
+		@state.latestDisharmonyChange = latestDisharmonyChange
+
+		###
+		#console.log 'fog color start:', @opts.fogColorStart
+		#console.log 'latestDisharmonyBlock', latestDisharmonyBlock
+		#console.log 'latestDisharmonyChange', latestDisharmonyChange
+		#console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
+		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
+		#console.log 'new fog color', newFogColor
+		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
+		###
+
+		# Change room color
+		#	#console.log 'latest disharmony change', latestDisharmonyChange
+		#@_tweenColor @room.material.ambient, @opts.roomColor, @opts.roomColor.clone().lerp( @opts.roomColorChaos, 1 - Math.pow(latestDisharmonyChange, 2) ), 100
+
+
+		# Change ball size depending on factor disharmonies
+		for node in @organism.getNodes()
+			cells = node.getCells()
+			#factorDisharmonySum = @organism.getFactorOfType(cell.factorType) for cell in cells
+
+			###
+
+			Relative changes to a node from its cells' factors' current conditions
+
+			factorsConditionSum = 0
+			factorsRelConditionSum = 0
+
+			for cell in cells
+
+				# Get the cell's factor's latest history
+				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
+				factorLatestHistory = factorDisharmonyHistory.slice(-10)
+				#console.log '··· factor history', factorLatestHistory
+
+				# Total disharmony over this period
+				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
+				#console.log('··· factorDisharmonySum', factorDisharmonySum)
+
+				# Calculate the factor's average dishamonry over this period
+				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
+				#console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
+
+				# Calculate the factor's current condition relative the average disharmony
+				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
+				#console.log '··· factorCurrCondition', factorCurrCondition
+
+				# Add it to the sum of current conditions
+				factorsRelConditionSum += factorCurrCondition
+				
+
+			#factorConditionAvg = factorConditionsSum / cells.length
+			factorsCurrCondition = factorsRelConditionSum / cells.length
+			#console.log 'factor condition sum', factorsConditionSum
+			#console.log 'factor condition cur', factorsCurrCondition
+			#console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
+			#console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
+
+			# Tween size
+			ball = @balls[node.nodeId]
+			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
+			###
+
+			allFactorsChangeSum = 0
+			allFactorsChangeAvg = 0
+
+			for cell in cells
+				factor = @organism.getFactorOfType cell.factorType
+				
+				factorDishStart = factor.disharmonyHistory[0]
+				factorDishCurr  = factor.disharmonyHistory[factor.disharmonyHistory.length - 1]
+				allFactorsChangeSum += factorDishCurr / factorDishStart
+
+				#console.log '··· factor dish start', factorDishStart
+				#console.log '··· factor dish current', factorDishCurr
+				#console.log '··· factor dish rel', factorDishCurr / factorDishStart
+
+			allFactorsChangeAvg = allFactorsChangeSum / cells.length
+			#console.log '::: node factors relative dish avg', allFactorsChangeAvg
+
+			# Tween size
+			ball = @balls[node.nodeId]
+			newBallRelSize = Math.pow(allFactorsChangeAvg, 1.4)
+			#console.log 'current ball scale', ball.ball3d.scale
+			ballScaleFrom = { 'x':ball.ball3d.scale.clone().x, 'y':ball.ball3d.scale.clone().y, 'z':ball.ball3d.scale.clone().z }
+			ballScaleTo = { 'x':newBallRelSize, 'y':newBallRelSize, 'z':newBallRelSize }
+			#ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize # new THREE.Vector3 newBallRelSize, newBallRelSize, newBallRelSize
+
+			@_tweenSomething ball, ballScaleFrom, ballScaleTo, 200
+
+			###
+			_tweenBack = () =>
+				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
+				#console.log ball.ballId
+				if ball.ballId is 1
+					#console.log 'original scale', origScale
+				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
+
+			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
+			###
+
+			#if ball.ballId is 0
+			#	#console.log '     ... ball scale from', ball.ball3d.scale, 'to', ballScaleTo
+
+			#@addToQueue ball.ball3d.scale, [new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )]
+			#ball.ball3d.scale = new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )
+			#ball.ball3d.children[ball.ball3d.children.length - 1].scale = ball.ball3d.scale.clone().multiplyScalar(50)
+
+			#@_tweenBallSize ball, ballScaleFrom, ballScaleTo, 100, () ->
+			
+			#	@_tweenBallSize ball, ball.ball3d.scale, ballScaleFrom, 1000
+
+
+			#console.log '::: ball size current', ball.ball3d.geometry.radius
+			#console.log '::: ball size new', newBallRelSize
+
+
+	# Darkens the room depending on the time of day
+	setDaylight: () ->
+		console.log ' -------------- #setDaylight() ----------------'
+		now = new Date()
+
+		roomColor = @opts.roomColor.clone()
+		minutesOfDay = now.getHours() + now.getMinutes()
+		minutesFromDark = if now.getHours() > 12 then 1440 - minutesOfDay else minutesOfDay
+		darken = 0.4 * (720 - minutesFromDark) / 720
+		roomColor.offsetHSL( 0, 0, -darken )
+
+		@room.material.ambient = roomColor
+
+
+	# Creates balls
+	createBalls: (numBalls) ->
+		console.log('VisualOrganism #createBalls', numBalls)
+		for i in [0..numBalls-1]
 
 			# Make ball info object
 			ball = {
-				ballId:     i
+				ballId:     @balls.length
 				hello:      "hello. i am ball no #{ i }."
 				direction:  new THREE.Vector3 (2 * Math.random() - 1), (2 * Math.random() - 1), (2 * Math.random() - 1)
 				ballSize:   @opts.ballSize
@@ -190,316 +583,21 @@ class VisualOrganism
 			ball3d        = new THREE.Mesh ballGeometry, ballMaterials[0]
 			ball3d.ballId = ball.ballId; # Store id reference
 
+			# Position ball
+			ball3d.position                 = ball.pos.clone()
+			ball3d.userData.hover           = true
+			ball3d.userData.startPosition   = ball3d.position.clone()
+			ball3d.userData.hoverStartFrame = 0
+
+			# Add ball to scene
+			ball3d.scale.set 0, 0 ,0
+			@scene.add ball3d
+			@_tweenSomething ball3d.scale, { 'x':0, 'y':0, 'z':0 }, { 'x':1, 'y':1, 'z':1 }, 1000
+			
+			@balls[ball.ballId] = ball
+
 			# Store ball 3d object in ball info object
 			ball.ball3d   = ball3d
-
-			# Position ball
-			ball.ball3d.position = ball.pos.clone()
-
-			#console.log ball.pos
-			@scene.add ball.ball3d
-			@balls[i] = ball
-
-			###
-			# Ball glow
-			ballGlowMaterial = new THREE.SpriteMaterial { 
-				map: new THREE.ImageUtils.loadTexture( 'img/glow.png' )
-				useScreenCoordinates: false
-				#alignment: THREE.SpriteAlignment.center
-				color: 0x111111 # @opts.ballColor.clone().multiplyScalar(0.1)
-				transparent: false
-				blending: THREE.AdditiveBlending
-			}
-			ballGlowSprite = new THREE.Sprite( ballGlowMaterial )
-			ballGlowSprite.scale.set(50, 50, 1.0)
-			ball.ball3d.add(ballGlowSprite) # this centers the glow at the mesh
-			###
-
-		#console.log @balls
-
-		# Create a plane
-		#planeXZ = new THREE.Mesh( new THREE.PlaneGeometry @opts.clusterSize * 3, @opts.clusterSize * 3, new THREE.MeshLambertMaterial { 'color':0x22eecc, 'side': THREE.DoubleSide, 'shading': THREE.FlatShading, 'blending': THREE.AdditiveBlending, 'vertexColors': THREE.VertexColors } )
-		#planeXZ.position.set 0, 0, 0
-		#@scene.add planeXZ
-
-		# Add mother point star of death
-		@centerBall = new THREE.Mesh new THREE.TetrahedronGeometry( 10, 0 ), new THREE.MeshLambertMaterial( { 'ambient':0x331177, 'opacity':0.1, 'side':THREE.DoubleSide } )
-		ballGlowMaterial = new THREE.SpriteMaterial { 
-			map: new THREE.ImageUtils.loadTexture( 'img/glow.png' )
-			useScreenCoordinates: false
-			#alignment: THREE.SpriteAlignment.center
-			color: 0x222222 # @opts.ballColor.clone().multiplyScalar(0.1)
-			transparent: false
-			blending: THREE.AdditiveBlending
-		}
-		ballGlowSprite = new THREE.Sprite( ballGlowMaterial )
-		ballGlowSprite.scale.set(50, 50, 1.0)
-		@centerBall.add(ballGlowSprite)
-		@scene.add @centerBall
-
-		# Add lights
-		@lightAmb = new THREE.AmbientLight 0xffffff
-		@scene.add @lightAmb
-
-		@lightSpot = new THREE.DirectionalLight 0xffffff, 0.2
-		@lightSpot.position.set 0, 1, 1
-		@scene.add @lightSpot
-
-		# Add axises
-		#@axis = new THREE.AxisHelper( 500 )
-		#@scene.add @axis
-
-		# Renderer
-		@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':true }
-		#renderer.setClearColor( 0x000000, 0 )
-		@renderer.setSize window.innerWidth, window.innerHeight
-
-
-		# Orbin control
-		#@orbitControls = new THREE.OrbitControls @camera, @renderer.domElement
-
-		#console.log @scene
-
-		$('#container').append @renderer.domElement
-
-
-	# Animate
-	animate: () ->
-
-		requestAnimationFrame( Audanism.Graphic.public.animate )
-
-		@frame++
-
-		# Rotate camera around cluster
-		@camera.position.x = Math.sin( @frame / 100 ) * @opts.cameraDistance
-		@camera.position.z = Math.cos( @frame / 100 ) * @opts.cameraDistance 
-		@camera.lookAt( @camera.target )
-
-		# Hovering balls
-		for ball in @balls
-			if ball.state.hover
-				ball.ball3d.position.y = ball.currPos.y + Math.sin( ball.hoverPhase + @frame * ball.hoverSpeed ) * 15
-
-
-		# Update cubes
-		if @instaCubes?
-			@_updateInstaCubes()
-
-		# Add possible new cubes
-		if @newCubes.length > 0
-			for cube in @newCubes
-
-				# Add cube to scene
-				@cubes.push cube
-				@scene.add cube
-
-				# Add line to mothership
-				lineGeometry = new THREE.Geometry()
-				lineGeometry.vertices.push new THREE.Vector3 0, 0, 0
-				lineGeometry.vertices.push cube.position.clone()
-				lineMaterial = new THREE.LineBasicMaterial { 'color':0xE3105A, 'opacity':0.3 }
-				@scene.add new THREE.Line lineGeometry, lineMaterial
-
-			@newCubes = []
-
-		# Room color
-		colorDiff = 1 - @state.latestDisharmonyChange
-		#rgbString = "rgb(100, #{Math.round(100 + (Math.cos( @frame / 200 ) * 20))}, #{Math.round(80 + (Math.sin( @frame / 200 ) * 20))})"
-
-		roomColor = @opts.roomColor.clone()
-		roomColor.lerp(@opts.roomColor2.clone(), 0.5 + Math.sin(@frame / 20) / 2)
-
-		#roomColor = new THREE.Color rgbString
-		relRoomColor = roomColor.clone()
-			
-		if colorDiff <= 0
-			relRoomColor.lerp(new THREE.Color(0x000000), Math.abs(colorDiff))
-		else
-			relRoomColor.lerp(new THREE.Color(0xffffff), Math.abs(colorDiff))
-
-		#@room.material.ambient = relRoomColor
-
-		TWEEN.update()
-
-		#@orbitControls.update()
-
-		# Render
-		@renderer.render( @scene, @camera )
-
-
-	addToQueue: (fn, args) ->
-		@queue.push { 'fn':fn, 'args':args }
-
-	runQueue: () ->
-		for action in @queue
-			action.fn.call @, action.args
-
-
-	# Handles an organism iteration
-	onIteration: (influenceInfo) ->
-		#console.log '#onIteration'
-
-		organism = influenceInfo.organism
-
-		disharmony = organism.getDisharmonyHistoryData()
-		if disharmony.length == 0
-			return
-
-		disharmony = disharmony[disharmony.length - 1]
-
-		if not @opts.initialDisharmonyData?
-			@opts.initialDisharmonyData = disharmony
-			#console.log 'stored initial disharmony', disharmony
-
-		relativeDisharmony = disharmony[2] / @opts.initialDisharmonyData[2]
-
-		@largestDistance = 0
-
-
-		# Set balls distance from center depending on the organism's state
-		for ball in @balls
-
-			# Tween the ball
-			newPos = ball.pos.clone().multiplyScalar relativeDisharmony
-			tweenFrom = ball.ball3d.position.clone()
-			tweenTo   = { 'x':newPos.x, 'y':newPos.y, 'z':newPos.z } # newPos.clone()
-
-			#@_tweenBall ball, tweenFrom, tweenTo
-
-			# Store furthest position if this is that
-			if (ball.ball3d.position.length() > @largestDistance)
-				@largestDistance = ball.ball3d.position.length()
-
-		# Move camera according to the ball furthest out
-		console.log 'tween camera to', @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
-		#@addToQueue @_tweenCameraDistance, [@largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)]
-		@_tweenCameraDistance @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
-
-		# Tween fog
-		latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10)
-
-		disharmonySum = 0
-		(disharmonySum += dish[2] for dish in latestDisharmonyBlock)
-		disharmonyAvg = disharmonySum / latestDisharmonyBlock.length
-
-		#latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / latestDisharmonyBlock[0][2]
-		latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg
-		@state.latestDisharmonyChange = latestDisharmonyChange
-
-		###
-		console.log 'fog color start:', @opts.fogColorStart
-		console.log 'latestDisharmonyBlock', latestDisharmonyBlock
-		console.log 'latestDisharmonyChange', latestDisharmonyChange
-		console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
-		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
-		console.log 'new fog color', newFogColor
-		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
-		###
-
-		# Change room color
-		#	console.log 'latest disharmony change', latestDisharmonyChange
-		#@_tweenColor @room.material.ambient, @opts.roomColor, @opts.roomColor.clone().lerp( @opts.roomColorChaos, 1 - Math.pow(latestDisharmonyChange, 2) ), 100
-
-
-		# Change ball size depending on factor disharmonies
-		for node in @organism.getNodes()
-			cells = node.getCells()
-			#factorDisharmonySum = @organism.getFactorOfType(cell.factorType) for cell in cells
-
-			###
-
-			Relative changes to a node from its cells' factors' current conditions
-
-			factorsConditionSum = 0
-			factorsRelConditionSum = 0
-
-			for cell in cells
-
-				# Get the cell's factor's latest history
-				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
-				factorLatestHistory = factorDisharmonyHistory.slice(-10)
-				console.log '··· factor history', factorLatestHistory
-
-				# Total disharmony over this period
-				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
-				console.log('··· factorDisharmonySum', factorDisharmonySum)
-
-				# Calculate the factor's average dishamonry over this period
-				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
-				console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
-
-				# Calculate the factor's current condition relative the average disharmony
-				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
-				console.log '··· factorCurrCondition', factorCurrCondition
-
-				# Add it to the sum of current conditions
-				factorsRelConditionSum += factorCurrCondition
-				
-
-			#factorConditionAvg = factorConditionsSum / cells.length
-			factorsCurrCondition = factorsRelConditionSum / cells.length
-			console.log 'factor condition sum', factorsConditionSum
-			console.log 'factor condition cur', factorsCurrCondition
-			console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
-			console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
-
-			# Tween size
-			ball = @balls[node.nodeId]
-			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
-			###
-
-			allFactorsChangeSum = 0
-			allFactorsChangeAvg = 0
-
-			for cell in cells
-				factor = @organism.getFactorOfType cell.factorType
-				
-				factorDishStart = factor.disharmonyHistory[0]
-				factorDishCurr  = factor.disharmonyHistory[factor.disharmonyHistory.length - 1]
-				allFactorsChangeSum += factorDishCurr / factorDishStart
-
-				#console.log '··· factor dish start', factorDishStart
-				#console.log '··· factor dish current', factorDishCurr
-				#console.log '··· factor dish rel', factorDishCurr / factorDishStart
-
-			allFactorsChangeAvg = allFactorsChangeSum / cells.length
-			#console.log '::: node factors relative dish avg', allFactorsChangeAvg
-
-			# Tween size
-			ball = @balls[node.nodeId]
-			newBallRelSize = Math.pow(allFactorsChangeAvg, 2)
-			#console.log 'current ball scale', ball.ball3d.scale
-			ballScaleFrom = { 'x':ball.ball3d.scale.clone().x, 'y':ball.ball3d.scale.clone().y, 'z':ball.ball3d.scale.clone().z }
-			ballScaleTo = { 'x':newBallRelSize, 'y':newBallRelSize, 'z':newBallRelSize }
-			ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize # new THREE.Vector3 newBallRelSize, newBallRelSize, newBallRelSize
-
-			###
-			_tweenBack = () =>
-				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
-				console.log ball.ballId
-				if ball.ballId is 1
-					console.log 'original scale', origScale
-				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
-
-			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
-			###
-
-			#if ball.ballId is 0
-			#	console.log '     ... ball scale from', ball.ball3d.scale, 'to', ballScaleTo
-
-			#@addToQueue ball.ball3d.scale, [new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )]
-			#ball.ball3d.scale = new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )
-			#ball.ball3d.children[ball.ball3d.children.length - 1].scale = ball.ball3d.scale.clone().multiplyScalar(50)
-
-			#@_tweenBallSize ball, ballScaleFrom, ballScaleTo, 100, () ->
-			
-			#	@_tweenBallSize ball, ball.ball3d.scale, ballScaleFrom, 1000
-
-
-			#console.log '::: ball size current', ball.ball3d.geometry.radius
-			#console.log '::: ball size new', newBallRelSize
-
-
 
 
 	# Handles node comparison
@@ -545,41 +643,134 @@ class VisualOrganism
 			, 500
 
 
+	# Handles factor influence
+	onInfluenceFactorAfter: (influenceData) ->
+		console.log('#onInfluenceFactorAfter', influenceData)
+
+		# Get factor
+		factor = influenceData.factor.factor
+		factor3d = @factors[factor.factorType]
+		
+		factor3d.userData.hover = false
+
+		# When completed, add scars
+		_afterFactorAnimation = () =>
+
+			# Get existing toruses
+			if not factor3d.userData.toruses
+				factor3d.userData.toruses = []
+			existingToruses = factor3d.userData.toruses
+
+			# Some settings
+			torusMargin = 10
+			torusSize   = 10
+
+			# Color and size
+			if existingToruses.length > 0
+				lastTorus = existingToruses[existingToruses.length - 1]
+
+				torusColor  = lastTorus.material.ambient.clone()
+				torusRadius = lastTorus.geometry.radius
+				torusSize   = lastTorus.geometry.tube
+			else
+				torusColor  = factor3d.material.ambient.clone()
+				torusRadius = factor3d.geometry.radiusTop
+				torusSize   = torusSize
+			
+			torusColor.offsetHSL( 0.05, -0.1, 0 )
+			torusRadius *= 0.96
+			torusSize   *= 0.9
+
+			# Create torus
+			torus = new THREE.Mesh(
+				new THREE.TorusGeometry( torusRadius, torusSize )
+				new THREE.MeshLambertMaterial({ 'ambient':torusColor, 'side':THREE.FrontSide })
+			)
+			torus.position.y = (factor3d.geometry.height / 2) + (torusMargin + existingToruses.length * (torusMargin + torusSize))
+			torus.rotation.x = Math.PI / 2
+			torus.scale.set 0, 0, 0
+
+			# Add and scale up torus
+			factor3d.userData.toruses.push torus
+			factor3d.add torus
+			@_tweenSomething torus.scale, { 'x':0, 'y':0, 'z':0 }, { 'x':1, 'y':1, 'z':1 }, 1000
+
+		# Factor size
+		factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue
+
+		# For wind: rotate according to the modified value
+		console.log 'influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value
+		if influenceData.meta.sourceAttr is 'wind'
+			@_tweenSomething factor3d.rotation, { 'z':factor3d.rotation.z }, { 'z':influenceData.factor.value }, 300, _afterFactorAnimation
+
+		# For temperatur, change the hue
+		else if influenceData.meta.sourceAttr is 'temperature'
+			newColor = factor3d.userData.baseColor.clone()
+			newColor.offsetHSL( 0, influenceData.factor.value / 5, 0 )
+			@_tweenSomething factor3d.material.ambient, factor3d.material.ambient.clone(), newColor, 300, _afterFactorAnimation
+
+		# Change x
+		@_tweenSomething factor3d.position, { 'x':factor3d.position.x }, { 'x':(if randomInt(0, 1) is 1 then -100 else 100) }, 300, () =>
+			factor3d.userData.startPosition = factor3d.position.clone()
+			factor3d.userData.hoverStartFrame = @frame
+			factor3d.userData.hover = true
+
+
 	# Animates properties of a ball being influenced
 	_animateInfluencedBall: (ball) ->
-		console.log '#_animateInfluencedBall', ball
+		#console.log '#_animateInfluencedBall', ball
 
-		console.log '   new state', ball.state
+		#console.log '   new state', ball.state
 
 		# Ball color
 		target = ball.ball3d.material.ambient
 		ballColor = target.clone() # { 'r':@opts.ballColor.r, 'g':@opts.ballColor.g, 'b':@opts.ballColor.b }
 		ballColorInfluence = { 'r':@opts.ballColorInfluence.r, 'g':@opts.ballColorInfluence.g, 'b':@opts.ballColorInfluence.b }
 
-		@_tweenBallColor ball, ballColor.clone(), @opts.ballColorInfluence.clone(), 200, () =>
-			@_tweenBallColor ball, @opts.ballColorInfluence.clone(), ballColor.clone(), 2000, () =>
+		#@_tweenBallColor ball, ballColor.clone(), @opts.ballColorInfluence.clone(), 200, () =>
+		#	@_tweenBallColor ball, @opts.ballColorInfluence.clone(), ballColor.clone(), 1000, () =>
+		@_tweenSomething target, target.clone(), @opts.ballColorInfluence.clone(), 200, () =>
+			@_tweenSomething target, @opts.ballColorInfluence.clone(), target.clone(), 200, () =>
 				ball.state.numInfluenced += 1
 
-				routine = ball.state.numInfluenced / 5
-				routine = 1 if routine > 1
+				# Balls get bluer the more they are affected
+				routine = ((ball.state.numInfluenced % 5)) / 5
+				#console.log('ball routine', routine)
 
-				console.log 'influenced ball finished tweeing', ball
+				#console.log 'influenced ball finished tweeing', ball
 				ball.currPos = ball.ball3d.position.clone()
 				ball.state.hover = true
 
-				nextColor = ball.ball3d.material.ambient.clone()
+				# Calculate color
+				nextColor = @opts.ballColor.clone()
 				nextColor.lerp( @opts.ballColorVeteran.clone(), routine )
 
-				@_tweenBallColor ball, ball.ball3d.material.ambient.clone(), { 'r':nextColor.r, 'g':nextColor.g, 'b':nextColor.b }, 10
+				# Assign color
+				#@_tweenBallColor ball, ball.ball3d.material.ambient.clone(), { 'r':nextColor.r, 'g':nextColor.g, 'b':nextColor.b }, 10
+				@_tweenSomething ball.ball3d.material.ambient, ball.ball3d.material.ambient.clone(), { 'r':nextColor.r, 'g':nextColor.g, 'b':nextColor.b }, 10
+
+				# For each time the ball reaches a routine of 1 it gets a ring
+				if routine is 0
+					ringRadius = 3 * ball.ball3d.geometry.radius
+					ring = new THREE.Mesh(
+						new THREE.CylinderGeometry( ringRadius, ringRadius, 1 )
+						new THREE.MeshLambertMaterial({ 'ambient':ball.ball3d.material.ambient.clone(), 'transparent':true, 'opacity':0.3, 'side':THREE.DoubleSide })
+					)
+					ring.rotation.x = (ball.state.numInfluenced / 5) * (Math.PI / 4)
+					ball.ball3d.add ring
 
 		# Ball position
-		ball.state.hover = false
+		ball.ball3d.userData.hover = false
 		newPos = { 
 			'x': ball.ball3d.position.x + (Math.random() * 2 - 1) * 300
 			'y': ball.ball3d.position.y + (Math.random() * 2 - 1) * 300
 			'z': ball.ball3d.position.z + (Math.random() * 2 - 1) * 300
 		}
-		@_tweenSomething ball.ball3d.position, ball.ball3d.position.clone(), newPos, 900
+		@_tweenSomething ball.ball3d.position, ball.ball3d.position.clone(), newPos, 200, () =>
+			ball.ball3d.userData.hoverStartFrame = @frame
+			ball.ball3d.userData.startPosition   = ball.ball3d.position.clone()
+			ball.ball3d.userData.hover           = true
+
 		#ball.ball3d.position.set newPos.x, newPos.y, newPos.z
 
 
@@ -610,10 +801,11 @@ class VisualOrganism
 
 		#cubeCam.position = cube.position
 
+
 		if not @instaCubes?
 			@instaCubes = []
 
-		@instaCubes.push { 
+		cubeInfo = { 
 			'cube':cube
 			#'cubeCam':cubeCam
 			'posStart':cube.position.clone()
@@ -621,19 +813,70 @@ class VisualOrganism
 			'hoverSpeed': 1 / (0.01 + Math.random() * 80)
 			'rotateSpeed': 1 / (10 + Math.random() * 40)
 		}
+		@instaCubes.push cubeInfo
 		@newCubes.push cube
+
+		# Replace old cubes?
+		if @instaCubes.length > @opts.groupCubesEvery and @instaCubes.length % @opts.groupCubesEvery is 1
+			@_replaceCubesWithMegaCube()
+
+
+	_replaceCubesWithMegaCube: () ->
+
+		console.log('num cubes', @instaCubes.length)
+
+
+		# Create a mega cube
+		cubeColor    = new THREE.Color()
+		cubeColor.setHSL( Math.random(), 0.2, 0.2 )
+		cubeGeometry = new THREE.IcosahedronGeometry 200
+		cubeMaterial = new THREE.MeshLambertMaterial { 'ambient':cubeColor, 'side':THREE.DoubleSide }
+		megaCube     = new THREE.Mesh cubeGeometry, cubeMaterial
+
+		megaCubePos = new THREE.Vector3( @opts.roomSize / 2 - 200, @opts.roomSize / 2 - 200, @opts.roomSize / 2 - 200 )
+		megaCubePos.applyAxisAngle(	new THREE.Vector3(1, 0, 0),	Math.random() * 2 * Math.PI	)
+		megaCubePos.applyAxisAngle(	new THREE.Vector3(0, 1, 0),	Math.random() * 2 * Math.PI	)
+		megaCubePos.applyAxisAngle(	new THREE.Vector3(0, 0, 1),	Math.random() * 2 * Math.PI	)
+			
+		#megaCubePos.multiplyScalar( @opts.roomSize / 2 )
+		megaCube.position = megaCubePos
+
+		if not @megaCubes?
+			@megaCubes = []
+
+		@megaCubes.push megaCube
+		@scene.add megaCube
+
+
+		# Remove old cubes
+		cubeStartIndex = @cubesGrouped
+		cubeEndIndex   = @cubesGrouped + @opts.cubesPerGroup
+
+		oldCubes = @instaCubes.slice( cubeStartIndex, cubeEndIndex )
+		for cubeInfo in oldCubes
+			@_removeCube cubeInfo, megaCubePos.clone(), megaCube
+
+		@cubesGrouped += cubeEndIndex - cubeStartIndex
+
+
+	_removeCube: (cubeInfo, destination, megaCube) ->
+		#console.log(cubeInfo)
+
+		# Add line to cube instead of scene
+		cubeInfo.cube.add( cubeInfo.cube.userData.cubeLine )
+
+		# Send away
+		cubePos = cubeInfo.cube.position
+		cubeTo = cubePos.clone()
+		cubeTo.multiplyScalar 100
+		@_tweenSomething cubePos, cubePos.clone(), destination, 1000, () =>
+			megaCube.add cubeInfo.cube.userData.cubeLine
+			@scene.remove cubeInfo.cube
 
 
 	_updateInstaCubes: () ->
 
 		for cubeInfo in @instaCubes
-			#cubeInfo.cube.visible = false
-			#cubeInfo.cubeCam.rotation = @camera.rotation #.set -@camera.rotation.x, -@camera.rotation.y, -@camera.rotation.z
-			#cubeInfo.cubeCam.updateCubeMap @renderer, @scene
-			#cubeInfo.cube.visible = true
-		
-			# Hover in y
-			#cubeInfo.cube.position.y = cubeInfo.posStart.y + Math.sin( cubeInfo.phase + @frame / 50 ) * 20
 
 			# Rotate slowly
 			cubeInfo.cube.rotation.x += cubeInfo.rotateSpeed
@@ -721,8 +964,8 @@ class VisualOrganism
 		@tweens.push tween
 		tween.onUpdate () ->
 			#console.log '       tween update ::', to
-			for key in Object.keys(to)
-				something[key] = to[key]
+			for key in Object.keys(@)
+				something[key] = @[key]
 
 		# Add possible callback
 		if callback

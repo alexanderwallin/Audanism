@@ -40,4 +40,4 @@ class NodeComparer
 		#console.log "   #_alterNodesUsingOrganismHarmonyComparison"
 
 
-window.NodeComparer = NodeComparer
+window.Audanism.Calculator.NodeComparer = NodeComparer

@@ -22,6 +22,6 @@
 
   })();
 
-  window.Interpreter = Interpreter;
+  window.Audanism.Environment.Interpreter = Interpreter;
 
 }).call(this);

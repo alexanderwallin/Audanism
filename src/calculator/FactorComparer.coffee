@@ -14,4 +14,4 @@ class FactorComparer
 	@getRelativeDisharmonyForFactors: (factors) ->
 
 
-window.FactorComparer = FactorComparer
+window.Audanism.Calculator.FactorComparer = FactorComparer

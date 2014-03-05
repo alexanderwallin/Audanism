@@ -1,7 +1,7 @@
 ###
 	Alters the factor and/or node values randomly
 ###
-class RandomSourceAdapter extends SourceAdapter
+class RandomSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 	@TIME_INTERVAL_ALTER_FACTORS: 2000
 	@PROBABILITY_ALTER_FACTORS: 1
@@ -68,4 +68,4 @@ class RandomSourceAdapter extends SourceAdapter
 
 
 
-window.RandomSourceAdapter = RandomSourceAdapter
+window.Audanism.SourceAdapter.RandomSourceAdapter = RandomSourceAdapter

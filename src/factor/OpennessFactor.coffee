@@ -1,7 +1,7 @@
-class OpennessFactor extends Factor
+class OpennessFactor extends Audanism.Factor.Factor
 
 	constructor: () ->
-		super(Factor.TYPE_OPENNESS, 90);
+		super(Audanism.Factor.Factor.TYPE_OPENNESS)
 
 
-window.OpennessFactor = OpennessFactor
+window.Audanism.Factor.OpennessFactor = OpennessFactor

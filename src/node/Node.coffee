@@ -10,7 +10,7 @@ class Node
 	@NUM_CELLS: 2
 
 	clone: () ->
-		newNode = new Node
+		newNode = new Audanism.Node.Node
 		Node._idCounter--
 
 		for key of @
@@ -22,8 +22,8 @@ class Node
 	constructor: () ->
 		@nodeId = Node._idCounter++
 
-		factorIndexes = [1..Organism.NUM_FACTORS]
-		@_cells = (new NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0 for i in [1..Node.NUM_CELLS]) # Math.round(Math.random() * 100) for i in [1..Node.NUM_CELLS])
+		factorIndexes = [1..Audanism.Environment.Organism.NUM_FACTORS]
+		@_cells = (new Audanism.Node.NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0 for i in [1..Audanism.Node.Node.NUM_CELLS]) # Math.round(Math.random() * 100) for i in [1..Node.NUM_CELLS])
 		@_cells.sort (a, b) ->
 			a.factorType > b.factorType
 
@@ -76,4 +76,4 @@ class Node
 		@getString()
 
 
-window.Node = Node
+window.Audanism.Node.Node = Node

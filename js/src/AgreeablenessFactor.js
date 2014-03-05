@@ -9,13 +9,13 @@
     __extends(AgreeablenessFactor, _super);
 
     function AgreeablenessFactor() {
-      AgreeablenessFactor.__super__.constructor.call(this, Factor.TYPE_AGREEABLENESS, 30);
+      AgreeablenessFactor.__super__.constructor.call(this, Audanism.Factor.Factor.TYPE_AGREEABLENESS);
     }
 
     return AgreeablenessFactor;
 
-  })(Factor);
+  })(Audanism.Factor.Factor);
 
-  window.AgreeablenessFactor = AgreeablenessFactor;
+  window.Audanism.Factor.AgreeablenessFactor = AgreeablenessFactor;
 
 }).call(this);

@@ -9,13 +9,13 @@
     __extends(ConscientiousnessFactor, _super);
 
     function ConscientiousnessFactor() {
-      ConscientiousnessFactor.__super__.constructor.call(this, Factor.TYPE_CONSCIENTIOUSNESS, 70);
+      ConscientiousnessFactor.__super__.constructor.call(this, Audanism.Factor.Factor.TYPE_CONSCIENTIOUSNESS);
     }
 
     return ConscientiousnessFactor;
 
-  })(Factor);
+  })(Audanism.Factor.Factor);
 
-  window.ConscientiousnessFactor = ConscientiousnessFactor;
+  window.Audanism.Factor.ConscientiousnessFactor = ConscientiousnessFactor;
 
 }).call(this);

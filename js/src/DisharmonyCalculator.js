@@ -58,9 +58,9 @@
         factor = _ref[_i];
         disharmonies[factor.factorType] = this.getFactorDisharmonyForNodes(factor, this._organism.getNodes());
       }
-      correlations = Factor.FACTOR_CORRELATIONS;
-      for (factorType = _j = 1, _ref1 = Organism.NUM_FACTORS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; factorType = 1 <= _ref1 ? ++_j : --_j) {
-        for (correlatingFactorType = _k = 1, _ref2 = Organism.NUM_FACTORS; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; correlatingFactorType = 1 <= _ref2 ? ++_k : --_k) {
+      correlations = Audanism.Factor.Factor.FACTOR_CORRELATIONS;
+      for (factorType = _j = 1, _ref1 = Audanism.Environment.Organism.NUM_FACTORS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; factorType = 1 <= _ref1 ? ++_j : --_j) {
+        for (correlatingFactorType = _k = 1, _ref2 = Audanism.Environment.Organism.NUM_FACTORS; 1 <= _ref2 ? _k <= _ref2 : _k >= _ref2; correlatingFactorType = 1 <= _ref2 ? ++_k : --_k) {
           if ((correlations[factorType] != null) && (correlations[factorType][correlatingFactorType] != null)) {
             correlationValue = correlations[factorType][correlatingFactorType];
             disharmonyDiff = Math.abs(disharmonies[factorType] - disharmonies[correlatingFactorType]);
@@ -115,7 +115,7 @@
 
     DisharmonyCalculator.prototype.alterNodesInComparisonMode = function(nodes, comparisonMode) {
       var aCell, bCell, cell, cellsToCompare, comparisonFn, currentDisharmony, factor, factorType, neededSaveNode, newDisharmony1, newDisharmony2, node, nodeAction, smallestNewDisharmony, testNodes, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1;
-      comparisonFn = comparisonMode === DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY ? 'getFactorDisharmonyForNodes' : 'getActualOrganismDisharmony';
+      comparisonFn = comparisonMode === Audanism.Calculator.NODE_COMPARISON_MODE_FACTOR_HARMONY ? 'getFactorDisharmonyForNodes' : 'getActualOrganismDisharmony';
       $(".node.comparing").removeClass('comparing');
       for (_i = 0, _len = nodes.length; _i < _len; _i++) {
         node = nodes[_i];
@@ -170,7 +170,7 @@
         testNodes[0].addCellValue(factorType, -1);
         testNodes[1].addCellValue(factorType, 1);
         smallestNewDisharmony = newDisharmony1 < newDisharmony2 ? newDisharmony1 : newDisharmony2;
-        nodeAction = newDisharmony1 < newDisharmony2 ? DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 : DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2;
+        nodeAction = newDisharmony1 < newDisharmony2 ? Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1 : Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2;
         this._performAction(nodes, factorType, nodeAction);
       }
       return true;
@@ -178,11 +178,11 @@
 
     DisharmonyCalculator.prototype._performAction = function(nodes, factorType, action) {
       switch (action) {
-        case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1:
+        case Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_1:
           nodes[0].addCellValue(factorType, -1);
           nodes[1].addCellValue(factorType, 1);
           break;
-        case DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2:
+        case Audanism.Calculator.DisharmonyCalculator.NODE_ACTION_MOVE_VALUE_2:
           nodes[0].addCellValue(factorType, 1);
           nodes[1].addCellValue(factorType, -1);
       }
@@ -215,6 +215,6 @@
 
   })();
 
-  window.DisharmonyCalculator = DisharmonyCalculator;
+  window.Audanism.Calculator.DisharmonyCalculator = DisharmonyCalculator;
 
 }).call(this);

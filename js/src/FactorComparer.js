@@ -26,6 +26,6 @@
 
   })();
 
-  window.FactorComparer = FactorComparer;
+  window.Audanism.Calculator.FactorComparer = FactorComparer;
 
 }).call(this);

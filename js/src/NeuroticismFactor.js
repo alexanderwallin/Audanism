@@ -9,13 +9,13 @@
     __extends(NeuroticismFactor, _super);
 
     function NeuroticismFactor() {
-      NeuroticismFactor.__super__.constructor.call(this, Factor.TYPE_NEUROTICISM, 10);
+      NeuroticismFactor.__super__.constructor.call(this, Audanism.Factor.Factor.TYPE_NEUROTICISM);
     }
 
     return NeuroticismFactor;
 
-  })(Factor);
+  })(Audanism.Factor.Factor);
 
-  window.NeuroticismFactor = NeuroticismFactor;
+  window.Audanism.Factor.NeuroticismFactor = NeuroticismFactor;
 
 }).call(this);

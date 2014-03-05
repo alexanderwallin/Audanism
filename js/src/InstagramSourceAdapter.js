@@ -15,37 +15,31 @@
     __extends(InstagramSourceAdapter, _super);
 
     function InstagramSourceAdapter(listener) {
-      var _this = this;
       this.listener = listener;
       InstagramSourceAdapter.__super__.constructor.call(this, this.listener);
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
-      this.tag = window.location.hash.match(/instatag=\w+/) ? window.location.hash.replace(/^#instatag=([^&]+)$/, "$1") || "audanism" : "audanism";
-      console.log('insta tag:', this.tag, '(', window.location.hash, ')');
+      this.tag = window.location.hash.match(/instatag=\w+/) ? window.location.hash.replace(/^#instatag=([^&]+)$/, "$1") || "art" : "art";
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
       this.jqxhr = null;
-      this.igGui = $('<div />', {
-        'id': 'ig-photo'
-      }).append('<img class="ig-photo" src="" /><span class="ig-caption">').appendTo($('#container'));
-      this.igGui.find('.ig-photo').on('load', function(e) {
-        console.log('image load', _this);
-        return $(e.currentTarget).fadeTo(100, 1);
-      });
     }
 
     InstagramSourceAdapter.prototype.activate = function() {
-      var _queryPhotos,
-        _this = this;
-      _this = this;
-      _queryPhotos = this.queryPhotos;
-      return setInterval(function() {
-        return _this.queryPhotos.call(_this);
-      }, 3000);
+      var _this = this;
+      this.active = true;
+      return this.queryInterval = setInterval(function() {
+        return _this.queryPhotos();
+      }, 5000);
+    };
+
+    InstagramSourceAdapter.prototype.deactive = function() {
+      this.active = false;
+      return clearInterval(this.queryInterval);
     };
 
     InstagramSourceAdapter.prototype.queryPhotos = function() {
       var _this = this;
-      if (this.jqxhr) {
+      if (this.jqxhr || !this.active) {
         return;
       }
       return this.jqxhr = $.ajax({
@@ -63,9 +57,9 @@
     };
 
     InstagramSourceAdapter.prototype.processPhotos = function(photos) {
-      var caption, captionVals, i, influenceData, interpreter, modVal, photo, _i, _j, _len, _ref,
-        _this = this;
-      interpreter = new TextInterpreter;
+      var caption, captionVals, i, influenceData, influenceDataList, interpreter, modVal, photo, _i, _j, _len, _ref;
+      interpreter = new Audanism.Util.TextInterpreter;
+      influenceDataList = [];
       for (_i = 0, _len = photos.length; _i < _len; _i++) {
         photo = photos[_i];
         if (photo.id === this.photoSinceId) {
@@ -76,12 +70,6 @@
           continue;
         }
         caption = photo.caption.text;
-        this.igGui.find('.ig-photo').css('opacity', 0).attr('src', photo.images.thumbnail.url);
-        this.igGui.find('.ig-caption').html(caption);
-        this.igGui.fadeTo(50, 1);
-        setTimeout(function() {
-          return _this.igGui.fadeTo(1000, 0);
-        }, 2000);
         captionVals = interpreter.getNumCharsInGroups(caption, 5);
         for (i = _j = 0, _ref = captionVals.length - 1; 0 <= _ref ? _j <= _ref : _j >= _ref; i = 0 <= _ref ? ++_j : --_j) {
           if (!captionVals[i]) {
@@ -102,8 +90,12 @@
               'sourceData': photo
             }
           };
+          influenceDataList.push(influenceData);
           EventDispatcher.trigger('audanism/influence', influenceData);
         }
+      }
+      if (influenceDataList.length > 0) {
+        EventDispatcher.trigger('audanism/influence/node/done', [influenceDataList]);
       }
       return this.jqxhr = null;
     };
@@ -112,8 +104,8 @@
 
     return InstagramSourceAdapter;
 
-  })(SourceAdapter);
+  })(Audanism.SourceAdapter.SourceAdapter);
 
-  window.InstagramSourceAdapter = InstagramSourceAdapter;
+  window.Audanism.SourceAdapter.InstagramSourceAdapter = InstagramSourceAdapter;
 
 }).call(this);

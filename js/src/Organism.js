@@ -12,7 +12,7 @@
 
     Organism.NUM_FACTORS = 5;
 
-    Organism.DEFAULT_NUM_NODES = 33;
+    Organism.DEFAULT_NUM_NODES = 10;
 
     Organism.DISTRIBUTE_FACTOR_VALUES = false;
 
@@ -35,20 +35,22 @@
       this._factors = (function() {
         var _i, _ref, _results;
         _results = [];
-        for (i = _i = 1, _ref = Organism.NUM_FACTORS; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
-          _results.push(Factor.createFactor(i, 0));
+        for (i = _i = 1, _ref = Audanism.Environment.Organism.NUM_FACTORS; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+          _results.push(Audanism.Factor.Factor.createFactor(i, 0));
         }
         return _results;
       })();
       EventDispatcher.trigger('audanism/init/factors', [this._factors]);
       if (numNodes <= 0) {
-        numNodes = Organism.DEFAULT_NUM_NODES;
+        numNodes = Audanism.Environment.Organism.DEFAULT_NUM_NODES;
       }
       this._createNodes(numNodes);
       EventDispatcher.trigger('audanism/init/nodes', [this._nodes]);
-      this.disharmonyCalculator = new DisharmonyCalculator(this);
+      EventDispatcher.listen('audanism/node/add', this, function(info) {
+        return _this._createNodes(info.numNodes);
+      });
+      this.disharmonyCalculator = new Audanism.Calculator.DisharmonyCalculator(this);
       this.disharmonyHistory = [];
-      this._gui = new GUI;
     }
 
     Organism.prototype.getNode = function(nodeId) {
@@ -92,7 +94,7 @@
       this.disharmonyCalculator.debug = true;
       for (i = _i = 1; 1 <= numComparisons ? _i <= numComparisons : _i >= numComparisons; i = 1 <= numComparisons ? ++_i : --_i) {
         nodes = this._getRandomNodes(2);
-        comparisonMode = this._inStressMode && false ? DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY : DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY;
+        comparisonMode = this._inStressMode && false ? Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY : Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY;
         EventDispatcher.trigger('audanism/compare/nodes', [
           {
             'nodes': nodes,
@@ -110,9 +112,9 @@
         factor = _ref[_j];
         factor.setDisharmony(this.disharmonyCalculator.getFactorDisharmonyForNodes(factor, this._nodes));
       }
-      if (!this._inStressMode && this._actualDisharmony < Organism.STRESS_THRESHOLD_ENTER) {
+      if (!this._inStressMode && this._actualDisharmony < Audanism.Environment.Organism.STRESS_THRESHOLD_ENTER) {
         return this._inStressMode = true;
-      } else if (this._inStressMode && this._actualDisharmony > Organism.STRESS_THRESHOLD_LEAVE) {
+      } else if (this._inStressMode && this._actualDisharmony > Audanism.Environment.Organism.STRESS_THRESHOLD_LEAVE) {
         return this._inStressMode = false;
       }
     };
@@ -130,21 +132,25 @@
 
     Organism.prototype._createNodes = function(numNodes) {
       var cell, factor, i, node, nodes, nodesWithFactorCells, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1, _ref2, _results, _results1;
-      this._nodeCellIndex = [];
-      _ref = this._factors;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        factor = _ref[_i];
-        this._nodeCellIndex[factor.factorType] = [];
+      if (!this._nodeCellIndex) {
+        this._nodeCellIndex = [];
+        _ref = this._factors;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          factor = _ref[_i];
+          this._nodeCellIndex[factor.factorType] = [];
+        }
+      }
+      if (!this._nodes) {
+        this._nodes = [];
       }
       nodes = (function() {
         var _j, _results;
         _results = [];
         for (i = _j = 1; 1 <= numNodes ? _j <= numNodes : _j >= numNodes; i = 1 <= numNodes ? ++_j : --_j) {
-          _results.push(new Node());
+          _results.push(new Audanism.Node.Node());
         }
         return _results;
       })();
-      this._nodes = [];
       for (_j = 0, _len1 = nodes.length; _j < _len1; _j++) {
         node = nodes[_j];
         this._nodes[node.nodeId] = node;
@@ -223,6 +229,6 @@
 
   })();
 
-  window.Organism = Organism;
+  window.Audanism.Environment.Organism = Organism;
 
 }).call(this);

@@ -7,9 +7,13 @@
 
 
 (function() {
-  var MouseSourceAdapter;
+  var MouseSourceAdapter,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  MouseSourceAdapter = (function() {
+  MouseSourceAdapter = (function(_super) {
+
+    __extends(MouseSourceAdapter, _super);
 
     function MouseSourceAdapter() {}
 
@@ -19,8 +23,8 @@
 
     return MouseSourceAdapter;
 
-  })();
+  })(Audanism.SourceAdapter.SourceAdapter);
 
-  window.MouseSourceAdapter = MouseSourceAdapter;
+  window.Audanism.SourceAdapter.MouseSourceAdapter = MouseSourceAdapter;
 
 }).call(this);

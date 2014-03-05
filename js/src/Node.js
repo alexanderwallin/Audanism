@@ -16,7 +16,7 @@
 
     Node.prototype.clone = function() {
       var cell, key, newNode;
-      newNode = new Node;
+      newNode = new Audanism.Node.Node;
       Node._idCounter--;
       for (key in this) {
         newNode[key] = this[key];
@@ -39,14 +39,14 @@
       this.nodeId = Node._idCounter++;
       factorIndexes = (function() {
         _results = [];
-        for (var _i = 1, _ref = Organism.NUM_FACTORS; 1 <= _ref ? _i <= _ref : _i >= _ref; 1 <= _ref ? _i++ : _i--){ _results.push(_i); }
+        for (var _i = 1, _ref = Audanism.Environment.Organism.NUM_FACTORS; 1 <= _ref ? _i <= _ref : _i >= _ref; 1 <= _ref ? _i++ : _i--){ _results.push(_i); }
         return _results;
       }).apply(this);
       this._cells = (function() {
         var _j, _ref1, _results1;
         _results1 = [];
-        for (i = _j = 1, _ref1 = Node.NUM_CELLS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
-          _results1.push(new NodeCell(factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0));
+        for (i = _j = 1, _ref1 = Audanism.Node.Node.NUM_CELLS; 1 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 1 <= _ref1 ? ++_j : --_j) {
+          _results1.push(new Audanism.Node.NodeCell(factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0));
         }
         return _results1;
       })();
@@ -145,6 +145,6 @@
 
   })();
 
-  window.Node = Node;
+  window.Audanism.Node.Node = Node;
 
 }).call(this);

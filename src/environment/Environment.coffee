@@ -15,32 +15,38 @@ class Environment
 	# handles core actions in each iteration
 	constructor: () ->
 		
+		# Running state variables
 		@_iterationCount = 0
 		@_isRunning      = true
 		@_isSingleStep   = true
 		
+		# Visualizer
 		@visualOrganism  = new Audanism.Graphic.VisualOrganism()
 		
-		@_organisms      = (new Organism for i in [1..Environment.NUM_ORGANISMS])
+		# Create organisms
+		@_organisms      = (new Audanism.Environment.Organism for i in [1..Environment.NUM_ORGANISMS])
 		EventDispatcher.trigger 'audanism/init/organism', [@_organisms[0]]
 
-		@_gui = new GUI
+		# GUI
+		@_gui = new Audanism.GUI.GUI
 
-		for organism in @_organisms
-			@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
-
+		# Controls
 		@listenToControls()
 
+		# Influnces
 		@createInfluenceSources()
-
-		@initConductor()
-
 		EventDispatcher.listen 'audanism/influence', @, @influence
 
+		# Conductor
+		@initConductor()
+
+		# Go.
 		@run()
 
 	# Initializes the loop
 	run: () ->
+		@start()
+
 		@_intervalId = setInterval =>
 			@handleIteration()
 		, Environment.TIME_INTERVAL
@@ -51,9 +57,15 @@ class Environment
 	start: () ->
 		@_isRunning = true
 
+		# Activate sources
+		sourceAdapter.activate() for sourceAdapter in @_influenceSources
+
 	# Pauses the loop
 	pause: () ->
 		@_isRunning = false
+
+		# Deactivate sources
+		(source.deactivate() for source in @_influenceSources)
 
 	# Stops the loop
 	stop: () ->
@@ -82,16 +94,18 @@ class Environment
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
 
-			if @conductor?
+			if @conductor? and @conductor.isMuted
 				@conductor.unmute()
 
 			for organism in @_organisms
 				
 				# Do comparison!
-				organism.performNodeComparison() 
+				organism.performNodeComparison()
 
-				# Update GUI
-				@_gui.update organism.getFactors(), organism.getNodes(), organism.getDisharmonyHistoryData 200
+				# Add nodes?
+				if @_iterationCount % 10 is 0
+					#organism.addNumNodes 10
+					EventDispatcher.trigger 'audanism/node/add', { 'numNodes':1 }
 
 				# Trigger event
 				EventDispatcher.trigger 'audanism/iteration', [{ 'count':@_iterationCount, 'organism':organism}]
@@ -99,7 +113,7 @@ class Environment
 				@_isSingleStep = false
 		else
 
-			if @conductor?
+			if @conductor? and not @conductor.isMuted
 				@conductor.mute()
 
 	#
@@ -109,10 +123,9 @@ class Environment
 		# Add sources
 		#@_influenceSources.push new RandomSourceAdapter(@)
 		#@_influenceSources.push new TwitterSourceAdapter(@)
-		@_influenceSources.push new InstagramSourceAdapter(@)
+		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(@)
+		@_influenceSources.push new Audanism.SourceAdapter.WheatherSourceAdapter()
 
-		# Activate sources
-		sourceAdapter.activate() for sourceAdapter in @_influenceSources
 
 	#
 	influence: (influenceData) ->
@@ -128,25 +141,34 @@ class Environment
 			# Iterate organisms
 			for organism in @_organisms
 
-				#console.log '-- organism factors', organism.getFactors()
-
 				# Get matching node
 				factor = if influenceData.node.factor is 'rand' then getRandomElements organism.getFactors() else organism.getFactorOfType influenceData.node.factor
-				node = if influenceData.node.node is 'rand' then organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] else organism.getNode influenceData.node.node
-
-				#console.log '-- factor', factor
-				#console.log '-- node', node
+				node   = if influenceData.node.node is 'rand' then organism._getRandomNodesOfFactorType(factor.factorType, 1)[0] else organism.getNode influenceData.node.node
 
 				# Affect node
-				#console.log('--> affect node:', node.nodeId, ', factor:', factor.factorType, ', value:', influenceData.node.valueModifier)
+				influenceInfo = { 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }
+				EventDispatcher.trigger 'audanism/influence/node', [influenceInfo]
 				node.addCellValue factor.factorType, influenceData.node.valueModifier
+				EventDispatcher.trigger 'audanism/influence/node/after', [influenceInfo]
 
-				EventDispatcher.trigger 'audanism/influence/node', [{ 'node':{ 'node':node, 'factor':factor, 'value':influenceData.node.valueModifier }, 'meta':influenceData.meta }]
-				
-				$node = $("[data-node-id='#{ node.nodeId }']").addClass('altered')
-				setTimeout () =>
-					$node.removeClass('altered')
-				, 2000
+		# Factor alteration
+		if influenceData.factor?
+
+			for organism in @_organisms
+				factor
+
+				# Random factor
+				if influenceData.factor.factor is 'rand'
+					factorType = randomInt( 1, Audanism.Environment.Organism.NUM_FACTORS )
+					factor = organism.getFactorOfType( factorType )
+
+				if factor
+					influenceInfo = { 'factor':{ 'factor':factor, 'value':influenceData.factor.valueModifier }, 'meta':influenceData.meta }
+					EventDispatcher.trigger 'audanism/influence/factor', influenceInfo
+					factor.addValue influenceData.factor.valueModifier
+					EventDispatcher.trigger 'audanism/influence/factor/after', influenceInfo
+					
+					#console.log('——— changed factor', factor, 'by value', influenceData.factor.valueModifier)
 
 
 		# Random alteration
@@ -213,16 +235,53 @@ class Environment
 
 
 	initConductor: () ->
-		@conductor = new Audanism.Sound.Conductor()
+		@conductor = new Audanism.Audio.Conductor()
 
 		@conductor.setOrganism @_organisms[0]
 		@conductor.mute()
 
+		###
+		$spectrum = $('<div id="spectrum" />').css({
+			'position': 'fixed'
+			'left': 0
+			'right': 0
+			'top': 0
+			'bottom': 0
+			'z-index': 9999
+			#'height': window.innerHeight
+		}).appendTo($('#container'))
+
+		for i in [0..@conductor.analyser.frequencyBinCount-1]
+			dLeft = i / @conductor.analyser.frequencyBinCount
+			dWidth = Math.round( $(window).width() / @conductor.analyser.frequencyBinCount )
+
+			$spectrum.append($('<div />').attr('id', 'bar-' + i).css({
+				'position': 'absolute', 
+				'top': 0, 
+				'left': i * dWidth + 1
+				'width': dWidth - 2
+				'height': 10
+				'background-color': 'red'
+			}))
+
+		EventDispatcher.listen 'audanism/iteration', @, (frame) =>
+			console.log('adjust freq bars')
+			frequencyData = @conductor.getFrequencyData()
+			#console.log(frequencyData.join(' | '))
+
+			i = -1
+
+			for freqData in frequencyData
+				i++
+				console.log(freqData)
+
+				if i is 0
+					console.log( $('#bar-' + i) )
+
+				$('#bar-' + i).css('height', 10 + Math.round(freqData))
+		###
 
 
-window.Environment = Environment
+window.Audanism.Environment.Environment = Environment
 
-# Initialize environment
-$(window).ready =>
-	environment = new Environment
-	window.environment = environment
+

@@ -5,20 +5,31 @@ class GUI
 
 	# Constructor
 	constructor: () ->
-		@$factorsWrap = $('#factors')
-		@$nodesWrap = $('#nodes')
-		@$meter = $('#disharmony-meter .value')
-
+		@$organismStats   = $('#organism-stats')
+		@$factorStats     = $('#factor-stats')
+		
+		@$influences      = $('#influences')
+		@$influenceTemplate = @$influences.find('.template').clone(true).removeClass('template')
+		@$influences.find('.template').hide()
+		
 		@_renderedFactors = false
-		@_renderedNodes = false
+		@_renderedNodes   = false
 
 		@_setupControls()
 
+		@_showCozyInfo()
+
+		EventDispatcher.listen 'audanism/iteration',             @, @onIteration
+		EventDispatcher.listen 'audanism/influence/node/done',   @, @onInfluenceNodeDone
+		EventDispatcher.listen 'audanism/influence/factor/after', @, @onInfluenceFactorAfter
+
+		###
 		if google?
 			google.setOnLoadCallback =>
 				@$disharmonyChart = $("#disharmony-chart")
 				@disharmonyChart = new google.visualization.LineChart @$disharmonyChart.get 0;
 				#console.log 'google.setOnLoadCallback', @disharmonyChart
+		###
 
 	_setupControls: () ->
 		$('#controls .btn').click (e) =>
@@ -30,75 +41,104 @@ class GUI
 		$(document).on 'dmpause', (e) =>
 			$('body').removeClass('running').addClass('paused')
 
-	update: (factors, nodes, tableData) ->
-		#@_updateFactors factors
-		#@_updateNodes nodes
-		#@_drawCharts tableData
 
-		#console.log('#GUI.update', tableData)
+	_showCozyInfo: () ->
+		hour = new Date().getHours()
+		showSelector = ''
 
-		if tableData.length > 0
-			@$meter.find('.sum').html(Math.round(tableData[tableData.length-1][2])).end().find('.actual').html(Math.round(tableData[tableData.length-1][1]))
+		switch hour
+			when 23, 0, 1, 2, 3, 4, 5
+				showSelector = 'night'
+			when 6, 7, 8
+				showSelector = 'early-morning'
+			when 9, 10, 11
+				showSelector = 'morning'
+			when 12, 13, 14, 15
+				showSelector = 'midday'
+			when 16, 17, 18, 19
+				showSelector = 'afternoon'
+			when 20, 21, 22
+				showSelector = 'evening'
 
-	_drawCharts: (tableData) ->
-		return
-		return if not @disharmonyChart?
+		console.log(showSelector)
+		$('.time-of-day').filter('.' + showSelector).show()
+
+
+	onIteration: (iterationInfo) ->
+		#console.log('GUI #onIteration', @$organismStats)
 		
-		tableData.unshift ['Iteration', 'Sum dish.', 'Actual dish.']
+		organism = iterationInfo.organism
 
-		#console.log "(GUI) #_drawCharts:", tableData
+		# Organism disharmony
+		disharmony = organism.getDisharmonyHistoryData( 1 )
+		@$organismStats.find('#summed-disharmony .value').html(Math.round(organism._sumDisharmony)).end().find('#actual-disharmony .value').html(Math.round(organism._actualDisharmony)).end()
 
-		data = google.visualization.arrayToDataTable tableData
-
-		options =
-			title: 'Disharmony chart'
-			#hAxis:
-			#	viewWindowMode: 'explicit'
-			#	viewWindow:
-			#		max: 300
-			vAxis:
-				viewWindowMode: 'explicit'
-				viewWindow:
-					min: 0
-
-		#console.log "@drawCharts --- stateHistory:", @stateHistory, "data:", data
-
-		@disharmonyChart.draw data, options
-
-	_updateFactors: (factors) ->
-		if not @_renderedFactors
-			@_buildFactors factors
-		else
-			for factor in factors
-				$(".factor[data-factor-type='#{ factor.factorType }']")
-					.attr('data-factor-disharmony', factor.disharmony)
-					.attr('data-factor-name', factor.name)
-					.find('.factor-value').html(factor.factorValue)
-
-	_buildFactors: (factors) ->
-		# for factor in factors
-
-		factorsHtml = ("<div class=\"factor\" data-factor-type=\"#{ factor.factorType }\"><span class=\"factor-name\">#{ factor.name }</span> <span class=\"factor-value\">#{ factor.factorValue }</span></div>" for factor in factors).join ""
-		@$factorsWrap.html factorsHtml
-		@_renderedFactors = true
-
-	_updateNodes: (nodes) ->
-		if not @_renderedNodes
-			@_buildNodes nodes
-		else
-			for node in nodes
-				$node = @$nodesWrap.find(".node[data-node-id=#{ node.nodeId }]")
-				for cell in node.getCells()
-					$node.find(".node-cell[data-cell-factor='#{ cell.factorType }']").html(cell.factorValue)
-
-	_buildNodes: (nodes) ->
-		for node in nodes
-			cellsHtml = ("<li class=\"node-cell\" data-cell-factor=\"#{ cell.factorType }\">#{ cell.factorValue }</li>" for cell in node.getCells()).join ""
-			cellsHtml = "<ul class=\"node-cells\">#{ cellsHtml }</ul>";
-			nodeHtml = "<div class=\"node\" data-node-id=\"#{ node.nodeId }\">#{ cellsHtml }</div>"
-			@$nodesWrap.append nodeHtml
-
-		@_renderedNodes = true
+		# Factor stats
+		$factorValues = @$factorStats.find('#factor-values')
+		$factorDish   = @$factorStats.find('#factor-disharmonies')
+		for factor in organism.getFactors()
+			$factorValues.find('[data-factor="' + factor.factorType + '"]').html(decimalAdjust('round', factor.factorValue, -1))
+			$factorDish.find('[data-factor="' + factor.factorType + '"]').html(numberSuffixed(factor.disharmony, -1))
 
 
-window.GUI = GUI
+	onInfluenceNodeDone: (influenceInfoList) ->
+		#console.log('GUI #onInfluenceNodeAfter', influenceInfoList)
+
+		influenceBoxInfo
+
+		influenceEntry = influenceInfoList[0]
+
+		if influenceEntry.meta.source is 'instagram'
+			photo = influenceEntry.meta.sourceData
+
+			influenceBoxInfo = {
+				'source':  influenceEntry.meta.source
+				'summary': '<img src="' + photo.images.thumbnail.url + '" /><span class="caption">' + photo.caption.text.substring(0, 30) + '</span>'
+				'url':     photo.link
+				'type':    'Nodes'
+				'value':   null
+			}
+
+		if influenceBoxInfo
+			@appendInfluenceBox influenceBoxInfo
+
+
+	onInfluenceFactorAfter: (influenceInfo) ->
+		#console.log('GUI #onInfluenceFactorAfter', influenceInfo)
+
+		influenceBoxInfo
+
+		if influenceInfo.meta.source = 'yr.no'
+			influenceBoxInfo = {
+				'source':  influenceInfo.meta.source
+				'summary': influenceInfo.meta.summary
+				'type':    'Factor ' + influenceInfo.factor.factor.factorType
+			}
+
+		if influenceBoxInfo
+			@appendInfluenceBox influenceBoxInfo
+
+
+	appendInfluenceBox: (influenceBoxInfo) ->
+		$box = @$influenceTemplate.clone()#.css('opacity', 0)
+
+		$box.find('.influence-source').html(influenceBoxInfo.source);
+		$box.find('.influence-summary').html(influenceBoxInfo.summary);
+		$box.find('.influence-link').html($('<a />', { 'href':influenceBoxInfo.url }).html('Link'))
+		$box.find('.influence-type').html(influenceBoxInfo.type)
+		$box.find('.influence-value').html(influenceBoxInfo.value || '')
+
+		@$influences.append($box)
+		$box.show() #.fadeTo(300, 1.0)
+
+		$boxes = @$influences.find('.influence')
+		numBoxes = $boxes.size()
+		if numBoxes > 3
+			@$influences.find('.influence').filter(() ->
+				return $boxes.index(@) < numBoxes - 3
+			).hide()#.animate({ 'opacity':0, 'height':0, 'margin-bottom':0 }, 300, () ->
+			#	$(@).hide()
+			#)
+
+
+window.Audanism.GUI.GUI = GUI

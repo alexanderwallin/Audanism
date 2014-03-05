@@ -12,6 +12,16 @@
 
     function EventDispatcher() {}
 
+    EventDispatcher.prototype.on = function(eventName, callback, context) {
+      var _this = this;
+      if (context) {
+        callback.bind(context);
+      }
+      return $(document).on(eventName, function(e) {
+        return callback.apply(null, arguments.slice(1));
+      });
+    };
+
     EventDispatcher.prototype.listen = function(eventName, listener, callback) {
       var _this = this;
       return $(document).on(eventName, function(e) {

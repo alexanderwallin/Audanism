@@ -1,7 +1,7 @@
-class ExtraversionFactor extends Factor
+class ExtraversionFactor extends Audanism.Factor.Factor
 
 	constructor: () ->
-		super(Factor.TYPE_EXTRAVERSION, 50);
+		super(Audanism.Factor.Factor.TYPE_EXTRAVERSION)
 
 
-window.ExtraversionFactor = ExtraversionFactor
+window.Audanism.Factor.ExtraversionFactor = ExtraversionFactor
