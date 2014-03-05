@@ -2,6 +2,8 @@
 
 $runLocal = @$_GET['local'] == 'yes';
 
+$isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
+
 ?><!DOCTYPE html>
 <!--[if lt IE 7]>	  <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>		 <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -171,6 +173,12 @@ $runLocal = @$_GET['local'] == 'yes';
 
 		<script src="js/vendor/AudioContextMonkeyPatch.js"></script>
 
+		<?php if ($isProduction) : ?>
+
+		<script defer src="js/audanism.js"></script>
+
+		<?php else : ?>
+
 		<!-- Utility functions -->
 		<script defer src="js/src/utilities.js?v=<?php echo time(); ?>"></script>
 
@@ -257,5 +265,7 @@ $runLocal = @$_GET['local'] == 'yes';
 
 		<!-- Visual -->
 		<script defer src="js/src/VisualOrganism.js?v=<?php echo time(); ?>"></script>
+
+		<?php endif; ?>
 	</body>
 </html>
