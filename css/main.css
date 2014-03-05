@@ -195,11 +195,15 @@ a.btn 								{ text-decoration: none !important; }
  */
 #stats-wrap							{ position: absolute; top: 10px; right: 10px; width: 200px; font-size: 10px; color: #fefefe; }
 
-.stats-block						{ margin-bottom: 2px; font-size: 10px; }
+.stats-block						{ margin-bottom: 10px; font-size: 10px; }
 .stats-title						{ margin-bottom: 2px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.2); }
 .stats-block-content				{ opacity: 0.8; }
 .stats-label						{ text-transform: uppercase; font-style: italic; }
 .stats-block p 						{ display: none; margin: 2px 0; }
+
+/* Stress mode */
+.stress-mode-indicator				{ float: right; width: 6px; height: 6px; margin: 3px 0 3px 3px; border-radius: 8px; background: green; }
+.stress-mode-indicator.stressed 	{ background: red; }
 
 /* Stats tables */
 .stats-table						{ width: 100%; margin-bottom: 10px; text-transform: uppercase; }

@@ -30,7 +30,7 @@
       }
       return this.queryInterval = setInterval(function() {
         return _this.queryWeather();
-      }, 2000);
+      }, 7000);
     };
 
     WheatherSourceAdapter.prototype.deactive = function() {
@@ -44,7 +44,6 @@
         url: '/js/data/yr-capitals.json',
         dataType: 'json',
         success: function(response) {
-          console.log('fetched towns', response);
           return _this.towns = response;
         },
         error: function(error) {

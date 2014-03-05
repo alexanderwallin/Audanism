@@ -12,7 +12,7 @@ class VisualOrganism
 		@opts = {
 			'cameraDistanceStart': 1600
 			'cameraDistance':      1300
-			'clusterSize':         500
+			'clusterSize':         1000
 
 			'roomSize':            3000
 			'roomVertices':        100
@@ -236,13 +236,14 @@ class VisualOrganism
 			)
 			factor3d.position.set(
 				if randomInt(0, 1) is 1 then randomInt(-800, -600) else randomInt(600, 800)
-				randomInt(-40, 40)
+				0
 				if randomInt(0, 1) is 1 then randomInt(-800, -600) else randomInt(600, 800)
 			)
 
 			factor3d.userData = {
-				'startPosition':  factor3d.position.clone()
-				'hover':          true
+				'isModifying':     false
+				'startPosition':   factor3d.position.clone()
+				'hover':           true
 				'hoverStartFrame': 0
 				'initialValue':    factor.factorValue
 				'baseColor':       factor3d.material.ambient.clone()
@@ -300,12 +301,30 @@ class VisualOrganism
 			@state.shouldSetDaylight = false
 
 		# Factors
+		_moveFactor = (factorType) =>
+			factor   = @organism.getFactorOfType factorType
+			factor3d = @factors[factorType]
+			
+			factor3d.userData.hover       = false
+			factor3d.userData.isModifying = true
+
+			@_tweenSomething factor3d.position, { 'y':factor3d.position.y }, { 'y':(1000 - factor.disharmony) / 2 }, 1000, () =>
+				factor3d.userData.startPosition = factor3d.position.clone()
+				factor3d.userData.hover         = true
+				factor3d.userData.isModifying   = false
+
+				#console.log '--> done (' + factor.factorValue + '). now:', factor3d.position.y
+
 		for factor in @organism.getFactors()
 			factor3d = @factors[factor.factorType]
 
 			# Factor hovering
-			if factor3d.userData.hover
+			if not factor3d.userData.isModifying and @frame > 10
+				#console.log '--> move factor', factor.factorType, 'from', factor3d.position.y, 'to', 1000 - factor.disharmony 
+				_moveFactor factor.factorType
+			else if factor3d.userData.hover
 				factor3d.position.y = factor3d.userData.startPosition.y + 200 * Math.sin( (@frame - factor3d.userData.hoverStartFrame) / (10 * factor.factorValue) )
+			
 
 		# Hovering balls
 		for ball in @balls
@@ -381,7 +400,7 @@ class VisualOrganism
 			@opts.initialDisharmonyData = disharmony
 
 		# Calculate disharmony relatively the initial disharmony
-		relativeDisharmony = disharmony[2] / @opts.initialDisharmonyData[2]
+		relativeDisharmony = organism.getDisharmonyChange(10, 'actual') # disharmony[2] / @opts.initialDisharmonyData[2]
 
 		# Float keeping track how far away the furthers away ball is
 		@largestDistance = 0
@@ -389,12 +408,17 @@ class VisualOrganism
 		# Set balls distance from center depending on the organism's state
 		for ball in @balls
 
-			# Tween the ball
-			newPos = ball.pos.clone().multiplyScalar relativeDisharmony
-			tweenFrom = ball.ball3d.position.clone()
-			tweenTo   = { 'x':newPos.x, 'y':newPos.y, 'z':newPos.z } # newPos.clone()
+			if @frame % 4 is 0
+				# Tween the ball
+				newPos = ball.pos.clone() # ball.ball3d.position.clone()
+				newPos.multiplyScalar relativeDisharmony
+				tweenFrom = ball.ball3d.position.clone()
+				tweenTo   = { 'x':newPos.x, 'y':newPos.y, 'z':newPos.z } # newPos.clone()
 
-			#@_tweenBall ball, tweenFrom, tweenTo
+				#@_tweenBall ball, tweenFrom, tweenTo
+				ball.ball3d.userData.hover = false
+				@_tweenSomething ball.ball3d.position, tweenFrom, tweenTo, 100, () =>
+					ball.ball3d.userData.hover = true
 
 			# Store furthest position if this is that
 			if (ball.ball3d.position.length() > @largestDistance)
@@ -402,27 +426,6 @@ class VisualOrganism
 
 		# Move camera according to the ball furthest out
 		@_tweenCameraDistance @largestDistance * (@opts.cameraDistanceStart / @opts.clusterSize)
-
-		# Tween fog
-		latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10)
-
-		disharmonySum = 0
-		(disharmonySum += dish[2] for dish in latestDisharmonyBlock)
-		disharmonyAvg = disharmonySum / latestDisharmonyBlock.length
-
-		#latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / latestDisharmonyBlock[0][2]
-		latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg
-		@state.latestDisharmonyChange = latestDisharmonyChange
-
-		###
-		#console.log 'fog color start:', @opts.fogColorStart
-		#console.log 'latestDisharmonyBlock', latestDisharmonyBlock
-		#console.log 'latestDisharmonyChange', latestDisharmonyChange
-		#console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
-		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
-		#console.log 'new fog color', newFogColor
-		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
-		###
 
 		# Change room color
 		#	#console.log 'latest disharmony change', latestDisharmonyChange
@@ -432,102 +435,23 @@ class VisualOrganism
 		# Change ball size depending on factor disharmonies
 		for node in @organism.getNodes()
 			cells = node.getCells()
-			#factorDisharmonySum = @organism.getFactorOfType(cell.factorType) for cell in cells
-
-			###
-
-			Relative changes to a node from its cells' factors' current conditions
-
-			factorsConditionSum = 0
-			factorsRelConditionSum = 0
-
-			for cell in cells
-
-				# Get the cell's factor's latest history
-				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
-				factorLatestHistory = factorDisharmonyHistory.slice(-10)
-				#console.log '··· factor history', factorLatestHistory
-
-				# Total disharmony over this period
-				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
-				#console.log('··· factorDisharmonySum', factorDisharmonySum)
-
-				# Calculate the factor's average dishamonry over this period
-				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
-				#console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
-
-				# Calculate the factor's current condition relative the average disharmony
-				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
-				#console.log '··· factorCurrCondition', factorCurrCondition
-
-				# Add it to the sum of current conditions
-				factorsRelConditionSum += factorCurrCondition
-				
-
-			#factorConditionAvg = factorConditionsSum / cells.length
-			factorsCurrCondition = factorsRelConditionSum / cells.length
-			#console.log 'factor condition sum', factorsConditionSum
-			#console.log 'factor condition cur', factorsCurrCondition
-			#console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
-			#console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
-
-			# Tween size
 			ball = @balls[node.nodeId]
-			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
-			###
 
-			allFactorsChangeSum = 0
-			allFactorsChangeAvg = 0
+			# This is not for newly born nodes
+			if @frame - ball.ball3d.userData.bornAt > 30
 
-			for cell in cells
-				factor = @organism.getFactorOfType cell.factorType
-				
-				factorDishStart = factor.disharmonyHistory[0]
-				factorDishCurr  = factor.disharmonyHistory[factor.disharmonyHistory.length - 1]
-				allFactorsChangeSum += factorDishCurr / factorDishStart
+				# Get the average disharmony change of the node's cells' factors
+				factorChangeSum = 0
+				for cell in cells
+					factorChangeSum += organism.getDisharmonyChangeForFactor cell.factorType, 20
+				factorChangeAvg = factorChangeSum / cells.length
+				#console.log 'factorChangeAvg', factorChangeAvg
 
-				#console.log '··· factor dish start', factorDishStart
-				#console.log '··· factor dish current', factorDishCurr
-				#console.log '··· factor dish rel', factorDishCurr / factorDishStart
-
-			allFactorsChangeAvg = allFactorsChangeSum / cells.length
-			#console.log '::: node factors relative dish avg', allFactorsChangeAvg
-
-			# Tween size
-			ball = @balls[node.nodeId]
-			newBallRelSize = Math.pow(allFactorsChangeAvg, 1.4)
-			#console.log 'current ball scale', ball.ball3d.scale
-			ballScaleFrom = { 'x':ball.ball3d.scale.clone().x, 'y':ball.ball3d.scale.clone().y, 'z':ball.ball3d.scale.clone().z }
-			ballScaleTo = { 'x':newBallRelSize, 'y':newBallRelSize, 'z':newBallRelSize }
-			#ball.ball3d.scale.x = ball.ball3d.scale.y = ball.ball3d.scale.z = newBallRelSize # new THREE.Vector3 newBallRelSize, newBallRelSize, newBallRelSize
-
-			@_tweenSomething ball, ballScaleFrom, ballScaleTo, 200
-
-			###
-			_tweenBack = () =>
-				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
-				#console.log ball.ballId
-				if ball.ballId is 1
-					#console.log 'original scale', origScale
-				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
-
-			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
-			###
-
-			#if ball.ballId is 0
-			#	#console.log '     ... ball scale from', ball.ball3d.scale, 'to', ballScaleTo
-
-			#@addToQueue ball.ball3d.scale, [new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )]
-			#ball.ball3d.scale = new THREE.Vector3( newBallRelSize, newBallRelSize, newBallRelSize )
-			#ball.ball3d.children[ball.ball3d.children.length - 1].scale = ball.ball3d.scale.clone().multiplyScalar(50)
-
-			#@_tweenBallSize ball, ballScaleFrom, ballScaleTo, 100, () ->
-			
-			#	@_tweenBallSize ball, ball.ball3d.scale, ballScaleFrom, 1000
-
-
-			#console.log '::: ball size current', ball.ball3d.geometry.radius
-			#console.log '::: ball size new', newBallRelSize
+				# Tween size
+				newBallScale = Math.min(Math.pow(factorChangeAvg, 2), 10)
+				#ballScaleFrom = { 'x':ball.ball3d.scale.clone().x, 'y':ball.ball3d.scale.clone().y, 'z':ball.ball3d.scale.clone().z }
+				ballScaleTo = { 'x':newBallScale, 'y':newBallScale, 'z':newBallScale }
+				@_tweenSomething ball.ball3d.scale, ball.ball3d.scale.clone(), ballScaleTo, 200
 
 
 	# Darkens the room depending on the time of day
@@ -588,6 +512,7 @@ class VisualOrganism
 			ball3d.userData.hover           = true
 			ball3d.userData.startPosition   = ball3d.position.clone()
 			ball3d.userData.hoverStartFrame = 0
+			ball3d.userData.bornAt          = @frame
 
 			# Add ball to scene
 			ball3d.scale.set 0, 0 ,0
@@ -633,6 +558,10 @@ class VisualOrganism
 
 	# Handles node influence
 	onInfluenceNode: (influenceData) ->
+
+		if not influenceData.node.node
+			return
+
 		@_animateInfluencedBall @balls[influenceData.node.node.nodeId]
 
 		if influenceData.meta.current is 1 and influenceData.meta.source? and influenceData.meta.source is 'instagram'
@@ -652,6 +581,7 @@ class VisualOrganism
 		factor3d = @factors[factor.factorType]
 		
 		factor3d.userData.hover = false
+		factor3d.userData.isModifying = true
 
 		# When completed, add scars
 		_afterFactorAnimation = () =>
@@ -662,7 +592,7 @@ class VisualOrganism
 			existingToruses = factor3d.userData.toruses
 
 			# Some settings
-			torusMargin = 10
+			torusMargin = 20
 			torusSize   = 10
 
 			# Color and size
@@ -695,6 +625,9 @@ class VisualOrganism
 			factor3d.add torus
 			@_tweenSomething torus.scale, { 'x':0, 'y':0, 'z':0 }, { 'x':1, 'y':1, 'z':1 }, 1000
 
+			# Done.
+			factor3d.userData.isModifying
+
 		# Factor size
 		factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue
 
@@ -709,8 +642,8 @@ class VisualOrganism
 			newColor.offsetHSL( 0, influenceData.factor.value / 5, 0 )
 			@_tweenSomething factor3d.material.ambient, factor3d.material.ambient.clone(), newColor, 300, _afterFactorAnimation
 
-		# Change x
-		@_tweenSomething factor3d.position, { 'x':factor3d.position.x }, { 'x':(if randomInt(0, 1) is 1 then -100 else 100) }, 300, () =>
+		# Change position
+		@_tweenSomething factor3d.position, factor3d.position.clone(), { 'x':(if randomInt(0, 1) is 1 then -100 else 100), 'y':(1000 - factor.disharmony) / 2 }, 300, () =>
 			factor3d.userData.startPosition = factor3d.position.clone()
 			factor3d.userData.hoverStartFrame = @frame
 			factor3d.userData.hover = true

@@ -21,9 +21,19 @@ class Organism
 		@_actualDisharmony = 0
 
 		# Stress mode
-		@_inStressMode = true
+		@_inStressMode = false
+		@stress = {
+			thresholdEnter: 0
+			thresholdLeave: 0
+		}
+		
 		$('#stressmode').change (e) =>
 			@_inStressMode = $(e.currentTarget).attr('checked') is 'checked'
+
+		EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
+		
+		setInterval @adjustStressThresholds.bind(@), 5000
+
 
 		# Create factors
 		@_factors = (Audanism.Factor.Factor.createFactor i, 0 for i in [1..Audanism.Environment.Organism.NUM_FACTORS])
@@ -82,7 +92,8 @@ class Organism
 	performNodeComparison: (numComparisons = 1) ->
 
 		#console.log "#performNodeComparison, #{ DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY }"
-		
+		@isInitialComparison = @_sumDisharmony is 0
+
 		@disharmonyCalculator.debug = true
 
 		# First, perform node comparison and alterations
@@ -109,17 +120,63 @@ class Organism
 
 		factor.setDisharmony @disharmonyCalculator.getFactorDisharmonyForNodes factor, @_nodes for factor in @_factors
 
+		if @isInitialComparison
+			@stress.thresholdEnter = @_actualDisharmony * 1.2
+			console.log 'initial stress threshold enter': @stress.thresholdEnter
+
+		#console.log '@_actualDisharmony', Math.round(@_actualDisharmony), Math.round(@stress.thresholdEnter), Math.round(@stress.thresholdLeave)
+
 		# Check if it should enter or leave stress mode
-		if not @_inStressMode and @_actualDisharmony < Audanism.Environment.Organism.STRESS_THRESHOLD_ENTER
+		if not @_inStressMode and @_actualDisharmony > @stress.thresholdEnter
+			console.log ' -----------------------------------------'
+			console.log ' #=#=#=#=#=#==# STRESS MODE =#=#=#=#=#=#=#'
+			console.log ' -----------------------------------------'
+
 			@_inStressMode = true
-		else if @_inStressMode and @_actualDisharmony > Audanism.Environment.Organism.STRESS_THRESHOLD_LEAVE
+			@stress.thresholdLeave = @stress.thresholdEnter * 1
+			EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
+		else if @_inStressMode and @_actualDisharmony < @stress.thresholdLeave
+			console.log ' -----------------------------------------'
+			console.log ' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#'
+			console.log ' -----------------------------------------'
+
 			@_inStressMode = false
+			@stress.thresholdEnter = @stress.thresholdLeave * 1.2
+			EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
 
 	# Returns the disharmony history data, reduced to the
 	# given number of data entries.
 	getDisharmonyHistoryData: (numEntries = 300) ->
 		#console.log "#getDisharmonyHistoryData", @disharmonyHistory
 		if numEntries > 0 then @disharmonyHistory.slice -numEntries else @disharmonyHistory.slice -@disharmonyHistory.length
+
+
+	getAverageDisharmony: (numEntries, type = 'sum') ->
+		history = @getDisharmonyHistoryData numEntries
+
+		sum = 0
+		for entry in history
+			sum += (if type is 'actual' then entry[2] else entry[1])
+
+		return sum / history.length
+
+	getDisharmonyChange: (entriesBack = 2, type = 'sum') ->
+		history = @getDisharmonyHistoryData entriesBack
+		dataIndex = if type is 'actual' then 2 else 1
+		return history[history.length - 1][dataIndex] / history[0][dataIndex]
+
+	getDisharmonyChangeForFactor: (factorType, entriesBack = 2) ->
+		factor = @getFactorOfType factorType
+		history = factor.disharmonyHistory.slice( if entriesBack < factor.disharmonyHistory.length then -entriesBack else 0 )
+		return history[history.length - 1] / history[0]
+
+	adjustStressThresholds: () ->
+		if @_inStressMode
+			@stress.thresholdLeave = @_actualDisharmony * 1
+		else
+			@stress.thresholdEnter = @_actualDisharmony * 1.2
+
+		#console.log('@adjustStressThresholds', 'new thresholds:', @stress)
 
 	# Creates the organism's nodes
 	_createNodes: (numNodes) ->

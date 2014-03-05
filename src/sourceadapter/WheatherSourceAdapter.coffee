@@ -29,7 +29,7 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 		@queryInterval = setInterval () =>
 			@queryWeather()
-		, 2000
+		, 7000
 
 
 	# Deactivate
@@ -45,7 +45,6 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 			url: '/js/data/yr-capitals.json',
 			dataType: 'json'
 			success: (response) =>
-				console.log('fetched towns', response)
 				@towns = response
 			error: (error) ->
 				console.error(error)

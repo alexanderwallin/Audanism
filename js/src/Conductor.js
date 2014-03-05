@@ -37,6 +37,7 @@
       EventDispatcher.listen('audanism/influence/node', this, this.handleNodeInfluence);
       EventDispatcher.listen('audanism/alternodes', this, this.handleNodeComparison);
       EventDispatcher.listen('audanism/performance/bad', this, this.onPermanceBad);
+      EventDispatcher.listen('audanism/organism/stressmode', this, this.onStressModeChange);
     }
 
     Conductor.prototype.createEndChain = function() {
@@ -129,6 +130,9 @@
       disharmonyNew = disharmonyData[disharmonyData.length - 1][2];
       disharmonyOld = disharmonyData[0][2];
       disharmonyRatio = disharmonyNew / disharmonyOld;
+      if (this.noise != null) {
+        this.noise.setLpfFrequency(disharmonyRatio * 1000);
+      }
       if (iterationInfo.count % 4 === 1) {
         this.arpeggiator.midNote += disharmonyRatio > 1 ? 1 : -1;
       }
@@ -136,10 +140,7 @@
         this.arpeggiator.shuffleAmount = 0.01 * (Math.round(disharmonyNew) % 100);
       }
       if (iterationInfo.count % 10 === 1) {
-        this.arpeggiator.setFrequency(disharmonyRatio * 2);
-      }
-      if (this.noise != null) {
-        return this.noise.setLpfFrequency(disharmonyRatio * 1000);
+        return this.arpeggiator.setFrequency(Math.max(6, disharmonyRatio));
       }
     };
 
@@ -151,7 +152,7 @@
       _results = [];
       for (i = _i = 0, _ref = comparisonData.nodes.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         node = comparisonData.nodes[i];
-        freq = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1);
+        freq = 90 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.3);
         note = Audanism.Audio.Module.Harmonizer.getNoteFromFreq(freq);
         _results.push(this.compareInstr.noteOn(note));
       }
@@ -170,6 +171,18 @@
       nodeFreq = 80 + (nodeId * 40);
       nodePan = nodeId / this.organism.getNodes().length;
       return this.influencePad.noteOn(Audanism.Audio.Module.Harmonizer.getNoteFromFreq(nodeFreq));
+    };
+
+    Conductor.prototype.onStressModeChange = function(inStressMode) {
+      var drone, _i, _len, _ref, _results;
+      console.log('Conductor #onStressModeChange', 'tell drons to go out of unison?', inStressMode);
+      _ref = this.factorDrones;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        drone = _ref[_i];
+        _results.push(drone.setUnison(!inStressMode));
+      }
+      return _results;
     };
 
     Conductor.prototype.onPermanceBad = function() {

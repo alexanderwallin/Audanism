@@ -87,7 +87,10 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 					<table id="organism-stats" class="stats-table">
 						<thead>
 							<tr>
-								<th class="title" colspan="2">Orgnaism</th>
+								<th class="title">Orgnaism</th>
+								<th class="stress-mode">
+									<div class="stress-mode-indicator"></div>
+								</th>
 							</tr>
 						</thead>
 

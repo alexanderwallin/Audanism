@@ -16,7 +16,7 @@
       this.opts = {
         'cameraDistanceStart': 1600,
         'cameraDistance': 1300,
-        'clusterSize': 500,
+        'clusterSize': 1000,
         'roomSize': 3000,
         'roomVertices': 100,
         'roomColor': new THREE.Color(0x4A6D8A),
@@ -180,8 +180,9 @@
           'ambient': factorColor,
           'side': THREE.FrontSide
         }));
-        factor3d.position.set(randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800), randomInt(-40, 40), randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800));
+        factor3d.position.set(randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800), 0, randomInt(0, 1) === 1 ? randomInt(-800, -600) : randomInt(600, 800));
         factor3d.userData = {
+          'isModifying': false,
           'startPosition': factor3d.position.clone(),
           'hover': true,
           'hoverStartFrame': 0,
@@ -200,7 +201,8 @@
     };
 
     VisualOrganism.prototype.animate = function() {
-      var ball, cube, factor, factor3d, line, lineGeometry, lineMaterial, megaCube, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _ref2, _ref3;
+      var ball, cube, factor, factor3d, line, lineGeometry, lineMaterial, megaCube, _i, _j, _k, _l, _len, _len1, _len2, _len3, _moveFactor, _ref, _ref1, _ref2, _ref3,
+        _this = this;
       requestAnimationFrame(Audanism.Graphic["public"].animate);
       this.thisLoop = new Date();
       if (this.lastLoop > 0) {
@@ -226,11 +228,29 @@
         this.setDaylight();
         this.state.shouldSetDaylight = false;
       }
+      _moveFactor = function(factorType) {
+        var factor, factor3d;
+        factor = _this.organism.getFactorOfType(factorType);
+        factor3d = _this.factors[factorType];
+        factor3d.userData.hover = false;
+        factor3d.userData.isModifying = true;
+        return _this._tweenSomething(factor3d.position, {
+          'y': factor3d.position.y
+        }, {
+          'y': (1000 - factor.disharmony) / 2
+        }, 1000, function() {
+          factor3d.userData.startPosition = factor3d.position.clone();
+          factor3d.userData.hover = true;
+          return factor3d.userData.isModifying = false;
+        });
+      };
       _ref = this.organism.getFactors();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         factor = _ref[_i];
         factor3d = this.factors[factor.factorType];
-        if (factor3d.userData.hover) {
+        if (!factor3d.userData.isModifying && this.frame > 10) {
+          _moveFactor(factor.factorType);
+        } else if (factor3d.userData.hover) {
           factor3d.position.y = factor3d.userData.startPosition.y + 200 * Math.sin((this.frame - factor3d.userData.hoverStartFrame) / (10 * factor.factorValue));
         }
       }
@@ -297,7 +317,8 @@
     };
 
     VisualOrganism.prototype.onIteration = function(influenceInfo) {
-      var allFactorsChangeAvg, allFactorsChangeSum, ball, ballScaleFrom, ballScaleTo, cell, cells, dish, disharmony, disharmonyAvg, disharmonySum, factor, factorDishCurr, factorDishStart, latestDisharmonyBlock, latestDisharmonyChange, newBallRelSize, newPos, node, organism, relativeDisharmony, tweenFrom, tweenTo, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref, _ref1, _results;
+      var ball, ballScaleTo, cell, cells, disharmony, factorChangeAvg, factorChangeSum, newBallScale, newPos, node, organism, relativeDisharmony, tweenFrom, tweenTo, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _results,
+        _this = this;
       organism = influenceInfo.organism;
       disharmony = organism.getDisharmonyHistoryData();
       if (disharmony.length === 0) {
@@ -307,123 +328,53 @@
       if (!(this.opts.initialDisharmonyData != null)) {
         this.opts.initialDisharmonyData = disharmony;
       }
-      relativeDisharmony = disharmony[2] / this.opts.initialDisharmonyData[2];
+      relativeDisharmony = organism.getDisharmonyChange(10, 'actual');
       this.largestDistance = 0;
       _ref = this.balls;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         ball = _ref[_i];
-        newPos = ball.pos.clone().multiplyScalar(relativeDisharmony);
-        tweenFrom = ball.ball3d.position.clone();
-        tweenTo = {
-          'x': newPos.x,
-          'y': newPos.y,
-          'z': newPos.z
-        };
+        if (this.frame % 4 === 0) {
+          newPos = ball.pos.clone();
+          newPos.multiplyScalar(relativeDisharmony);
+          tweenFrom = ball.ball3d.position.clone();
+          tweenTo = {
+            'x': newPos.x,
+            'y': newPos.y,
+            'z': newPos.z
+          };
+          ball.ball3d.userData.hover = false;
+          this._tweenSomething(ball.ball3d.position, tweenFrom, tweenTo, 100, function() {
+            return ball.ball3d.userData.hover = true;
+          });
+        }
         if (ball.ball3d.position.length() > this.largestDistance) {
           this.largestDistance = ball.ball3d.position.length();
         }
       }
       this._tweenCameraDistance(this.largestDistance * (this.opts.cameraDistanceStart / this.opts.clusterSize));
-      latestDisharmonyBlock = organism.getDisharmonyHistoryData().slice(-10);
-      disharmonySum = 0;
-      for (_j = 0, _len1 = latestDisharmonyBlock.length; _j < _len1; _j++) {
-        dish = latestDisharmonyBlock[_j];
-        disharmonySum += dish[2];
-      }
-      disharmonyAvg = disharmonySum / latestDisharmonyBlock.length;
-      latestDisharmonyChange = latestDisharmonyBlock[latestDisharmonyBlock.length - 1][2] / disharmonyAvg;
-      this.state.latestDisharmonyChange = latestDisharmonyChange;
-      /*
-      		#console.log 'fog color start:', @opts.fogColorStart
-      		#console.log 'latestDisharmonyBlock', latestDisharmonyBlock
-      		#console.log 'latestDisharmonyChange', latestDisharmonyChange
-      		#console.log 'color scalar', (1 + (1 - latestDisharmonyChange))
-      		newFogColor = @opts.fogColorStart.clone().multiplyScalar 0.2 * (1 + (1 - latestDisharmonyChange))
-      		#console.log 'new fog color', newFogColor
-      		@_tweenColor @scene.fog.color, @scene.fog.color, newFogColor, 400
-      */
-
       _ref1 = this.organism.getNodes();
       _results = [];
-      for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
-        node = _ref1[_k];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        node = _ref1[_j];
         cells = node.getCells();
-        /*
-        
-        			Relative changes to a node from its cells' factors' current conditions
-        
-        			factorsConditionSum = 0
-        			factorsRelConditionSum = 0
-        
-        			for cell in cells
-        
-        				# Get the cell's factor's latest history
-        				factorDisharmonyHistory = @organism.getFactorOfType(cell.factorType).disharmonyHistory
-        				factorLatestHistory = factorDisharmonyHistory.slice(-10)
-        				#console.log '··· factor history', factorLatestHistory
-        
-        				# Total disharmony over this period
-        				factorDisharmonySum = factorDisharmonySum + hist for hist in factorLatestHistory
-        				#console.log('··· factorDisharmonySum', factorDisharmonySum)
-        
-        				# Calculate the factor's average dishamonry over this period
-        				factorDisharmonyAvg = factorDisharmonySum / factorLatestHistory.length
-        				#console.log '··· factorDisharmonyAvg', factorDisharmonyAvg
-        
-        				# Calculate the factor's current condition relative the average disharmony
-        				factorCurrCondition = factorLatestHistory[factorLatestHistory.length - 1] / factorDisharmonyAvg
-        				#console.log '··· factorCurrCondition', factorCurrCondition
-        
-        				# Add it to the sum of current conditions
-        				factorsRelConditionSum += factorCurrCondition
-        				
-        
-        			#factorConditionAvg = factorConditionsSum / cells.length
-        			factorsCurrCondition = factorsRelConditionSum / cells.length
-        			#console.log 'factor condition sum', factorsConditionSum
-        			#console.log 'factor condition cur', factorsCurrCondition
-        			#console.log '-- cur ball size', @balls[node.nodeId].ball3d.geometry.radius
-        			#console.log '-- new ball size', @opts.ballSize * factorsCurrCondition
-        
-        			# Tween size
-        			ball = @balls[node.nodeId]
-        			@_tweenBallSize ball, ball.ball3d.geometry.radius, @opts.ballSize * factorsCurrCondition
-        */
-
-        allFactorsChangeSum = 0;
-        allFactorsChangeAvg = 0;
-        for (_l = 0, _len3 = cells.length; _l < _len3; _l++) {
-          cell = cells[_l];
-          factor = this.organism.getFactorOfType(cell.factorType);
-          factorDishStart = factor.disharmonyHistory[0];
-          factorDishCurr = factor.disharmonyHistory[factor.disharmonyHistory.length - 1];
-          allFactorsChangeSum += factorDishCurr / factorDishStart;
-        }
-        allFactorsChangeAvg = allFactorsChangeSum / cells.length;
         ball = this.balls[node.nodeId];
-        newBallRelSize = Math.pow(allFactorsChangeAvg, 1.4);
-        ballScaleFrom = {
-          'x': ball.ball3d.scale.clone().x,
-          'y': ball.ball3d.scale.clone().y,
-          'z': ball.ball3d.scale.clone().z
-        };
-        ballScaleTo = {
-          'x': newBallRelSize,
-          'y': newBallRelSize,
-          'z': newBallRelSize
-        };
-        _results.push(this._tweenSomething(ball, ballScaleFrom, ballScaleTo, 200));
-        /*
-        			_tweenBack = () =>
-        				origScale = { 'x':1/ballScaleTo.x, 'y':1/ballScaleTo.y, 'z':1/ballScaleTo.z }
-        				#console.log ball.ballId
-        				if ball.ballId is 1
-        					#console.log 'original scale', origScale
-        				@_tweenSomething ball.ball3d.scale, ballScaleTo, origScale, 4000
-        
-        			@_tweenSomething ball.ball3d.scale, ballScaleFrom, ballScaleTo, 50, _tweenBack
-        */
-
+        if (this.frame - ball.ball3d.userData.bornAt > 30) {
+          factorChangeSum = 0;
+          for (_k = 0, _len2 = cells.length; _k < _len2; _k++) {
+            cell = cells[_k];
+            factorChangeSum += organism.getDisharmonyChangeForFactor(cell.factorType, 20);
+          }
+          factorChangeAvg = factorChangeSum / cells.length;
+          newBallScale = Math.min(Math.pow(factorChangeAvg, 2), 10);
+          ballScaleTo = {
+            'x': newBallScale,
+            'y': newBallScale,
+            'z': newBallScale
+          };
+          _results.push(this._tweenSomething(ball.ball3d.scale, ball.ball3d.scale.clone(), ballScaleTo, 200));
+        } else {
+          _results.push(void 0);
+        }
       }
       return _results;
     };
@@ -482,6 +433,7 @@
         ball3d.userData.hover = true;
         ball3d.userData.startPosition = ball3d.position.clone();
         ball3d.userData.hoverStartFrame = 0;
+        ball3d.userData.bornAt = this.frame;
         ball3d.scale.set(0, 0, 0);
         this.scene.add(ball3d);
         this._tweenSomething(ball3d.scale, {
@@ -537,6 +489,9 @@
 
     VisualOrganism.prototype.onInfluenceNode = function(influenceData) {
       var _this = this;
+      if (!influenceData.node.node) {
+        return;
+      }
       this._animateInfluencedBall(this.balls[influenceData.node.node.nodeId]);
       if (influenceData.meta.current === 1 && (influenceData.meta.source != null) && influenceData.meta.source === 'instagram') {
         this._spawnInstaCube.bind(this);
@@ -553,13 +508,14 @@
       factor = influenceData.factor.factor;
       factor3d = this.factors[factor.factorType];
       factor3d.userData.hover = false;
+      factor3d.userData.isModifying = true;
       _afterFactorAnimation = function() {
         var existingToruses, lastTorus, torus, torusColor, torusMargin, torusRadius, torusSize;
         if (!factor3d.userData.toruses) {
           factor3d.userData.toruses = [];
         }
         existingToruses = factor3d.userData.toruses;
-        torusMargin = 10;
+        torusMargin = 20;
         torusSize = 10;
         if (existingToruses.length > 0) {
           lastTorus = existingToruses[existingToruses.length - 1];
@@ -583,7 +539,7 @@
         torus.scale.set(0, 0, 0);
         factor3d.userData.toruses.push(torus);
         factor3d.add(torus);
-        return _this._tweenSomething(torus.scale, {
+        _this._tweenSomething(torus.scale, {
           'x': 0,
           'y': 0,
           'z': 0
@@ -592,6 +548,7 @@
           'y': 1,
           'z': 1
         }, 1000);
+        return factor3d.userData.isModifying;
       };
       factor3d.scale.y = factor.factorValue / factor3d.userData.initialValue;
       console.log('influence source attr', influenceData.meta.sourceAttr, influenceData.factor.value);
@@ -606,10 +563,9 @@
         newColor.offsetHSL(0, influenceData.factor.value / 5, 0);
         this._tweenSomething(factor3d.material.ambient, factor3d.material.ambient.clone(), newColor, 300, _afterFactorAnimation);
       }
-      return this._tweenSomething(factor3d.position, {
-        'x': factor3d.position.x
-      }, {
-        'x': (randomInt(0, 1) === 1 ? -100 : 100)
+      return this._tweenSomething(factor3d.position, factor3d.position.clone(), {
+        'x': (randomInt(0, 1) === 1 ? -100 : 100),
+        'y': (1000 - factor.disharmony) / 2
       }, 300, function() {
         factor3d.userData.startPosition = factor3d.position.clone();
         factor3d.userData.hoverStartFrame = _this.frame;

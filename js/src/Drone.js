@@ -14,9 +14,10 @@
 
     __extends(Drone, _super);
 
-    function Drone(instrumentsIn) {
+    function Drone(instrumentsIn, unison) {
       var i;
       this.instrumentsIn = instrumentsIn;
+      this.unison = unison != null ? unison : true;
       Drone.__super__.constructor.call(this, this.instrumentsIn, 'MonoistEnvModWide', false);
       this.autoPans = (function() {
         var _i, _ref, _results;
@@ -38,23 +39,36 @@
     }
 
     Drone.prototype.setNote = function(note) {
-      var osc, voice, _i, _len, _ref, _results;
+      var osc, voice, _i, _j, _len, _len1, _ref, _ref1, _results;
       this.droneNote = note;
       _ref = this.voices;
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         voice = _ref[_i];
         if (voice) {
-          _results.push((function() {
-            var _j, _len1, _ref1, _results1;
-            _ref1 = voice.oscillators;
-            _results1 = [];
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              osc = _ref1[_j];
-              _results1.push(osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(note));
-            }
-            return _results1;
-          })());
+          _ref1 = voice.oscillators;
+          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+            osc = _ref1[_j];
+            osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(note);
+          }
+          _results.push(voice.setUnison(this.unison));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    Drone.prototype.setUnison = function(unison) {
+      var voice, _i, _len, _ref, _results;
+      this.unison = unison;
+      console.log('Drone #setUnison', this.unison);
+      _ref = this.voices;
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        voice = _ref[_i];
+        if (voice) {
+          _results.push(voice.setUnison(this.unison));
         } else {
           _results.push(void 0);
         }
@@ -92,6 +106,7 @@
 
       var vibrate,
         _this = this;
+      this.setUnison(this.unison);
       vibrate = {
         note: note,
         frame: -1,

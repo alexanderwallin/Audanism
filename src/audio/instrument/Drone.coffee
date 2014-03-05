@@ -3,7 +3,7 @@
 ###
 class Drone extends Audanism.Audio.Instrument.Instrument
 
-	constructor: (@instrumentsIn) ->
+	constructor: (@instrumentsIn, @unison = true) ->
 		super(@instrumentsIn, 'MonoistEnvModWide', false)
 
 		@autoPans = (null for i in [0..@voices.length-1])
@@ -18,6 +18,14 @@ class Drone extends Audanism.Audio.Instrument.Instrument
 			if voice
 				for osc in voice.oscillators
 					osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote( note )
+
+				voice.setUnison( @unison )
+
+	setUnison: (@unison) ->
+		console.log 'Drone #setUnison', @unison
+		for voice in @voices
+			if voice
+				voice.setUnison @unison
 
 	onNoteOn: (note) ->
 		#console.log('Drone#onNoteOn', note)
@@ -50,6 +58,8 @@ class Drone extends Audanism.Audio.Instrument.Instrument
 
 		@autoPans[note] = autoPan
 		###
+
+		@setUnison @unison
 
 		# Vibrate
 		vibrate = {

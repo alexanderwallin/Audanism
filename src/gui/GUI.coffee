@@ -19,9 +19,10 @@ class GUI
 
 		@_showCozyInfo()
 
-		EventDispatcher.listen 'audanism/iteration',             @, @onIteration
-		EventDispatcher.listen 'audanism/influence/node/done',   @, @onInfluenceNodeDone
+		EventDispatcher.listen 'audanism/iteration',              @, @onIteration
+		EventDispatcher.listen 'audanism/influence/node/done',    @, @onInfluenceNodeDone
 		EventDispatcher.listen 'audanism/influence/factor/after', @, @onInfluenceFactorAfter
+		EventDispatcher.listen 'audanism/organism/stressmode',    @, @onStressModeChange
 
 		###
 		if google?
@@ -133,12 +134,14 @@ class GUI
 
 		$boxes = @$influences.find('.influence')
 		numBoxes = $boxes.size()
-		if numBoxes > 3
+		if numBoxes > 6
 			@$influences.find('.influence').filter(() ->
-				return $boxes.index(@) < numBoxes - 3
+				return $boxes.index(@) < numBoxes - 6
 			).hide()#.animate({ 'opacity':0, 'height':0, 'margin-bottom':0 }, 300, () ->
 			#	$(@).hide()
 			#)
 
+	onStressModeChange: (stressMode) ->
+		@$organismStats.find('.stress-mode-indicator').toggleClass('stressed', stressMode)
 
 window.Audanism.GUI.GUI = GUI

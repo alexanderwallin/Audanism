@@ -28,10 +28,16 @@
       }
       this._sumDisharmony = 0;
       this._actualDisharmony = 0;
-      this._inStressMode = true;
+      this._inStressMode = false;
+      this.stress = {
+        thresholdEnter: 0,
+        thresholdLeave: 0
+      };
       $('#stressmode').change(function(e) {
         return _this._inStressMode = $(e.currentTarget).attr('checked') === 'checked';
       });
+      EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+      setInterval(this.adjustStressThresholds.bind(this), 5000);
       this._factors = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -91,6 +97,7 @@
       if (numComparisons == null) {
         numComparisons = 1;
       }
+      this.isInitialComparison = this._sumDisharmony === 0;
       this.disharmonyCalculator.debug = true;
       for (i = _i = 1; 1 <= numComparisons ? _i <= numComparisons : _i >= numComparisons; i = 1 <= numComparisons ? ++_i : --_i) {
         nodes = this._getRandomNodes(2);
@@ -112,10 +119,26 @@
         factor = _ref[_j];
         factor.setDisharmony(this.disharmonyCalculator.getFactorDisharmonyForNodes(factor, this._nodes));
       }
-      if (!this._inStressMode && this._actualDisharmony < Audanism.Environment.Organism.STRESS_THRESHOLD_ENTER) {
-        return this._inStressMode = true;
-      } else if (this._inStressMode && this._actualDisharmony > Audanism.Environment.Organism.STRESS_THRESHOLD_LEAVE) {
-        return this._inStressMode = false;
+      if (this.isInitialComparison) {
+        this.stress.thresholdEnter = this._actualDisharmony * 1.2;
+        console.log({
+          'initial stress threshold enter': this.stress.thresholdEnter
+        });
+      }
+      if (!this._inStressMode && this._actualDisharmony > this.stress.thresholdEnter) {
+        console.log(' -----------------------------------------');
+        console.log(' #=#=#=#=#=#==# STRESS MODE =#=#=#=#=#=#=#');
+        console.log(' -----------------------------------------');
+        this._inStressMode = true;
+        this.stress.thresholdLeave = this.stress.thresholdEnter * 1;
+        return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+      } else if (this._inStressMode && this._actualDisharmony < this.stress.thresholdLeave) {
+        console.log(' -----------------------------------------');
+        console.log(' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#');
+        console.log(' -----------------------------------------');
+        this._inStressMode = false;
+        this.stress.thresholdEnter = this.stress.thresholdLeave * 1.2;
+        return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
       }
     };
 
@@ -127,6 +150,51 @@
         return this.disharmonyHistory.slice(-numEntries);
       } else {
         return this.disharmonyHistory.slice(-this.disharmonyHistory.length);
+      }
+    };
+
+    Organism.prototype.getAverageDisharmony = function(numEntries, type) {
+      var entry, history, sum, _i, _len;
+      if (type == null) {
+        type = 'sum';
+      }
+      history = this.getDisharmonyHistoryData(numEntries);
+      sum = 0;
+      for (_i = 0, _len = history.length; _i < _len; _i++) {
+        entry = history[_i];
+        sum += (type === 'actual' ? entry[2] : entry[1]);
+      }
+      return sum / history.length;
+    };
+
+    Organism.prototype.getDisharmonyChange = function(entriesBack, type) {
+      var dataIndex, history;
+      if (entriesBack == null) {
+        entriesBack = 2;
+      }
+      if (type == null) {
+        type = 'sum';
+      }
+      history = this.getDisharmonyHistoryData(entriesBack);
+      dataIndex = type === 'actual' ? 2 : 1;
+      return history[history.length - 1][dataIndex] / history[0][dataIndex];
+    };
+
+    Organism.prototype.getDisharmonyChangeForFactor = function(factorType, entriesBack) {
+      var factor, history;
+      if (entriesBack == null) {
+        entriesBack = 2;
+      }
+      factor = this.getFactorOfType(factorType);
+      history = factor.disharmonyHistory.slice(entriesBack < factor.disharmonyHistory.length ? -entriesBack : 0);
+      return history[history.length - 1] / history[0];
+    };
+
+    Organism.prototype.adjustStressThresholds = function() {
+      if (this._inStressMode) {
+        return this.stress.thresholdLeave = this._actualDisharmony * 1;
+      } else {
+        return this.stress.thresholdEnter = this._actualDisharmony * 1.2;
       }
     };
 

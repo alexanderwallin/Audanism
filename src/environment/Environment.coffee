@@ -7,7 +7,7 @@ class Environment
 	@NUM_ORGANISMS: 1
 
 	# The time in milliseconds between each iteration
-	@TIME_INTERVAL: 800
+	@TIME_INTERVAL: 500
 
 	# Constructor
 	#

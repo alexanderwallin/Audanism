@@ -36,10 +36,11 @@ class Conductor
 		@arpeggiator.start()
 
 		# Listenings
-		EventDispatcher.listen 'audanism/iteration',       @, @updateSounds
-		EventDispatcher.listen 'audanism/influence/node',  @, @handleNodeInfluence
-		EventDispatcher.listen 'audanism/alternodes',      @, @handleNodeComparison
-		EventDispatcher.listen 'audanism/performance/bad', @, @onPermanceBad
+		EventDispatcher.listen 'audanism/iteration',           @, @updateSounds
+		EventDispatcher.listen 'audanism/influence/node',      @, @handleNodeInfluence
+		EventDispatcher.listen 'audanism/alternodes',          @, @handleNodeComparison
+		EventDispatcher.listen 'audanism/performance/bad',     @, @onPermanceBad
+		EventDispatcher.listen 'audanism/organism/stressmode', @, @onStressModeChange
 
 	createEndChain: () ->
 
@@ -116,7 +117,7 @@ class Conductor
 		if iterationInfo.count % 10 is not 0
 			return
 
-		# Organism noise
+		# Get some history data
 		disharmonyData  = @organism.getDisharmonyHistoryData(200)
 		disharmonyNew   = disharmonyData[disharmonyData.length - 1][2]
 		disharmonyOld   = disharmonyData[0][2]
@@ -125,6 +126,11 @@ class Conductor
 		#console.log '... disharmonies', disharmonyOld, disharmonyNew
 		#console.log '... ratio', disharmonyRatio
 		#console.log '... ---> freq =', disharmonyRatio * 1000
+		
+		# Organism noise
+		if @noise?
+			#console.log( 'noise lpf freq', disharmonyRatio * 1000 )
+			@noise.setLpfFrequency( disharmonyRatio * 1000 )
 
 		# Arpeggiator stuff
 		if iterationInfo.count % 4 is 1
@@ -135,11 +141,7 @@ class Conductor
 			#console.log('arpeggiator shuffle amount', @arpeggiator.shuffleAmount, disharmonyNew)
 		if iterationInfo.count % 10 is 1 
 			#console.log('arpeggiator frequency', disharmonyRatio * 2)
-			@arpeggiator.setFrequency( disharmonyRatio * 2 )
-
-		if @noise?
-			#console.log( 'noise lpf freq', disharmonyRatio * 1000 )
-			@noise.setLpfFrequency( disharmonyRatio * 1000 )
+			@arpeggiator.setFrequency( Math.max(6, disharmonyRatio) )
 
 
 	handleNodeComparison: (comparisonData) ->
@@ -148,7 +150,7 @@ class Conductor
 
 		for i in [0..comparisonData.nodes.length-1]
 			node   = comparisonData.nodes[i]
-			freq   = 80 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.1)
+			freq   = 90 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.3)
 			note   = Audanism.Audio.Module.Harmonizer.getNoteFromFreq( freq )
 
 			@compareInstr.noteOn( note )
@@ -175,6 +177,11 @@ class Conductor
 		#	@influenceActionSounds.push influenceActionSound
 		#	console.log 'add influence action sound', influenceActionSound
 
+
+	onStressModeChange: (inStressMode) ->
+		console.log 'Conductor #onStressModeChange', 'tell drons to go out of unison?', inStressMode
+		for drone in @factorDrones
+			drone.setUnison !inStressMode
 
 	onPermanceBad: () ->
 		if @isMuted

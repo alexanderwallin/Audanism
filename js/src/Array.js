@@ -37,4 +37,21 @@
 
   window.getRandomElements = getRandomElements;
 
+  Array.prototype.shuffle = function() {
+    var counter, index, temp;
+    counter = this.length;
+    temp;
+
+    index;
+
+    while (counter > 0) {
+      index = Math.floor(Math.random() * counter);
+      counter--;
+      temp = this[counter];
+      this[counter] = this[index];
+      this[index] = temp;
+    }
+    return this;
+  };
+
 }).call(this);

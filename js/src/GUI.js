@@ -23,6 +23,7 @@
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/influence/node/done', this, this.onInfluenceNodeDone);
       EventDispatcher.listen('audanism/influence/factor/after', this, this.onInfluenceFactorAfter);
+      EventDispatcher.listen('audanism/organism/stressmode', this, this.onStressModeChange);
       /*
       		if google?
       			google.setOnLoadCallback =>
@@ -159,11 +160,15 @@
       $box.show();
       $boxes = this.$influences.find('.influence');
       numBoxes = $boxes.size();
-      if (numBoxes > 3) {
+      if (numBoxes > 6) {
         return this.$influences.find('.influence').filter(function() {
-          return $boxes.index(this) < numBoxes - 3;
+          return $boxes.index(this) < numBoxes - 6;
         }).hide();
       }
+    };
+
+    GUI.prototype.onStressModeChange = function(stressMode) {
+      return this.$organismStats.find('.stress-mode-indicator').toggleClass('stressed', stressMode);
     };
 
     return GUI;

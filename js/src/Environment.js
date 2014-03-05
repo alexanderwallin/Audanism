@@ -12,7 +12,7 @@
 
     Environment.NUM_ORGANISMS = 1;
 
-    Environment.TIME_INTERVAL = 800;
+    Environment.TIME_INTERVAL = 500;
 
     function Environment() {
       var i;

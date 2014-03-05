@@ -9,7 +9,7 @@ class MonoistEnv extends Audanism.Audio.Synthesizer.Voice
 		super(note)
 
 		# Envelope
-		@asdr = new Audanism.Audio.Module.ASDR( 0.2, 0.2, 0.7, 0.7 )
+		@asdr = new Audanism.Audio.Module.ASDR( 0.2, 0.1, 0.7, 0.2 )
 		@envelope = Audanism.Audio.audioContext.createGain()
 		@envelope.gain.setValueAtTime( 0, 0 )
 
@@ -17,7 +17,7 @@ class MonoistEnv extends Audanism.Audio.Synthesizer.Voice
 
 		# Create, connect and start oscillator
 		@osc                 = Audanism.Audio.audioContext.createOscillator()
-		@osc.type            = @getRandomOscType()
+		@osc.type            = 'sine' #@getRandomOscType()
 		@osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote( @note )
 		
 		@oscillators.push( @osc )

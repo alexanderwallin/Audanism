@@ -16,12 +16,12 @@
 
     function MonoistEnv(note) {
       MonoistEnv.__super__.constructor.call(this, note);
-      this.asdr = new Audanism.Audio.Module.ASDR(0.2, 0.2, 0.7, 0.7);
+      this.asdr = new Audanism.Audio.Module.ASDR(0.2, 0.1, 0.7, 0.2);
       this.envelope = Audanism.Audio.audioContext.createGain();
       this.envelope.gain.setValueAtTime(0, 0);
       this.envelopes.push(this.envelope);
       this.osc = Audanism.Audio.audioContext.createOscillator();
-      this.osc.type = this.getRandomOscType();
+      this.osc.type = 'sine';
       this.osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note);
       this.oscillators.push(this.osc);
       this.osc.connect(this.envelope);

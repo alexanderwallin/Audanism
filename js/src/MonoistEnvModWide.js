@@ -14,8 +14,11 @@
 
     __extends(MonoistEnvModWide, _super);
 
-    function MonoistEnvModWide(note) {
+    function MonoistEnvModWide(note, unison) {
+      this.unison = unison != null ? unison : true;
       MonoistEnvModWide.__super__.constructor.call(this, note);
+      this.extraNotes = [19, 27, 13];
+      this.extraNotes.shuffle();
       this.asdr = new Audanism.Audio.Module.ASDR(0.03, 0.1, 100, 0.1);
       this.envelope = Audanism.Audio.audioContext.createGain();
       this.envelope.gain.value = 0;
@@ -32,15 +35,15 @@
       this.pan3.connect(this.envelope);
       this.osc1 = Audanism.Audio.audioContext.createOscillator();
       this.osc1.type = this.getRandomOscType();
-      this.osc1.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note);
+      this.osc1.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + (this.unison ? 0 : this.extraNotes[0]));
       this.osc1.connect(this.pan1);
       this.osc2 = Audanism.Audio.audioContext.createOscillator();
       this.osc2.type = this.getRandomOscType();
-      this.osc2.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + 15);
+      this.osc2.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + (this.unison ? 0 : this.extraNotes[1]));
       this.osc2.connect(this.pan2);
       this.osc3 = Audanism.Audio.audioContext.createOscillator();
       this.osc3.type = this.getRandomOscType();
-      this.osc3.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + 6.5);
+      this.osc3.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + (this.unison ? 0 : this.extraNotes[2]));
       this.osc3.connect(this.pan2);
       this.oscillators.push(this.osc1);
       this.oscillators.push(this.osc2);
@@ -49,7 +52,7 @@
       this.freqModGain1.gain.value = 5;
       this.freqModGain1.connect(this.osc1.frequency);
       this.freqMod1 = Audanism.Audio.audioContext.createOscillator();
-      this.freqMod1.type = 'square';
+      this.freqMod1.type = this.getRandomOscType();
       this.freqMod1.frequency.value = 8;
       this.freqMod1.connect(this.freqModGain1);
       this.freqMod1.start(0);
@@ -57,7 +60,7 @@
       this.freqModGain2.gain.value = 5;
       this.freqModGain2.connect(this.osc2.frequency);
       this.freqMod2 = Audanism.Audio.audioContext.createOscillator();
-      this.freqMod2.type = 'triangle';
+      this.freqMod2.type = this.getRandomOscType();
       this.freqMod2.frequency.value = 13.123;
       this.freqMod2.connect(this.freqModGain2);
       this.freqMod2.start(0);
@@ -65,13 +68,25 @@
       this.freqModGain3.gain.value = 15;
       this.freqModGain3.connect(this.osc3.frequency);
       this.freqMod3 = Audanism.Audio.audioContext.createOscillator();
-      this.freqMod3.type = 'sawtooth';
+      this.freqMod3.type = this.getRandomOscType();
       this.freqMod3.frequency.value = 0.123;
       this.freqMod3.connect(this.freqModGain3);
       this.freqMod3.start(0);
       this.osc1.start(0);
       this.osc2.start(0);
+      this.osc3.start(0);
     }
+
+    MonoistEnvModWide.prototype.setUnison = function(unison) {
+      var extraNote, i, _i, _ref, _results;
+      this.unison = unison;
+      _results = [];
+      for (i = _i = 0, _ref = this.oscillators.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        extraNote = this.unison ? 0 : this.extraNotes[i];
+        _results.push(this.oscillators[i].frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote(this.note + extraNote));
+      }
+      return _results;
+    };
 
     return MonoistEnvModWide;
 
