@@ -15,8 +15,8 @@ class TextInterpreter
 		normalized  = if normalized? then normalized else true
 
 		# Get character counts for each group
-		for char in chars
-			charVal = char.toUpperCase().charCodeAt(0) - 65
+		for aChar in chars
+			charVal = aChar.toUpperCase().charCodeAt(0) - 65
 
 			if (charVal >= numChars || charVal < 0)
 				continue

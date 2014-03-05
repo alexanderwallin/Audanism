@@ -1,0 +1,5 @@
+build/
+js/src/_*
+places-to-json.php
+launch.php
+test/

@@ -13,7 +13,7 @@
     function TextInterpreter() {}
 
     TextInterpreter.prototype.getNumCharsInGroups = function(str, numGroups, normalized) {
-      var char, charIndex, charVal, chars, countRatios, counts, i, largestVal, numChars, sum, val, _i, _j, _k, _l, _len, _len1, _len2, _ref;
+      var aChar, charIndex, charVal, chars, countRatios, counts, i, largestVal, numChars, sum, val, _i, _j, _k, _l, _len, _len1, _len2, _ref;
       chars = str.split('');
       numChars = 26;
       counts = (function() {
@@ -27,8 +27,8 @@
       countRatios = null;
       normalized = normalized != null ? normalized : true;
       for (_i = 0, _len = chars.length; _i < _len; _i++) {
-        char = chars[_i];
-        charVal = char.toUpperCase().charCodeAt(0) - 65;
+        aChar = chars[_i];
+        charVal = aChar.toUpperCase().charCodeAt(0) - 65;
         if (charVal >= numChars || charVal < 0) {
           continue;
         }
