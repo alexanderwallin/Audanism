@@ -1,4 +1,7 @@
 build/
+js/script-list*
+js/vendor-combined.js
+js/vendor.js
 js/src/_*
 places-to-json.php
 launch.php

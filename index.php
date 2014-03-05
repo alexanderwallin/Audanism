@@ -170,11 +170,11 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<script src="js/vendor/three.stats.js"></script>
 		<script src="js/vendor/tween.min.js"></script>
 		<script src="js/vendor/sprintf.min.js"></script>
-
 		<script src="js/vendor/AudioContextMonkeyPatch.js"></script>
 
 		<?php if ($isProduction) : ?>
 
+		<!-- Data scripts -->
 		<script defer src="js/audanism.js"></script>
 
 		<?php else : ?>
