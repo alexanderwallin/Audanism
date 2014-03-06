@@ -12,11 +12,12 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title>Audanism - Prototype 2 - Test 3</title>
-		<meta name="description" content="">
+		<title>Audanism - An audiovisual online quasi-organism</title>
+		<meta name="description" content="Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism.">
+		<meta property="og:image" content="http://<?php echo $_SERVER['HTTP_HOST']; ?>/img/audanism-og-image2.jpg">
 		<meta name="viewport" content="width=device-width">
 
-		<link rel="shortcut icon" href="img/favicon.png">
+		<link rel="shortcut icon" href="img/favicon.jpg">
 		<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'> -->
 		<!-- <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'> -->
 		<link rel="stylesheet" href="css/normalize.css">
@@ -41,6 +42,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<div id="container">
 			<header id="header">
 				<div id="title">Audanism</div>
+				<div id="top-author">By Alexander Wallin</div>
 			</header>
 
 			<?php /*
@@ -77,6 +79,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 				<div id="intro-content">
 					<div id="intro" class="tab-content" data-tab="1">
 						<h1>Audanism</h1>
+						<p class="author">Created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a></p>
 
 						<p>Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism. It is a way of studying views on life and data simultaneously through philosophical, psychological and technical approaches and analysis.</p>
 
