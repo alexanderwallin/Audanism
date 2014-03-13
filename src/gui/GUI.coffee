@@ -14,13 +14,13 @@ class GUI
 		@$influenceTemplate = @$influences.find('.template').clone(true).removeClass('template')
 		@$influences.find('.template').hide()
 
-		@$introPage         = $('#intro-page')
+		@$wiki              = $('#wiki')
 
 		# Controls
 		@_setupControls()
 
-		# Intro page
-		@_setupIntroPage()
+		# Wiki
+		@_setupWiki()
 
 		# Some coziness in the stats sidebar
 		@_showCozyInfo()
@@ -43,25 +43,49 @@ class GUI
 		$('#controls .btn').click (e) =>
 			e.preventDefault()
 			EventDispatcher.trigger 'audanism/controls/' + $(e.currentTarget).attr('href').replace("#", "")
-			#$(document).trigger "dm#{ $(e.currentTarget).attr('href').replace("#", "") }"
 
 		EventDispatcher.listen 'audanism/controls/start', @, () =>
-		#$(document).on 'dmstart', (e) =>
 			$('body').removeClass('paused').addClass('running')
 
 		EventDispatcher.listen 'audanism/controls/pause audanism/controls/stop', @, () =>
-		#$(document).on 'dmpause', (e) =>
 			$('body').removeClass('running').addClass('paused')
 
 
-	_setupIntroPage: () ->
-		#console.log(@$introPage)
-		$('#intro-content').fadeTo(2000, 1.0)
+	_setupWiki: () ->
+		$('#wiki').fadeTo(2000, 1.0)
 
+		# Start btn
 		$(document).on 'click', '#intro-btn-start', (e) =>
 			e.preventDefault()
 			EventDispatcher.trigger 'audanism/controls/start'
-			@$introPage.fadeOut 500
+			@$wiki.fadeOut 500, () =>
+				$('#intro-btn-start').html('Resume')
+
+		# Wiki links
+		$(document).on 'click', '[data-target-tab]', (e) =>
+			e.preventDefault()
+			@_setWikiContent($(e.currentTarget).attr('data-target-tab'))
+
+		# Wiki toggle
+		$(document).on 'click', '[data-toggle-wiki]', (e) =>
+			e.preventDefault()
+			action = $(e.currentTarget).attr('data-toggle-wiki')
+
+			if action is 'show'
+				@$wiki.fadeIn(500)
+			else
+				@$wiki.fadeOut(500)
+
+
+	_setWikiContent: (tabIndex) =>
+		if not @$wiki.is(':visible')
+			@$wiki.fadeIn(500)
+
+		# Show the tab
+		$('.tab-content').removeClass('active').filter("[data-tab='#{ tabIndex }']").addClass('active')
+
+		# Set active table of contents link
+		@$wiki.find('a[data-target-tab]').removeClass('active').filter("[data-target-tab='#{ tabIndex }']").addClass('active')
 
 
 	_showCozyInfo: () ->

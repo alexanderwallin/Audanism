@@ -34,58 +34,43 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 			</script>
 		<?php endif; */ ?>
 	</head>
-	<body>
-		<!--[if lt IE 7]>
-			<p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
-		<![endif]-->
+	<body class="paused">
 
 		<div id="container">
+
+			<!-- Header -->
 			<header id="header">
 				<div id="title">Audanism</div>
 				<div id="top-author">By Alexander Wallin</div>
 			</header>
 
-			<?php /*
-			<div id="main">
-				<h3>Factors</h3>
-				<div id="factors" class="clearfix block"></div>
+			<!-- Wiki -->
+			<div id="wiki">
 
-				<h3>Nodes</h3>
-				<div id="nodes" class="clearfix block"></div>
-			</div>
-
-			<aside id="meta">
-				<p id="organism-state"></p>
-
-				<div id="disharmony-chart"></div>
-
-				<div id="disharmony-meter">
-					<div class="meter"></div>
-					<div class="value">
-						<span class="sum"></span>
-						<span class="actual"></span>
-					</div>
-				</div>
-			</aside>
-			*/ ?>
-
-			<div id="intro-page">
-
-				<?php /*
+				<!-- Table of contents -->
 				<nav id="table-of-contents">
-				</nav>
-				*/ ?>
+					<a href="#intro" class="active" data-target-tab="1">Introduction</a>
+					<a href="#project-outline" data-target-tab="2">Project outline</a>
+					<a href="#add-your-influence" data-target-tab="3">Add your influence</a>
 
-				<div id="intro-content">
-					<div id="intro" class="tab-content" data-tab="1">
+					<a href="#close" class="wiki-close" data-toggle-wiki="hide">Close &nbsp; &times;</a>
+				</nav>
+
+				<!-- Wiki contents -->
+				<div id="wiki-content">
+
+					<!-- Introduction -->
+					<div id="intro" class="tab-content active" data-tab="1">
 						<h1>Audanism</h1>
-						<p class="author">Created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a></p>
+						<!--<p class="author">Created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a></p>-->
 
 						<p>Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism. It is a way of studying views on life and data simultaneously through philosophical, psychological and technical approaches and analysis.</p>
 
 						<p>Here you may spawn a tiny piece of online, computerized life. <?php /*Once the audanism has started its lifecycle, you can affect it via its environment (the Internet) following the guidelines on the page.*/ ?></p>
 
 						<p class="note">Note: This site is developed using modern web technologies (WebGL and Web Audio API) for the Google Chrome desktop web browser and needs a lot of computer juice to run. <?php /*If you are experiencing problems you watch the video from the link below.*/ ?></p>
+
+						<p class="note">Audanism is created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a>.</p>
 
 						<div id="intro-actions">
 							<a id="intro-btn-start" href="#start">Initiate life</a>
@@ -94,31 +79,75 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 						</div>
 					</div>
 
-					<?php /*
+					<!-- Project outline -->
 					<div id="project-outline" class="tab-content" data-tab="2">
 						<h1>Audanism</h1>
 
-						<!-- ## Summary -->
-
-						<p>Audanism is an experimet striving to create an, in some way, alive and self-aware audiovisual organism. It is a way of studying views on life and data simultaneously using philosophical, psychological and technical approaches and analysis.</p>
-
-						<!-- ## What is an organism? -->
-
+						<h2>Summary</h2>
+						<p><strong>Audanism is an experimet striving to create an, in some way, alive and self-aware audiovisual organism.</strong> It is a way of studying views on life and data simultaneously using philosophical, psychological and technical approaches and analysis.</p>
+						<p class="note">You will also find this outline at <a href="//alexanderwallin.com/art/audanism" target="_blank">alexanderwallin.com/art/audanism</a>.</p>
+						<h2>What is an organism?</h2>
 						<p>In contrast to reconstruation of physiological organisms, f.i. in development of artificial intelligense, this project aims to invent a lifeform that meets criteria similar to that of the physiological organism (metabolism, evolutionary reproduction etc.), but from a more general philosophical entry point, centered upon self-development and the programmatical environment.</p>
-
 						<p>An audanism has to meet the following criteria:</p>
-
 						<ol>
-							<li>it is affected, directly or indirectly, by a surrounding environment;</li>
-							<li>it has at least on purpose of living (raison d'être); and</li>
-							<li>it alters its structure or its structure's components in quest to attain its purpose of living (decision making/self-development).</li>
+						<li>it is affected, directly or indirectly, by a surrounding environment;</li>
+						<li>it has at least on purpose of living (raison d'être); and</li>
+						<li>it alters its structure or its structure's components in quest to attain its purpose of living (decision making/self-development).</li>
 						</ol>
+						<h3>Surroundings and environment</h3>
+						<p>The audanism lives in a bubble on the Internet, literally. As such it has both a direct and indirect environment; the bubble and the rest of the web.</p>
+						<p>It is mostly affected and influnced by the indirect environment through information available via APIs. How different influencial sources affect the audanism is largely arbitrary, but its influence can be direct either towards factors or node cells.</p>
+						<h3>Purpose of life</h3>
+						<p>The audanism's continuous goal is to keep an as harmonic state as possible. Harmony is here a value calculated from the relations between its different components' various attributes and their values. The algorithm used for these calculations are in most senses completely arbitrary, which, arguably, the conditions of the real world are too, as long as you don't believe in one or more Makers.</p>
+						<h3>Self-development</h3>
+						<p>By reviewing and modifying the relations between its components' various attributes and values, the audanism performs a form of self-development, where all possible actions resulting in greater harmony are taken. There are, of course, limitations in the number of possible actions and in the evaluation frequency (more on that further down).</p>
+						<p>During strong trends of negative harmony development, the audanism can be thrown into stress mode. When in stress mode, the self-evaluation algorithm is less accurate. One could say that it panics and recedes into short-term thinking.</p>
+						<h2>Structure</h2>
+						<p>The audanism consists of five factors and some number of nodes, which themselves consists of cells.</p>
+						<h3>The five factors</h3>
+						<p>The five factors are based on the psychological theory about the Big Five personality traits, where each factor corresponds to a trait.</p>
+						<p>The factors have fixed interrelationships; each factor has a set value for each of the other factors which constitutes how well it fits with that factor. This is accounted for when calculating harmony.</p>
+						<h3>Nodes and cells</h3>
+						<p>A node is a container of between two and five cells, where each cell corresponds to a factor through a numeric value. Cells within a node must have unique corresponding factors.</p>
+						<h2>Harmony calculation and boost</h2>
+						<p>The audanism's harmony is calculated through two methods:</p>
+						<ul>
+						<li>the elaborate method (actual harmony); and</li>
+						<li>the simplified method (estimated harmony).</li>
+						</ul>
+						<p>The methods are used for both present and possible harmonic levels. Which method is used for evaluation depends on whether the audanism is in stress mode or not.</p>
+						<p>It is always the actual harmony that represents the audanism's true state.</p>
+						<h3>Simplified method (estimated harmony)</h3>
+						<p>The simplified method sums the differences between cells' factor values and the corresponding factors in all nodes inside the audanism. This method is used while in stress mode.</p>
+						<h3>Elaborate method (actual harmony)</h3>
+						<p>The elaborate method performs the steps of the simplified method, but takes into account the factor interrelationships and adjusts the values of harmony thereafter. This method is used while in normal state (not in stress mode).</p>
+						<h3>Actions an application of calculation methods</h3>
+						<p>In every evaluation the audanism looks at cells from two nodes. If the nodes have one or more cells with common corresponding factor, those are brought to comparison between each other. For each comparison there are two possible actions:</p>
+						<ol>
+						<li>Move a value of one (1) from the cell in the first node to the corresponding cell in the second node.</li>
+						<li>Move a value of one (1) from the cell in the second node to the corresponding cell in the first node.</li>
+						</ol>
+						<p>The beneficiance is determined by comparing pre-calculations of each action (i.e. simulating them and storing the resulting overall harmony), where the one with the highest resulting harmony is chosen. The calculation method used here is, like stated above, determined by the audanisms current state. Herein is a key aspect: <strong>when in stress mode, the audanism makes less accurate forecasts</strong>. In its normal state, the predictions will always be the best possible.</p>
+						<h2>Embodiment</h2>
+						<p>The audanism's components are in great extent directly visually represented in a spheric space, where changes in form and movement pictures their own and the audanism's state. The visualization also has marks of experience, where past outer influences are collected in shapes that perhaps could be seen as scars.</p>
+						<p>Through sonic layers, the audanism's gets its pulse, through which rate of inner change, current condition and outer influences are directly perceivable. This composition is designed so that ones own (human) associations on what is perceived as harmonious or not has as little impact on the soundscape as possible, this due to the main purpose of the experiment to invent life, not reconstruct it.</p>
 					</div>
-					*/ ?>
+
+					<!-- Add your influnce -->
+					<div id="add-your-influence" class="tab-content" data-tab="3">
+						<h1>Audanism</h1>
+
+						<h2>Add your influence</h2>
+
+						<p>Audanism is currently influenced by weather around the world and by Instagram photos tagged with <code>#art</code> and <code>#audanism</code>. To add your own influence, post a photo and tag it with <code>#audanism</code>, and you should soon see it in effect.</p>
+					</div>
 				</div>
 			</div>
 
+			<!-- Stats and feeds -->
 			<aside id="stats-wrap">
+
+				<!-- Coziness -->
 				<div id="cozy-stats" class="stats-block">
 					<div class="stats-title">Right now</div>
 
@@ -201,21 +230,24 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 							<div class="influence-value"></div>
 						</div>
 					</div>
+
+					<div id="interact">
+						<div id="interact-btn" data-target-tab="3">Add your influence</div>
+					</div>
 				</div>
 			</aside>
 
+			<!-- Controls -->
 			<div id="controls">
 				<a class="btn" href="#start">Start</a>
 				<a class="btn" href="#pause">Pause</a>
-				<!-- <a class="btn" href="#stop">Stop</a> -->
-				<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
-				<a class="btn" href="#step" style="display: none;">Step ></a>
-				<!-- <span style="float: left; margin-right: 10px; color: #999;">&middot;&middot;&middot;</span> -->
-				<!-- <input id="stressmode" type="checkbox" name="stressmode" /> -->
-				<!-- <label for="stressmode">Stress mode</label> -->
+				<!-- <a class="btn" href="#step" style="display: none;">Step ></a> -->
+
+				<a id="wiki-toggle-link" data-toggle-wiki="show" href="#wiki">i</a>
 			</div>
 		</div>
 
+		<!-- Canvas wrap -->
 		<div id="canvas-wrap"></div>
 
 		<!-- Vendor scripts -->
@@ -271,9 +303,6 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 		<!-- Calculator -->
 		<script defer src="js/src/DisharmonyCalculator.js?v=<?php echo time(); ?>"></script>
-		<!-- <script defer src="js/src/OrganismDisharmonyCalculator.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="js/src/FactorComparer.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="js/src/NodeComparer.js?v=<?php echo time(); ?>"></script> -->
 
 		<!-- Source adapters -->
 		<script defer src="js/src/SourceAdapter.js?v=<?php echo time(); ?>"></script>
@@ -307,14 +336,6 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<script defer src="js/src/MonoistEnvMulti.js?v=<?php echo time(); ?>"></script>
 		<script defer src="js/src/MonoistPerc.js?v=<?php echo time(); ?>"></script>
 		<script defer src="js/src/Conductor.js?v=<?php echo time(); ?>"></script>
-		<!-- <script defer src="js/src/Noise.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="js/src/Synth.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="js/src/Synth2.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="js/src/Blip.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="src/sound/instrument/NodeInfluenceSound1.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="src/sound/instrument/NodeInfluenceSound2.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="src/sound/instrument/NodeComparisonSound1.js?v=<?php echo time(); ?>"></script> -->
-		<!-- <script defer src="src/sound/instrument/InfluenceActionSound1.js?v=<?php echo time(); ?>"></script> -->
 
 		<!-- GUI -->
 		<script defer src="js/src/GUI.js?v=<?php echo time(); ?>"></script>

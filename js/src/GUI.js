@@ -6,19 +6,21 @@
 
 
 (function() {
-  var GUI;
+  var GUI,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   GUI = (function() {
 
     function GUI() {
+      this._setWikiContent = __bind(this._setWikiContent, this);
       this.$organismStats = $('#organism-stats');
       this.$factorStats = $('#factor-stats');
       this.$influences = $('#influences');
       this.$influenceTemplate = this.$influences.find('.template').clone(true).removeClass('template');
       this.$influences.find('.template').hide();
-      this.$introPage = $('#intro-page');
+      this.$wiki = $('#wiki');
       this._setupControls();
-      this._setupIntroPage();
+      this._setupWiki();
       this._showCozyInfo();
       EventDispatcher.listen('audanism/iteration', this, this.onIteration);
       EventDispatcher.listen('audanism/influence/node/done', this, this.onInfluenceNodeDone);
@@ -48,14 +50,38 @@
       });
     };
 
-    GUI.prototype._setupIntroPage = function() {
+    GUI.prototype._setupWiki = function() {
       var _this = this;
-      $('#intro-content').fadeTo(2000, 1.0);
-      return $(document).on('click', '#intro-btn-start', function(e) {
+      $('#wiki').fadeTo(2000, 1.0);
+      $(document).on('click', '#intro-btn-start', function(e) {
         e.preventDefault();
         EventDispatcher.trigger('audanism/controls/start');
-        return _this.$introPage.fadeOut(500);
+        return _this.$wiki.fadeOut(500, function() {
+          return $('#intro-btn-start').html('Resume');
+        });
       });
+      $(document).on('click', '[data-target-tab]', function(e) {
+        e.preventDefault();
+        return _this._setWikiContent($(e.currentTarget).attr('data-target-tab'));
+      });
+      return $(document).on('click', '[data-toggle-wiki]', function(e) {
+        var action;
+        e.preventDefault();
+        action = $(e.currentTarget).attr('data-toggle-wiki');
+        if (action === 'show') {
+          return _this.$wiki.fadeIn(500);
+        } else {
+          return _this.$wiki.fadeOut(500);
+        }
+      });
+    };
+
+    GUI.prototype._setWikiContent = function(tabIndex) {
+      if (!this.$wiki.is(':visible')) {
+        this.$wiki.fadeIn(500);
+      }
+      $('.tab-content').removeClass('active').filter("[data-tab='" + tabIndex + "']").addClass('active');
+      return this.$wiki.find('a[data-target-tab]').removeClass('active').filter("[data-target-tab='" + tabIndex + "']").addClass('active');
     };
 
     GUI.prototype._showCozyInfo = function() {
