@@ -21,7 +21,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'> -->
 		<!-- <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'> -->
 		<link rel="stylesheet" href="css/normalize.css">
-		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/main.css?v=20140313-1">
 
 		<?php /* if ($runLocal) : ?>
 			<script type="text/javascript" src="js/vendor/google.jsapi.js?v=<?php echo time(); ?>"></script>
