@@ -27,12 +27,10 @@ class Organism
 			thresholdLeave: 0
 		}
 		
-		$('#stressmode').change (e) =>
-			@_inStressMode = $(e.currentTarget).attr('checked') is 'checked'
-
 		EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
-		
-		setInterval @adjustStressThresholds.bind(@), 5000
+
+		@_stressAdjustmentTime     = 8000
+		@_stressAdjustmentInterval = setInterval @adjustStressThresholds.bind(@), @_stressAdjustmentTime
 
 
 		# Create factors
@@ -135,6 +133,11 @@ class Organism
 			@_inStressMode = true
 			@stress.thresholdLeave = @stress.thresholdEnter * 1
 			EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
+
+			# Retart stress level adjustment interval
+			clearInterval @_stressAdjustmentInterval
+			@_stressAdjustmentInterval = setInterval @adjustStressThresholds.bind(@), @_stressAdjustmentTime
+
 		else if @_inStressMode and @_actualDisharmony < @stress.thresholdLeave
 			#console.log ' -----------------------------------------'
 			#console.log ' #=#=#=#=#=#==# LEAVE STRESS MODE =#=#=#=#=#=#=#'
@@ -143,6 +146,10 @@ class Organism
 			@_inStressMode = false
 			@stress.thresholdEnter = @stress.thresholdLeave * 1.2
 			EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
+
+			# Retart stress level adjustment interval
+			clearInterval @_stressAdjustmentInterval
+			@_stressAdjustmentInterval = setInterval @adjustStressThresholds.bind(@), @_stressAdjustmentTime
 
 	# Returns the disharmony history data, reduced to the
 	# given number of data entries.

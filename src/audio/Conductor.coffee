@@ -14,7 +14,7 @@ class Conductor
 			alert('Sorry, your browser does not support AudioContext, try Chrome!')
 
 		# State
-		@isMuted = true
+		@isMuted = false
 
 		# Create the end audio chain
 		@createEndChain()
@@ -36,11 +36,12 @@ class Conductor
 		@arpeggiator = new Audanism.Audio.Instrument.PercArpeggiator( @instrumentsIn, 4, 0 )
 
 		# Listenings
-		EventDispatcher.listen 'audanism/iteration',           @, @updateSounds
-		EventDispatcher.listen 'audanism/influence/node',      @, @handleNodeInfluence
-		EventDispatcher.listen 'audanism/alternodes',          @, @handleNodeComparison
-		EventDispatcher.listen 'audanism/performance/bad',     @, @onPermanceBad
-		EventDispatcher.listen 'audanism/organism/stressmode', @, @onStressModeChange
+		EventDispatcher.listen 'audanism/controls/togglesound', @, @toggleMute
+		EventDispatcher.listen 'audanism/iteration',            @, @updateSounds
+		EventDispatcher.listen 'audanism/influence/node',       @, @handleNodeInfluence
+		EventDispatcher.listen 'audanism/alter/nodes',          @, @handleNodeComparison
+		EventDispatcher.listen 'audanism/performance/bad',      @, @onPermanceBad
+		EventDispatcher.listen 'audanism/organism/stressmode',  @, @onStressModeChange
 
 	createEndChain: () ->
 
@@ -87,7 +88,7 @@ class Conductor
 	setOrganism: (@organism) ->
 
 	mute: () ->
-		#console.log('Conductor #mute()')
+		console.log('Conductor #mute()')
 		@isMuted = true
 
 		@arpeggiator.stop()
@@ -95,11 +96,16 @@ class Conductor
 		(drone.kill() for drone in @factorDrones)
 
 	unmute: () ->
-		#console.log('Conductor #unmute()')
+		console.log('Conductor #unmute()')
 		@isMuted = false
 
 		@arpeggiator.start()
 		(drone.noteOn( drone.droneNote ) for drone in @factorDrones)
+
+	toggleMute: () ->
+		console.log 'Conductor #toggleMute'
+		if @isMuted then @unmute() else @mute()
+		console.log '... now muted:', @isMuted
 
 	updateSounds: (iterationInfo) ->
 		#console.log('#updateSounds', iterationInfo, iterationInfo.count % 10)
@@ -147,7 +153,7 @@ class Conductor
 
 
 	handleNodeComparison: (comparisonData) ->
-		if @muted
+		if @isMuted
 			return
 
 		for i in [0..comparisonData.nodes.length-1]
@@ -161,7 +167,7 @@ class Conductor
 	handleNodeInfluence: (influenceData) ->
 		#return
 
-		if @muted
+		if @isMuted
 			return
 		if not @organism or not influenceData.meta
 			return

@@ -98,8 +98,8 @@ class Environment
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
 
-			if @conductor? and @conductor.isMuted
-				@conductor.unmute()
+			#if @conductor? and @conductor.isMuted
+			#	@conductor.unmute()
 
 			for organism in @_organisms
 				
@@ -117,8 +117,8 @@ class Environment
 				@_isSingleStep = false
 		else
 
-			if @conductor? and not @conductor.isMuted
-				@conductor.mute()
+			#if @conductor? and not @conductor.isMuted
+			#	@conductor.mute()
 
 	#
 	createInfluenceSources: () ->
@@ -127,17 +127,14 @@ class Environment
 		# Add sources
 		#@_influenceSources.push new RandomSourceAdapter(@)
 		#@_influenceSources.push new TwitterSourceAdapter(@)
-		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(@)
-		@_influenceSources.push new Audanism.SourceAdapter.WheatherSourceAdapter()
+		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(6000, 'art')
+		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(3000, 'audanism')
+		@_influenceSources.push new Audanism.SourceAdapter.WheatherSourceAdapter(4000)
 
 
 	#
 	influence: (influenceData) ->
 		return if not @_isRunning
-
-		#console.log "---"
-		#console.log "#influence", influenceData
-
 
 		# Node alteration
 		if influenceData.node?
@@ -171,8 +168,6 @@ class Environment
 					EventDispatcher.trigger 'audanism/influence/factor', influenceInfo
 					factor.addValue influenceData.factor.valueModifier
 					EventDispatcher.trigger 'audanism/influence/factor/after', influenceInfo
-					
-					#console.log('——— changed factor', factor, 'by value', influenceData.factor.valueModifier)
 
 
 		# Random alteration
@@ -192,7 +187,7 @@ class Environment
 			else if numType is 'string' and argNum is 'rand' 
 				num = Math.randomRange(if type is 'factor' then 1 else 5)
 
-			# Apply alteration
+			# Factor alteration
 			if type is 'factor'
 				for organism in @_organisms
 					
@@ -208,11 +203,10 @@ class Environment
 						else if valType is 'string' and argVal is 'rand' 
 							valueMod = Math.randomRange 5, -5
 
-						#console.log "    --> influence: factor #{ factor.factorType } by #{ valueMod }"
-						#console.log "        ... before: #{ factor }"
+						# Add the value
 						organism.getFactorOfType(factor.factorType).addValue valueMod
-						#console.log "        ... after: #{ factor }"
 
+			# Node alteration
 			else if type is 'node'
 				for organism in @_organisms
 					
@@ -228,62 +222,15 @@ class Environment
 						else if valType is 'string' and argVal is 'rand' 
 							valueMod = Math.randomRange 50, -50
 
+						# Add the value
 						cell = getRandomElements(node.getCells(), 1)[0]
-
-						#console.log "    --> influence: node #{ node.nodeId }->#{ cell.factorType } by #{ valueMod }"
-						#console.log "        ... before: #{ node }"
 						cell.addFactorValue valueMod
-						#console.log "        ... after: #{ node }"
-
-		#console.log "---"
 
 
 	initConductor: () ->
 		@conductor = new Audanism.Audio.Conductor()
-
 		@conductor.setOrganism @_organisms[0]
-		@conductor.mute()
-
-		###
-		$spectrum = $('<div id="spectrum" />').css({
-			'position': 'fixed'
-			'left': 0
-			'right': 0
-			'top': 0
-			'bottom': 0
-			'z-index': 9999
-			#'height': window.innerHeight
-		}).appendTo($('#container'))
-
-		for i in [0..@conductor.analyser.frequencyBinCount-1]
-			dLeft = i / @conductor.analyser.frequencyBinCount
-			dWidth = Math.round( $(window).width() / @conductor.analyser.frequencyBinCount )
-
-			$spectrum.append($('<div />').attr('id', 'bar-' + i).css({
-				'position': 'absolute', 
-				'top': 0, 
-				'left': i * dWidth + 1
-				'width': dWidth - 2
-				'height': 10
-				'background-color': 'red'
-			}))
-
-		EventDispatcher.listen 'audanism/iteration', @, (frame) =>
-			console.log('adjust freq bars')
-			frequencyData = @conductor.getFrequencyData()
-			#console.log(frequencyData.join(' | '))
-
-			i = -1
-
-			for freqData in frequencyData
-				i++
-				console.log(freqData)
-
-				if i is 0
-					console.log( $('#bar-' + i) )
-
-				$('#bar-' + i).css('height', 10 + Math.round(freqData))
-		###
+		#@conductor.mute()
 
 
 window.Audanism.Environment.Environment = Environment

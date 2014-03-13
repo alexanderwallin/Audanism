@@ -14,12 +14,12 @@
 
     __extends(InstagramSourceAdapter, _super);
 
-    function InstagramSourceAdapter(listener) {
-      this.listener = listener;
-      InstagramSourceAdapter.__super__.constructor.call(this, this.listener);
+    function InstagramSourceAdapter(interval, tag) {
+      this.interval = interval != null ? interval : 5000;
+      this.tag = tag != null ? tag : 'audanism';
+      InstagramSourceAdapter.__super__.constructor.call(this, 'instagram', this.interval);
       this.clientId = "f42a4ce0632e412ea5a0353c2b5e581f";
       this.photoSinceId = 0;
-      this.tag = window.location.hash.match(/instatag=\w+/) ? window.location.hash.replace(/^#instatag=([^&]+)$/, "$1") || "art" : "art";
       this.queryUrl = "https://api.instagram.com/v1/tags/" + this.tag + "/media/recent";
       this.jqxhr = null;
     }
@@ -29,7 +29,7 @@
       this.active = true;
       return this.queryInterval = setInterval(function() {
         return _this.queryPhotos();
-      }, 5000);
+      }, this.interval);
     };
 
     InstagramSourceAdapter.prototype.deactive = function() {
@@ -86,7 +86,7 @@
             'meta': {
               'current': i + 1,
               'total': captionVals.length,
-              'source': 'instagram',
+              'source': this.sourceId,
               'sourceData': photo
             }
           };
@@ -99,8 +99,6 @@
       }
       return this.jqxhr = null;
     };
-
-    InstagramSourceAdapter.prototype.adaptSourceData = function() {};
 
     return InstagramSourceAdapter;
 

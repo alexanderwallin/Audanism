@@ -13,8 +13,9 @@
 
   SourceAdapter = (function() {
 
-    function SourceAdapter(listener) {
-      this.listener = listener;
+    function SourceAdapter(sourceId, interval) {
+      this.sourceId = sourceId;
+      this.interval = interval != null ? interval : 5000;
       this.active = false;
     }
 
@@ -24,6 +25,10 @@
 
     SourceAdapter.prototype.deactivate = function() {
       return this.active = false;
+    };
+
+    SourceAdapter.prototype.setInterval = function(interval) {
+      this.interval = interval;
     };
 
     SourceAdapter.prototype.getAdaptedSourceData = function(sourceData) {

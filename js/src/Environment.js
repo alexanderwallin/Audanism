@@ -101,9 +101,6 @@
       var organism, _i, _len, _ref, _results;
       this._iterationCount++;
       if (this._isRunning || this._isSingleStep) {
-        if ((this.conductor != null) && this.conductor.isMuted) {
-          this.conductor.unmute();
-        }
         _ref = this._organisms;
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -124,16 +121,15 @@
         }
         return _results;
       } else {
-        if ((this.conductor != null) && !this.conductor.isMuted) {
-          return this.conductor.mute();
-        }
+
       }
     };
 
     Environment.prototype.createInfluenceSources = function() {
       this._influenceSources = [];
-      this._influenceSources.push(new Audanism.SourceAdapter.InstagramSourceAdapter(this));
-      return this._influenceSources.push(new Audanism.SourceAdapter.WheatherSourceAdapter());
+      this._influenceSources.push(new Audanism.SourceAdapter.InstagramSourceAdapter(6000, 'art'));
+      this._influenceSources.push(new Audanism.SourceAdapter.InstagramSourceAdapter(3000, 'audanism'));
+      return this._influenceSources.push(new Audanism.SourceAdapter.WheatherSourceAdapter(4000));
     };
 
     Environment.prototype.influence = function(influenceData) {
@@ -255,49 +251,7 @@
 
     Environment.prototype.initConductor = function() {
       this.conductor = new Audanism.Audio.Conductor();
-      this.conductor.setOrganism(this._organisms[0]);
-      return this.conductor.mute();
-      /*
-      		$spectrum = $('<div id="spectrum" />').css({
-      			'position': 'fixed'
-      			'left': 0
-      			'right': 0
-      			'top': 0
-      			'bottom': 0
-      			'z-index': 9999
-      			#'height': window.innerHeight
-      		}).appendTo($('#container'))
-      
-      		for i in [0..@conductor.analyser.frequencyBinCount-1]
-      			dLeft = i / @conductor.analyser.frequencyBinCount
-      			dWidth = Math.round( $(window).width() / @conductor.analyser.frequencyBinCount )
-      
-      			$spectrum.append($('<div />').attr('id', 'bar-' + i).css({
-      				'position': 'absolute', 
-      				'top': 0, 
-      				'left': i * dWidth + 1
-      				'width': dWidth - 2
-      				'height': 10
-      				'background-color': 'red'
-      			}))
-      
-      		EventDispatcher.listen 'audanism/iteration', @, (frame) =>
-      			console.log('adjust freq bars')
-      			frequencyData = @conductor.getFrequencyData()
-      			#console.log(frequencyData.join(' | '))
-      
-      			i = -1
-      
-      			for freqData in frequencyData
-      				i++
-      				console.log(freqData)
-      
-      				if i is 0
-      					console.log( $('#bar-' + i) )
-      
-      				$('#bar-' + i).css('height', 10 + Math.round(freqData))
-      */
-
+      return this.conductor.setOrganism(this._organisms[0]);
     };
 
     return Environment;

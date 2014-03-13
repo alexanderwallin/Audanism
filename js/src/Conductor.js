@@ -18,7 +18,7 @@
       } catch (e) {
         alert('Sorry, your browser does not support AudioContext, try Chrome!');
       }
-      this.isMuted = true;
+      this.isMuted = false;
       this.createEndChain();
       this.noise = new Audanism.Audio.Instrument.NoisePink(this.instrumentsIn);
       this.noise.setLpfFrequency(1000);
@@ -33,9 +33,10 @@
       this.compareInstr = new Audanism.Audio.Instrument.TestInstrument(this.instrumentsIn);
       this.influencePad = new Audanism.Audio.Instrument.Pad(this.instrumentsIn);
       this.arpeggiator = new Audanism.Audio.Instrument.PercArpeggiator(this.instrumentsIn, 4, 0);
+      EventDispatcher.listen('audanism/controls/togglesound', this, this.toggleMute);
       EventDispatcher.listen('audanism/iteration', this, this.updateSounds);
       EventDispatcher.listen('audanism/influence/node', this, this.handleNodeInfluence);
-      EventDispatcher.listen('audanism/alternodes', this, this.handleNodeComparison);
+      EventDispatcher.listen('audanism/alter/nodes', this, this.handleNodeComparison);
       EventDispatcher.listen('audanism/performance/bad', this, this.onPermanceBad);
       EventDispatcher.listen('audanism/organism/stressmode', this, this.onStressModeChange);
     }
@@ -76,6 +77,7 @@
 
     Conductor.prototype.mute = function() {
       var drone, _i, _j, _len, _len1, _ref, _ref1, _results;
+      console.log('Conductor #mute()');
       this.isMuted = true;
       this.arpeggiator.stop();
       _ref = this.factorDrones;
@@ -94,6 +96,7 @@
 
     Conductor.prototype.unmute = function() {
       var drone, _i, _len, _ref, _results;
+      console.log('Conductor #unmute()');
       this.isMuted = false;
       this.arpeggiator.start();
       _ref = this.factorDrones;
@@ -103,6 +106,16 @@
         _results.push(drone.noteOn(drone.droneNote));
       }
       return _results;
+    };
+
+    Conductor.prototype.toggleMute = function() {
+      console.log('Conductor #toggleMute');
+      if (this.isMuted) {
+        this.unmute();
+      } else {
+        this.mute();
+      }
+      return console.log('... now muted:', this.isMuted);
     };
 
     Conductor.prototype.updateSounds = function(iterationInfo) {
@@ -146,7 +159,7 @@
 
     Conductor.prototype.handleNodeComparison = function(comparisonData) {
       var freq, i, node, note, _i, _ref, _results;
-      if (this.muted) {
+      if (this.isMuted) {
         return;
       }
       _results = [];
@@ -161,7 +174,7 @@
 
     Conductor.prototype.handleNodeInfluence = function(influenceData) {
       var nodeFreq, nodeId, nodePan;
-      if (this.muted) {
+      if (this.isMuted) {
         return;
       }
       if (!this.organism || !influenceData.meta) {

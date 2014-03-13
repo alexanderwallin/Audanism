@@ -33,11 +33,9 @@
         thresholdEnter: 0,
         thresholdLeave: 0
       };
-      $('#stressmode').change(function(e) {
-        return _this._inStressMode = $(e.currentTarget).attr('checked') === 'checked';
-      });
       EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
-      setInterval(this.adjustStressThresholds.bind(this), 5000);
+      this._stressAdjustmentTime = 8000;
+      this._stressAdjustmentInterval = setInterval(this.adjustStressThresholds.bind(this), this._stressAdjustmentTime);
       this._factors = (function() {
         var _i, _ref, _results;
         _results = [];
@@ -125,11 +123,15 @@
       if (!this._inStressMode && this._actualDisharmony > this.stress.thresholdEnter) {
         this._inStressMode = true;
         this.stress.thresholdLeave = this.stress.thresholdEnter * 1;
-        return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+        EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+        clearInterval(this._stressAdjustmentInterval);
+        return this._stressAdjustmentInterval = setInterval(this.adjustStressThresholds.bind(this), this._stressAdjustmentTime);
       } else if (this._inStressMode && this._actualDisharmony < this.stress.thresholdLeave) {
         this._inStressMode = false;
         this.stress.thresholdEnter = this.stress.thresholdLeave * 1.2;
-        return EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+        EventDispatcher.trigger('audanism/organism/stressmode', this._inStressMode);
+        clearInterval(this._stressAdjustmentInterval);
+        return this._stressAdjustmentInterval = setInterval(this.adjustStressThresholds.bind(this), this._stressAdjustmentTime);
       }
     };
 

@@ -6,9 +6,8 @@
 ###
 class SourceAdapter
 
-	constructor: (@listener) ->
-		#console.log "(SourceAdapter) #constructor", @listener
-
+	# Constructor
+	constructor: (@sourceId, @interval = 5000) ->
 		@active = false
 
 	# Activates the source adapter. 
@@ -18,6 +17,10 @@ class SourceAdapter
 	# Deactivates/pauses the source adapter.
 	deactivate: () ->
 		@active = false
+
+	# Sets the interval in which the source adapter fetches och listens for
+	# new data
+	setInterval: (@interval) ->
 
 	# Adapts/translates the source data into data that the environment
 	# understands.

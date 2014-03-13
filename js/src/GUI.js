@@ -45,8 +45,14 @@
       EventDispatcher.listen('audanism/controls/start', this, function() {
         return $('body').removeClass('paused').addClass('running');
       });
-      return EventDispatcher.listen('audanism/controls/pause audanism/controls/stop', this, function() {
+      EventDispatcher.listen('audanism/controls/pause audanism/controls/stop', this, function() {
         return $('body').removeClass('running').addClass('paused');
+      });
+      EventDispatcher.listen('audanism/controls/toggleview', this, function() {
+        return $('body').toggleClass('clean-view');
+      });
+      return EventDispatcher.listen('audanism/controls/togglesound', this, function() {
+        return $('body').toggleClass('muted');
       });
     };
 
@@ -170,7 +176,7 @@
       influenceBoxInfo;
 
       var influenceBoxInfo;
-      if (influenceInfo.meta.source = 'yr.no') {
+      if (influenceInfo.meta.source === 'weather') {
         influenceBoxInfo = {
           'source': influenceInfo.meta.source,
           'summary': influenceInfo.meta.summary,
@@ -184,11 +190,12 @@
 
     GUI.prototype.appendInfluenceBox = function(influenceBoxInfo) {
       var $box, $boxes, numBoxes;
-      $box = this.$influenceTemplate.clone();
+      $box = this.$influenceTemplate.clone().attr('data-influence-source', influenceBoxInfo.source);
       $box.find('.influence-source').html(influenceBoxInfo.source);
       $box.find('.influence-summary').html(influenceBoxInfo.summary);
       $box.find('.influence-link').html($('<a />', {
-        'href': influenceBoxInfo.url
+        'href': influenceBoxInfo.url,
+        'target': '_blank'
       }).html('Link'));
       $box.find('.influence-type').html(influenceBoxInfo.type);
       $box.find('.influence-value').html(influenceBoxInfo.value || '');

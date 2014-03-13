@@ -4,8 +4,8 @@
 class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 	# Constructor
-	constructor: () ->
-		super()
+	constructor: (@interval = 5000) ->
+		super('weather', @interval)
 
 		# Query params
 		@queryUrl = "http://www.yr.no/place/%s/%s/%s/forecast.xml"
@@ -24,12 +24,9 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 	activate: () ->
 		@active = true
 
-		#if not @towns
-		#	@fetchTowns()
-
 		@queryInterval = setInterval () =>
 			@queryWeather()
-		, 7000
+		, @interval
 
 
 	# Deactivate
@@ -67,15 +64,6 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 		if @jqxhr or not @active
 			return
 
-		# Get a town
-		#townInfo = @getATown()
-		#console.log('··· towns:', @towns)
-		#console.log('··· got town:', townInfo)
-		#if not townInfo
-		#	return
-
-		#console.log('··· town url', townInfo[townInfo.length-1])
-
 		# Make ajax call
 		@jqxhr = $.ajax {
 			dataType: 'xml'
@@ -94,7 +82,6 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 	# Process photos
 	processWeather: (townWeather) ->
 		#console.log('••• parse wheather •••', townWeather)
-		#return
 
 		# Parse XML
 		$xml   = $( townWeather )
@@ -104,14 +91,14 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 		influenceData = {
 			'factor': {
 				'factor':        'rand'
-				#'valueModifier': modVal
+				#'valueModifier': ''
 			},
 			'meta': {
 				'current':       1
 				'total':         1
-				'source':        'yr.no'
+				'source':        @sourceId
 				'sourceData':    townWeather
-				#'summary':       'Wind blowing at ' + windSpeed + ' mps in ' + $xml.find('location name').text()
+				#'summary':      ''
 			}
 		}
 

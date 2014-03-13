@@ -14,8 +14,9 @@
 
     __extends(WheatherSourceAdapter, _super);
 
-    function WheatherSourceAdapter() {
-      WheatherSourceAdapter.__super__.constructor.call(this);
+    function WheatherSourceAdapter(interval) {
+      this.interval = interval != null ? interval : 5000;
+      WheatherSourceAdapter.__super__.constructor.call(this, 'weather', this.interval);
       this.queryUrl = "http://www.yr.no/place/%s/%s/%s/forecast.xml";
       this.jqxhr = null;
       this.queryInterval;
@@ -27,7 +28,7 @@
       this.active = true;
       return this.queryInterval = setInterval(function() {
         return _this.queryWeather();
-      }, 7000);
+      }, this.interval);
     };
 
     WheatherSourceAdapter.prototype.deactive = function() {
@@ -87,7 +88,7 @@
         'meta': {
           'current': 1,
           'total': 1,
-          'source': 'yr.no',
+          'source': this.sourceId,
           'sourceData': townWeather
         }
       };

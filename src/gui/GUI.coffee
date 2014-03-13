@@ -42,6 +42,8 @@ class GUI
 	_setupControls: () ->
 		$('#controls .btn').click (e) =>
 			e.preventDefault()
+			#$(e.currentTarget).addClass('active').siblings().removeClass('active')
+
 			EventDispatcher.trigger 'audanism/controls/' + $(e.currentTarget).attr('href').replace("#", "")
 
 		EventDispatcher.listen 'audanism/controls/start', @, () =>
@@ -49,6 +51,12 @@ class GUI
 
 		EventDispatcher.listen 'audanism/controls/pause audanism/controls/stop', @, () =>
 			$('body').removeClass('running').addClass('paused')
+
+		EventDispatcher.listen 'audanism/controls/toggleview', @, () =>
+			$('body').toggleClass('clean-view')
+
+		EventDispatcher.listen 'audanism/controls/togglesound', @, () =>
+			$('body').toggleClass('muted')
 
 
 	_setupWiki: () ->
@@ -154,7 +162,7 @@ class GUI
 
 		influenceBoxInfo
 
-		if influenceInfo.meta.source = 'yr.no'
+		if influenceInfo.meta.source is 'weather'
 			influenceBoxInfo = {
 				'source':  influenceInfo.meta.source
 				'summary': influenceInfo.meta.summary
@@ -166,11 +174,13 @@ class GUI
 
 
 	appendInfluenceBox: (influenceBoxInfo) ->
-		$box = @$influenceTemplate.clone()#.css('opacity', 0)
+		#console.log '#appendInfluenceBox', influenceBoxInfo
+
+		$box = @$influenceTemplate.clone().attr('data-influence-source', influenceBoxInfo.source)
 
 		$box.find('.influence-source').html(influenceBoxInfo.source);
 		$box.find('.influence-summary').html(influenceBoxInfo.summary);
-		$box.find('.influence-link').html($('<a />', { 'href':influenceBoxInfo.url }).html('Link'))
+		$box.find('.influence-link').html($('<a />', { 'href':influenceBoxInfo.url, 'target':'_blank' }).html('Link'))
 		$box.find('.influence-type').html(influenceBoxInfo.type)
 		$box.find('.influence-value').html(influenceBoxInfo.value || '')
 

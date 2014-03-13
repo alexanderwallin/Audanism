@@ -140,6 +140,8 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 						<h2>Add your influence</h2>
 
 						<p>Audanism is currently influenced by weather around the world and by Instagram photos tagged with <code>#art</code> and <code>#audanism</code>. To add your own influence, post a photo and tag it with <code>#audanism</code>, and you should soon see it in effect.</p>
+
+						<!-- TODO: Credits -->
 					</div>
 				</div>
 			</div>
@@ -169,7 +171,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 							<tr>
 								<th class="title">Orgnaism</th>
 								<th class="stress-mode">
-									<div class="stress-mode-indicator"></div>
+									<div class="stress-mode-indicator" title="Stress mode"></div>
 								</th>
 							</tr>
 						</thead>
@@ -242,6 +244,13 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 				<a class="btn" href="#start">Start</a>
 				<a class="btn" href="#pause">Pause</a>
 				<!-- <a class="btn" href="#step" style="display: none;">Step ></a> -->
+
+				<div class="controls-sep"></div>
+
+				<a class="btn" href="#toggleview">Clean view</a>
+				<a class="btn" href="#togglesound">Pause</a>
+
+				<div class="controls-sep"></div>
 
 				<a id="wiki-toggle-link" data-toggle-wiki="show" href="#wiki">i</a>
 			</div>
