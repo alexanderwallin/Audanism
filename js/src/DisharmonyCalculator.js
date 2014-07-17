@@ -2,6 +2,11 @@
 
 /*
 	DisharmonyCalculator
+
+	The disharmony calculator 
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 */
 
 

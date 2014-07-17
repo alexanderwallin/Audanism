@@ -1,9 +1,18 @@
 ###
-	Listens for Instagram pictures.
+	InstagramSourceAdapter
+
+	Listens for Instagram pictures on a given tag. When a new picture
+	is fetched, the InstagramSourceAdapter spits out an influence 
+	event with information about the picture.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
+	#
 	# Constructor
+	#
 	constructor: (@interval = 5000, @tag = 'audanism') ->
 		super('instagram', @interval)
 
@@ -16,8 +25,9 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 		# Ajax handler
 		@jqxhr        = null
 
-
-	# Sets up mouse event listeners
+	#
+	# Starts the query interval
+	#
 	activate: () ->
 		@active = true
 
@@ -27,15 +37,17 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 		#@queryPhotos()
 
-
-	# Deactivate
+	#
+	# Deactivates the listener
+	#
 	deactive: () ->
 		@active = false
 
 		clearInterval( @queryInterval )
 
-
+	#
 	# Performs a query for photos
+	#
 	queryPhotos: () ->
 		#console.log('••• query instagram photots', @queryUrl, '•••')
 
@@ -56,8 +68,9 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 				@processPhotos response.data
 		}
 	
-
-	# Process photos
+	#
+	# Processes a set of photos
+	#
 	processPhotos: (photos) ->
 		interpreter = new Audanism.Util.TextInterpreter
 

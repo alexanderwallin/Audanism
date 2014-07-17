@@ -1,5 +1,6 @@
-
-# Source hierarchy
+###
+	The Audanism object hierarchy.
+###
 window.Audanism = {
 	'Audio': {
 		'FX':          {}

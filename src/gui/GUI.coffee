@@ -1,5 +1,11 @@
 ###
-	GUI super class
+	GUI
+
+	The GUI handles visual updates, statistics tables, controls and 
+	their actions.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class GUI
 
@@ -39,6 +45,9 @@ class GUI
 				#console.log 'google.setOnLoadCallback', @disharmonyChart
 		###
 
+	#
+	# Add UI controls listeners
+	#
 	_setupControls: () ->
 		$('#controls .btn').click (e) =>
 			e.preventDefault()
@@ -58,7 +67,9 @@ class GUI
 		EventDispatcher.listen 'audanism/controls/togglesound', @, () =>
 			$('body').toggleClass('muted')
 
-
+	#
+	# Wiki handler
+	#
 	_setupWiki: () ->
 		$('#wiki').fadeTo(2000, 1.0)
 
@@ -84,7 +95,9 @@ class GUI
 			else
 				@$wiki.fadeOut(500)
 
-
+	#
+	# Sets the wiki content from a tab index
+	#
 	_setWikiContent: (tabIndex) =>
 		if not @$wiki.is(':visible')
 			@$wiki.fadeIn(500)
@@ -95,7 +108,9 @@ class GUI
 		# Set active table of contents link
 		@$wiki.find('a[data-target-tab]').removeClass('active').filter("[data-target-tab='#{ tabIndex }']").addClass('active')
 
-
+	#
+	# Display useless, but cozy information
+	#
 	_showCozyInfo: () ->
 		hour = new Date().getHours()
 		showSelector = ''
@@ -117,7 +132,9 @@ class GUI
 		#console.log(showSelector)
 		$('.time-of-day').filter('.' + showSelector).show()
 
-
+	#
+	# Envinronment iteration handler
+	#
 	onIteration: (iterationInfo) ->
 		#console.log('GUI #onIteration', @$organismStats)
 		
@@ -134,7 +151,9 @@ class GUI
 			$factorValues.find('[data-factor="' + factor.factorType + '"]').html(decimalAdjust('round', factor.factorValue, -1))
 			$factorDish.find('[data-factor="' + factor.factorType + '"]').html(numberSuffixed(factor.disharmony, -1))
 
-
+	#
+	# Display information about a node influence
+	#
 	onInfluenceNodeDone: (influenceInfoList) ->
 		#console.log('GUI #onInfluenceNodeAfter', influenceInfoList)
 
@@ -156,7 +175,9 @@ class GUI
 		if influenceBoxInfo
 			@appendInfluenceBox influenceBoxInfo
 
-
+	#
+	# Displays information about a factor influence
+	#
 	onInfluenceFactorAfter: (influenceInfo) ->
 		#console.log('GUI #onInfluenceFactorAfter', influenceInfo)
 
@@ -172,7 +193,9 @@ class GUI
 		if influenceBoxInfo
 			@appendInfluenceBox influenceBoxInfo
 
-
+	#
+	# Appends an influence box to the influence feed.
+	#
 	appendInfluenceBox: (influenceBoxInfo) ->
 		#console.log '#appendInfluenceBox', influenceBoxInfo
 
@@ -196,7 +219,11 @@ class GUI
 			#	$(@).hide()
 			#)
 
+	#
+	# Updates stress mode indicator when the mode has changed
+	#
 	onStressModeChange: (stressMode) ->
 		@$organismStats.find('.stress-mode-indicator').toggleClass('stressed', stressMode)
+
 
 window.Audanism.GUI.GUI = GUI

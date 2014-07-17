@@ -1,9 +1,17 @@
 ###
-	Listens for weather.
+	WheatherSourceAdapter
+
+	Sends requests for weather forecasts and triggers influence events
+	when it recieves them.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
+	#
 	# Constructor
+	#
 	constructor: (@interval = 5000) ->
 		super('weather', @interval)
 
@@ -16,11 +24,9 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 		# Interval
 		@queryInterval
 
-		# List of towns
-		@towns = null
-
-
+	#
 	# Sets up mouse event listeners
+	#
 	activate: () ->
 		@active = true
 
@@ -28,35 +34,17 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 			@queryWeather()
 		, @interval
 
-
+	#
 	# Deactivate
+	#
 	deactive: () ->
 		@active = false
 
 		clearInterval( @queryInterval )
 
-
-	# Fetches a list of towns
-	fetchTowns: () ->
-		$.ajax({
-			url: '/js/data/yr-capitals.json',
-			dataType: 'json'
-			success: (response) =>
-				@towns = response
-			error: (error) ->
-				console.error(error)
-		});
-
-
-	# Returns a town from the list of towns
-	getATown: () ->
-		if @towns
-			return @towns[ randomInt(0, @towns.length - 1) ]
-		
-		return null
-
-
-	# Performs a query for photos
+	#
+	# Performs a query for wheater data
+	#
 	queryWeather: () ->
 		#console.log('••• query wheather •••', @jqxhr)
 
@@ -78,8 +66,9 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 				@jqxhr = null
 		}
 	
-
-	# Process photos
+	#
+	# Process wheather data and trigger influence event
+	#
 	processWeather: (townWeather) ->
 		#console.log('••• parse wheather •••', townWeather)
 

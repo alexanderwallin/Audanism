@@ -1,10 +1,16 @@
 ###
-	WebGL organism visualizer
+	VisualOrganism
+
+	WebGL organism visualizer. Visualizes the environment and its organisms using three.js.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class VisualOrganism
 
-
+	#
 	# Constructor
+	#
 	constructor: () ->
 		_this = @
 
@@ -63,32 +69,36 @@ class VisualOrganism
 
 		#$('html').addClass 'canvas-only'
 
-
+	#
 	# App start
+	#
 	onStart: () ->
 
 		# Make balls
 		if @balls.length is 0
 			@createBalls @numBalls
 
-
+	#
 	# Handles organism init
+	#
 	onInitOrganism: (organism) ->
 		#console.log '#onInitOrganism', organism, @
 		@organism = organism
 
 		@init()
 
-
+	#
 	# Window resize handler
+	#
 	onWindowResize: (e) ->
 		@camera.aspect = window.innerWidth / window.innerHeight;
 		@camera.updateProjectionMatrix();
 
 		@renderer.setSize( window.innerWidth, window.innerHeight );
 
-
+	#
 	# Initialzer
+	#
 	init: () ->
 
 		# Make the animate() functions public
@@ -99,8 +109,9 @@ class VisualOrganism
 		@buildScene()
 		@animate()
 
-
+	#
 	# Builds the WebGL scene
+	#
 	buildScene: () ->
 		#console.log '#buildScene'
 
@@ -271,8 +282,9 @@ class VisualOrganism
 
 		$('#canvas-wrap').css('opacity', 0).append(@renderer.domElement).fadeTo(1000, 1.0)
 
-
+	#
 	# Animate
+	#
 	animate: () ->
 
 		requestAnimationFrame( Audanism.Graphic.public.animate )
@@ -379,15 +391,22 @@ class VisualOrganism
 		@renderer.render( @scene, @camera )
 
 
+	#
+	# Adds a callback to the callback queue
+	#
 	addToQueue: (fn, args) ->
 		@queue.push { 'fn':fn, 'args':args }
 
+	#
+	# Invokes all callbacks in the callback queue
+	#
 	runQueue: () ->
 		for action in @queue
 			action.fn.call @, action.args
 
-
+	#
 	# Handles an organism iteration
+	#
 	onIteration: (influenceInfo) ->
 		#console.log '#onIteration'
 
@@ -459,8 +478,9 @@ class VisualOrganism
 				ballScaleTo = { 'x':newBallScale, 'y':newBallScale, 'z':newBallScale }
 				@_tweenSomething ball.ball3d.scale, ball.ball3d.scale.clone(), ballScaleTo, 200
 
-
+	#
 	# Darkens the room depending on the time of day
+	#
 	setDaylight: () ->
 		#console.log ' -------------- #setDaylight() ----------------'
 		now = new Date()
@@ -475,8 +495,9 @@ class VisualOrganism
 
 		@room.material.ambient = roomColor
 
-
+	#
 	# Creates balls
+	#
 	createBalls: (numBalls) ->
 		#console.log('VisualOrganism #createBalls', numBalls)
 		for i in [0..numBalls-1]
@@ -532,14 +553,16 @@ class VisualOrganism
 			# Store ball 3d object in ball info object
 			ball.ball3d   = ball3d
 
-
+	#
 	# Handles node comparison
+	#
 	onCompareNodes: (compareData) ->
 		for node in compareData.nodes
 			@_animateComparingBall @balls[node.nodeId]
 
-
+	#
 	# Animates the color of an ball whose node is in comparison
+	#
 	_animateComparingBall: (ball) ->
 		#console.log '#_animateComparingBall', ball
 
@@ -563,8 +586,9 @@ class VisualOrganism
 			ball.state.hover = true
 		#ball.ball3d.position.set newPos.x, newPos.y, newPos.z
 
-
+	#
 	# Handles node influence
+	#
 	onInfluenceNode: (influenceData) ->
 
 		if not influenceData.node.node
@@ -579,8 +603,9 @@ class VisualOrganism
 				@_spawnInstaCube(influenceData)
 			, 500
 
-
+	#
 	# Handles factor influence
+	#
 	onInfluenceFactorAfter: (influenceData) ->
 		#console.log('#onInfluenceFactorAfter', influenceData)
 
@@ -656,8 +681,9 @@ class VisualOrganism
 			factor3d.userData.hoverStartFrame = @frame
 			factor3d.userData.hover = true
 
-
+	#
 	# Animates properties of a ball being influenced
+	#
 	_animateInfluencedBall: (ball) ->
 		#console.log '#_animateInfluencedBall', ball
 
@@ -714,34 +740,18 @@ class VisualOrganism
 
 		#ball.ball3d.position.set newPos.x, newPos.y, newPos.z
 
-
+	#
+	# Spawns an Instagram cube (or scarr if you will)
+	#
 	_spawnInstaCube: (influenceData) ->
-		#console.log '#_spawnInstaCube', influenceData
-		#igTexture = new THREE.ImageUtils.loadTexture influenceData.meta.sourceData.images.thumbnail.url
-
-		#cubeCam = new THREE.CubeCamera 0.1, 500, 128
-		#@scene.add cubeCam
-
 		cubeGeometry = new THREE.CubeGeometry 30, 30, 30
 		cubeMaterials = [
 			new THREE.MeshLambertMaterial { 'ambient':0x0E1B21, 'side':THREE.DoubleSide }
-			#new THREE.MeshBasicMaterial { 'envMap':cubeCam.renderTarget, 'blending':THREE.NormalBlending }
-			#new THREE.MeshPhongMaterial { 'diffuse':0x999999, 'specular':0xffffff, 'side':THREE.DoubleSide }
 		]
-		###
-		cubeMaterials [
-			new THREE.MeshLambertMaterial { 'ambient':0x07325E, 'side':THREE.DoubleSide }
-			new THREE.MeshPhongMaterial { 'ambient':0x07325E, 'side':THREE.DoubleSide }
-		]
-		###
+
 		cube = new THREE.Mesh cubeGeometry, cubeMaterials[0]
-		#cube = new THREE.SceneUtils.createMultiMaterialObject cubeGeometry, cubeMaterials
-
-		cube.position.set (1 - 2 * Math.random()) * @opts.clusterSize * 0.5 * (1.5 - Math.random()), (1 - 2 * Math.random()) * @opts.clusterSize * (1.5 - Math.random()), (1 - 2 * Math.random()) * @opts.clusterSize * (1.5 - Math.random()) # @opts.clusterSize + (200 - Math.random() * 100), @opts.clusterSize + (200 - Math.random() * 100), @opts.clusterSize + (200 - Math.random() * 100)
+		cube.position.set (1 - 2 * Math.random()) * @opts.clusterSize * 0.5 * (1.5 - Math.random()), (1 - 2 * Math.random()) * @opts.clusterSize * (1.5 - Math.random()), (1 - 2 * Math.random()) * @opts.clusterSize * (1.5 - Math.random())
 		cube.rotation.set Math.random(), Math.random(), Math.random()
-
-		#cubeCam.position = cube.position
-
 
 		if not @instaCubes?
 			@instaCubes = []
@@ -761,11 +771,10 @@ class VisualOrganism
 		if @instaCubes.length > @opts.groupCubesEvery and @instaCubes.length % @opts.groupCubesEvery is 1
 			@_replaceCubesWithMegaCube()
 
-
+	#
+	# Replaces a number of small cubes with a bigger one
+	#
 	_replaceCubesWithMegaCube: () ->
-
-		#console.log('num cubes', @instaCubes.length)
-
 
 		# Create a mega cube
 		cubeColor    = new THREE.Color()
@@ -799,7 +808,9 @@ class VisualOrganism
 
 		@cubesGrouped += cubeEndIndex - cubeStartIndex
 
-
+	#
+	# Removes a cube from the scene
+	#
 	_removeCube: (cubeInfo, destination, megaCube) ->
 		#console.log(cubeInfo)
 
@@ -816,7 +827,9 @@ class VisualOrganism
 
 			@scene.remove cubeInfo.cube
 
-
+	#
+	# Updates cubes
+	#
 	_updateInstaCubes: () ->
 
 		for cubeInfo in @instaCubes
@@ -824,9 +837,9 @@ class VisualOrganism
 			# Rotate slowly
 			cubeInfo.cube.rotation.x += cubeInfo.rotateSpeed
 
-
-
+	#
 	# Tweens a ball's position between two points
+	#
 	_tweenBall: (ball, from, to, duration) ->
 		duration = duration || 300
 		tween = new TWEEN.Tween( from ).to( to, duration )
@@ -836,6 +849,9 @@ class VisualOrganism
 			ball.ball3d.position.set @.x, @.y, @.z
 		tween.start()
 
+	#
+	# Tweens a ball's size
+	#
 	_tweenBallSize: (ball, from, to, duration, callback) ->
 
 		tween = new TWEEN.Tween( { from } ).to( to, duration )
@@ -845,8 +861,9 @@ class VisualOrganism
 			ball.ball3d.scale.set @.x, @.y, @.z
 		tween.start()
 
-
+	#
 	# Tweens the camera's distance between two points
+	#
 	_tweenCameraDistance: (to) ->
 		_this = @
 
@@ -857,8 +874,9 @@ class VisualOrganism
 			_this.opts.cameraDistance = @.distance
 		tween.start()
 
-
+	#
 	# Tweens a ball's color between two values
+	#
 	_tweenBallColor: (ball, fromColor, toColor, duration, callback) ->
 		colorFrom = { 'r':fromColor.r, 'g':fromColor.g, 'b':fromColor.b }
 		colorTo   = { 'r':toColor.r,   'g':toColor.g,   'b':toColor.b   }
@@ -879,8 +897,9 @@ class VisualOrganism
 
 		tween.start()
 
-
+	#
 	# Tweens a color object between two values
+	#
 	_tweenColor: (targetColor, fromColor, toColor, duration, callback) ->
 		colorFrom = { 'r':fromColor.r, 'g':fromColor.g, 'b':fromColor.b }
 		colorTo   = { 'r':toColor.r,   'g':toColor.g,   'b':toColor.b   }
@@ -897,8 +916,9 @@ class VisualOrganism
 
 		tween.start()
 
-
+	#
 	# Generic tween function
+	#
 	_tweenSomething: (something, from, to, duration, callback) ->
 		#console.log '#_tweenSomething', something, from, to, duration
 

@@ -2,6 +2,12 @@
 
 /*
 	Factor
+
+	A factor a factor type and a value. They are used when calculating
+	disharmonic relations to nodes sharing the same parent organism.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 */
 
 

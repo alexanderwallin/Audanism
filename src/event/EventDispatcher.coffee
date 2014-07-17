@@ -1,10 +1,19 @@
 ###
-	Event dispatcher. Gets rid of context issues.
+	EventDispatcher
+
+	The event dispatcher is an abstraction of jQuery's event dispatchment.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class EventDispatcher
 
 	constructor: () ->
 
+	# 
+	# Binds an event to a handler, where the handler is possibly bound 
+	# to a given this context.
+	#
 	on: (eventName, callback, context) ->
 		if context
 			callback.bind context
@@ -16,6 +25,9 @@ class EventDispatcher
 		$(document).on eventName, (e) =>
 			callback.call listener, arguments[1]
 
+	# 
+	# Triggers an event with the given arguments.
+	#
 	trigger: (eventName, args) ->
 		$(document).trigger eventName, args
 

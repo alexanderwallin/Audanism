@@ -1,5 +1,17 @@
 ###
 	Organism
+
+	An organism object contains sets of nodes and factors. It has a stress 
+	mode, which is used to determine ways of calculating its disharmony.
+	The threshold for when to enter or leave stress mode is self-adjusting 
+	over time, meaning it will normalize to the current disharmony state 
+	every once in a while.
+
+	It also provides methods for getting historical disharmony data regarding
+	its nodes and factors.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class Organism
 
@@ -26,7 +38,7 @@ class Organism
 			thresholdEnter: 0
 			thresholdLeave: 0
 		}
-		
+
 		EventDispatcher.trigger 'audanism/organism/stressmode', @_inStressMode
 
 		@_stressAdjustmentTime     = 8000
@@ -151,13 +163,17 @@ class Organism
 			clearInterval @_stressAdjustmentInterval
 			@_stressAdjustmentInterval = setInterval @adjustStressThresholds.bind(@), @_stressAdjustmentTime
 
+	#
 	# Returns the disharmony history data, reduced to the
 	# given number of data entries.
+	#
 	getDisharmonyHistoryData: (numEntries = 300) ->
 		#console.log "#getDisharmonyHistoryData", @disharmonyHistory
 		if numEntries > 0 then @disharmonyHistory.slice -numEntries else @disharmonyHistory.slice -@disharmonyHistory.length
 
-
+	#
+	# Returns a disharmony average from a given number of entries
+	#
 	getAverageDisharmony: (numEntries, type = 'sum') ->
 		history = @getDisharmonyHistoryData numEntries
 
@@ -167,16 +183,27 @@ class Organism
 
 		return sum / history.length
 
+	#
+	# Returns the relative change in disharmony from some given number
+	# of entries back in time.
+	#
 	getDisharmonyChange: (entriesBack = 2, type = 'sum') ->
 		history = @getDisharmonyHistoryData entriesBack
 		dataIndex = if type is 'actual' then 2 else 1
 		return history[history.length - 1][dataIndex] / history[0][dataIndex]
 
+	#
+	# Returns a factor's relative change in disharmony from some given
+	# number of entries back.
+	#
 	getDisharmonyChangeForFactor: (factorType, entriesBack = 2) ->
 		factor = @getFactorOfType factorType
 		history = factor.disharmonyHistory.slice( if entriesBack < factor.disharmonyHistory.length then -entriesBack else 0 )
 		return history[history.length - 1] / history[0]
 
+	#
+	# Offsets the disharmony threshold depending on whether in stress mode
+	#
 	adjustStressThresholds: () ->
 		if @_inStressMode
 			@stress.thresholdLeave = @_actualDisharmony * 1
@@ -185,7 +212,9 @@ class Organism
 
 		#console.log('@adjustStressThresholds', 'new thresholds:', @stress)
 
+	#
 	# Creates the organism's nodes
+	#
 	_createNodes: (numNodes) ->
 
 		# Create indexes

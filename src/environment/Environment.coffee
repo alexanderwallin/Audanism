@@ -1,5 +1,12 @@
 ###
 	Environment
+
+	The environment contains a set of organisms, a "conductor" 
+	(responsible for the generative audio), handles outer influences 
+	and the main loop.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class Environment
 
@@ -9,10 +16,12 @@ class Environment
 	# The time in milliseconds between each iteration
 	@TIME_INTERVAL: 500
 
+	#
 	# Constructor
 	#
 	# Creates organisms and interpreters. Initializes the loop and
 	# handles core actions in each iteration
+	#
 	constructor: () ->
 		
 		# Running state variables
@@ -47,39 +56,48 @@ class Environment
 		EventDispatcher.listen 'audanism/controls/stop',  @, @stop
 		EventDispatcher.listen 'audanism/controls/step',  @, @step
 
+	#
 	# Initializes the loop
+	#
 	run: () ->
-		#@start()
-
 		@_intervalId = setInterval =>
 			@handleIteration()
 		, Environment.TIME_INTERVAL
 
-		#@handleIteration()
-
+	#
 	# Starts/resumes the loop
+	#
 	start: () ->
 		@_isRunning = true
 
 		# Activate sources
 		sourceAdapter.activate() for sourceAdapter in @_influenceSources
 
+	#
 	# Pauses the loop
+	#
 	pause: () ->
 		@_isRunning = false
 
 		# Deactivate sources
 		(source.deactivate() for source in @_influenceSources)
 
+	#
 	# Stops the loop
+	#
 	stop: () ->
 		@_isRunning = false
 		clearInterval @_intervalId
 
+	#
 	# Performs one step of the loop
+	#
 	step: () ->
 		@_isSingleStep = true
 
+	#
+	# UI controls listener
+	#
 	listenToControls: () ->
 		$(document).on 'dmstart', (e) =>
 			EventDispatcher.trigger 'audanism/controls/start' #@start()
@@ -90,16 +108,14 @@ class Environment
 		$(document).on 'dmstep', (e) =>
 			EventDispatcher.trigger 'audanism/controls/step' #@step()
 
+	#
 	# Handles the current iteration by listening to 
+	#
 	handleIteration: () ->
 		@_iterationCount++
-		# console.log "#handleIteration #{ @_iterationCount }, running: #{ @_isRunning }, step: #{ @_isSingleStep }"
-
+		
 		# If running, trigger node comparisons for all organisms
 		if @_isRunning or @_isSingleStep
-
-			#if @conductor? and @conductor.isMuted
-			#	@conductor.unmute()
 
 			for organism in @_organisms
 				
@@ -115,11 +131,9 @@ class Environment
 				EventDispatcher.trigger 'audanism/iteration', [{ 'count':@_iterationCount, 'organism':organism}]
 
 				@_isSingleStep = false
-		else
 
-			#if @conductor? and not @conductor.isMuted
-			#	@conductor.mute()
-
+	#
+	# Creates influence sources
 	#
 	createInfluenceSources: () ->
 		@_influenceSources = []
@@ -131,7 +145,8 @@ class Environment
 		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(3000, 'audanism')
 		@_influenceSources.push new Audanism.SourceAdapter.WheatherSourceAdapter(4000)
 
-
+	#
+	# Handles an influence
 	#
 	influence: (influenceData) ->
 		return if not @_isRunning
@@ -226,7 +241,9 @@ class Environment
 						cell = getRandomElements(node.getCells(), 1)[0]
 						cell.addFactorValue valueMod
 
-
+	#
+	# Let there be music.
+	#
 	initConductor: () ->
 		@conductor = new Audanism.Audio.Conductor()
 		@conductor.setOrganism @_organisms[0]

@@ -26,7 +26,6 @@ class NodeComparer
 		# 
 		for aCell in nodes[0].getCells()
 			for bCell in nodes[1].getCells()
-				# console.log "        aCell.type =", aCell.factorType, "bCell.type = ", bCell.factorType, "==> ", aCell.factorType is bCell.factorType
 				if aCell.factorType is bCell.factorType
 					console.log "      alter factor #{ aCell.factorType } for cells in #{ nodes[0].nodeId } and #{ nodes[1].nodeId }"
 

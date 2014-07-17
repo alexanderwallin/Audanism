@@ -2,6 +2,13 @@
 
 /*
 	Environment
+
+	The environment contains a set of organisms, a "conductor" 
+	(responsible for the generative audio), handles outer influences 
+	and the main loop.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 */
 
 
@@ -120,8 +127,6 @@
           _results.push(this._isSingleStep = false);
         }
         return _results;
-      } else {
-
       }
     };
 

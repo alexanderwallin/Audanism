@@ -1,5 +1,11 @@
 ###
 	Factor
+
+	A factor a factor type and a value. They are used when calculating
+	disharmonic relations to nodes sharing the same parent organism.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class Factor
 
@@ -29,7 +35,9 @@ class Factor
 		#5: # Neuroticism
 			#4: -20
 
-
+	#
+	# Factor factory method
+	#
 	@createFactor: (factorType, factorValue = 0) ->
 		switch factorType
 			when Factor.TYPE_OPENNESS then new Audanism.Factor.OpennessFactor()
@@ -39,7 +47,9 @@ class Factor
 			when Factor.TYPE_NEUROTICISM then new Audanism.Factor.NeuroticismFactor()
 			else null
 
+	#
 	# Constructor
+	#
 	constructor: (@factorType, @factorValue) ->
 
 		@factorValue = randomInt(10, 90) if not @factorValue
@@ -52,15 +62,24 @@ class Factor
 		@relativeDisharmony = []
 		@disharmonyHistory = []
 
+	#
+	# Adds some value to the factor's value.
+	#
 	addValue: (value) ->
 		@factorValue += value
 		@factorValue = 0 if @factorValue < 0
 		@factorValue = 100 if @factorValue > 100
 
+	#
+	# Adds a disharmony value to the factor's disharmony history.
+	#
 	setDisharmony: (disharmony) ->
 		@disharmony = disharmony
 		@disharmonyHistory.push disharmony
 
+	#
+	# Return a string representation of this factor
+	#
 	toString: () ->
 		"<Factor ##{ @factorType } (#{ @name }); factorValue = #{ @factorValue }>"
 

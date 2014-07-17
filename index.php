@@ -1,7 +1,12 @@
 <?php
+/**
+ * Audanism index.php.
+ */
 
+// Fake localhost
 $runLocal = @$_GET['local'] == 'yes';
 
+// Check environment
 $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 ?><!DOCTYPE html>
@@ -12,27 +17,19 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<!-- Meta -->
 		<title>Audanism - An audiovisual online quasi-organism</title>
 		<meta name="description" content="Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism.">
 		<meta property="og:image" content="http://<?php echo $_SERVER['HTTP_HOST']; ?>/img/audanism-og-image2.jpg">
 		<meta name="viewport" content="width=device-width">
 
+		<!-- Icon -->
 		<link rel="shortcut icon" href="img/favicon.jpg">
-		<!-- <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'> -->
-		<!-- <link href='http://fonts.googleapis.com/css?family=Dosis:300,400,700' rel='stylesheet' type='text/css'> -->
+
+		<!-- CSS -->
 		<link rel="stylesheet" href="css/normalize.css">
 		<link rel="stylesheet" href="css/main.css?v=20140317-1">
-
-		<?php /* if ($runLocal) : ?>
-			<script type="text/javascript" src="js/vendor/google.jsapi.js?v=<?php echo time(); ?>"></script>
-			<!-- <script type="text/javascript" src="js/vendor/google.visualization.js?v=<?php echo time(); ?>"></script> -->
-			<script type="text/javascript" src="js/vendor/google.charts.js?v=<?php echo time(); ?>"></script>
-		<?php else : ?>
-			<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-			<script type="text/javascript">
-			google.load("visualization", "1", {packages:["corechart"]});
-			</script>
-		<?php endif; */ ?>
 	</head>
 	<body class="paused">
 
@@ -62,20 +59,17 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 					<!-- Introduction -->
 					<div id="intro" class="tab-content active" data-tab="1">
 						<h1>Audanism</h1>
-						<!--<p class="author">Created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a></p>-->
-
+						
 						<p>Audanism is an online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism. It is a way of studying views on life and data simultaneously through philosophical, psychological and technical approaches and analysis.</p>
 
-						<p>Here you may spawn a tiny piece of online, computerized life. <?php /*Once the audanism has started its lifecycle, you can affect it via its environment (the Internet) following the guidelines on the page.*/ ?></p>
+						<p>Here you may spawn a tiny piece of online, computerized life.</p>
 
-						<p class="note">Note: This site is developed using modern web technologies (WebGL and Web Audio API) for the Google Chrome desktop web browser and needs a lot of computer juice to run. <?php /*If you are experiencing problems you watch the video from the link below.*/ ?></p>
+						<p class="note">Note: This site is developed using modern web technologies (WebGL and Web Audio API) for the Google Chrome desktop web browser and needs a lot of computer juice to run.</p>
 
 						<p class="note">Audanism is created by <a href="http://alexanderwallin.com" target="_blank">Alexander Wallin</a>.</p>
 
 						<div id="intro-actions">
 							<a id="intro-btn-start" href="#start">Initiate life</a>
-							<!-- <a id="intro-btn-wiki" href="#wiki">Read the project outline</a> -->
-							<!-- <a id="intro-btn-video" href="#video">Watch an Audanism screencast</a> -->
 						</div>
 					</div>
 

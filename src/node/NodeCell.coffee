@@ -1,13 +1,27 @@
 ###
-	A node cell
+	NodeCell
+
+	A node cell has a factor type and a value.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 ###
 class NodeCell
 
+	#
+	# Returns a copy of this cell
+	#
 	clone: () ->
 		new Audanism.Node.NodeCell @factorType, @factorValue
 
+	#
+	# Constructor
+	#
 	constructor: (@factorType, @factorValue) ->
 
+	#
+	# Adds some value to the cell's value
+	#
 	addFactorValue: (value) ->
 		@factorValue += value
 		@factorValue = 0 if @factorValue < 0

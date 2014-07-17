@@ -2,6 +2,18 @@
 
 /*
 	Organism
+
+	An organism object contains sets of nodes and factors. It has a stress 
+	mode, which is used to determine ways of calculating its disharmony.
+	The threshold for when to enter or leave stress mode is self-adjusting 
+	over time, meaning it will normalize to the current disharmony state 
+	every once in a while.
+
+	It also provides methods for getting historical disharmony data regarding
+	its nodes and factors.
+
+	@author Alexander Wallin
+	@url    http://alexanderwallin.com
 */
 
 
