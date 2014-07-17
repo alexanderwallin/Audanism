@@ -29,7 +29,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 
 		<!-- CSS -->
 		<link rel="stylesheet" href="css/normalize.css">
-		<link rel="stylesheet" href="css/main.css?v=20140317-1">
+		<link rel="stylesheet" href="css/main.css?v=20140717-1">
 	</head>
 	<body class="paused">
 
@@ -266,7 +266,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<?php if ($isProduction) : ?>
 
 		<!-- Data scripts -->
-		<script defer src="js/audanism.js?v=20140313-1"></script>
+		<script defer src="js/audanism.js?v=20140717-1"></script>
 
 		<?php else : ?>
 
