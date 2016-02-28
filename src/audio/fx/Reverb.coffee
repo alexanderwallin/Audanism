@@ -15,7 +15,7 @@ class Reverb extends Audanism.Audio.FX.FX
 
 		# Wet gain out
 		@wet            = Audanism.Audio.audioContext.createGain()
-		@wet.gain.value = wetAmount
+		@wet.gain.value = @wetAmount
 		@rev.connect( @wet )
 
 		super( @rev, @wet )
