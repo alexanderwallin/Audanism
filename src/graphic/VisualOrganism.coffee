@@ -165,7 +165,7 @@ class VisualOrganism
 
 
 		# Renderer
-		@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':true }
+		@renderer = new THREE.WebGLRenderer { 'alpha':false, 'antialias':false }
 		@renderer.setSize window.innerWidth, window.innerHeight
 		@renderer.clearColor = 0xff1190
 
