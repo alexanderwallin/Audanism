@@ -91,7 +91,7 @@
           influenceData.meta.sourceAttr = 'temperature';
           influenceData.meta.summary = "It's around " + temperature + "°C in " + $xml.find('location name').text();
       }
-      if (townWeather) {
+      if (townWeather && influenceData.factor.valueModifier) {
         EventDispatcher.trigger('audanism/influence', influenceData);
         return EventDispatcher.trigger('audanism/influence/factor/done', [[influenceData]]);
       }

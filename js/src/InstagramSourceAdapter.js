@@ -101,6 +101,11 @@
           EventDispatcher.trigger('audanism/influence', influenceData);
         }
       }
+      influenceDataList = influenceDataList.filter((function(_this) {
+        return function(x) {
+          return x.node.valueModifier;
+        };
+      })(this));
       if (influenceDataList.length > 0) {
         EventDispatcher.trigger('audanism/influence/node/done', [influenceDataList]);
       }
