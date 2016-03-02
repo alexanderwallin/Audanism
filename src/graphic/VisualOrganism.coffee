@@ -544,9 +544,9 @@ class VisualOrganism
 			ball3d.userData.bornAt          = @frame
 
 			# Add ball to scene
-			ball3d.scale.set 0, 0 ,0
+			ball3d.scale.set 0.01, 0.01 ,0.01
 			@scene.add ball3d
-			@_tweenSomething ball3d.scale, { 'x':0, 'y':0, 'z':0 }, { 'x':1, 'y':1, 'z':1 }, 1000
+			@_tweenSomething ball3d.scale, { 'x':0.01, 'y':0.01, 'z':0.01 }, { 'x':1, 'y':1, 'z':1 }, 1000
 			
 			@balls[ball.ballId] = ball
 
@@ -651,12 +651,12 @@ class VisualOrganism
 			)
 			torus.position.y = (factor3d.geometry.height / 2) + (torusMargin + existingToruses.length * (torusMargin + torusSize))
 			torus.rotation.x = Math.PI / 2
-			torus.scale.set 0, 0, 0
+			torus.scale.set 0.01, 0.01, 0.01
 
 			# Add and scale up torus
 			factor3d.userData.toruses.push torus
 			factor3d.add torus
-			@_tweenSomething torus.scale, { 'x':0, 'y':0, 'z':0 }, { 'x':1, 'y':1, 'z':1 }, 1000
+			@_tweenSomething torus.scale, { 'x':0.01, 'y':0.01, 'z':0.01 }, { 'x':1, 'y':1, 'z':1 }, 1000
 
 			# Done.
 			factor3d.userData.isModifying
