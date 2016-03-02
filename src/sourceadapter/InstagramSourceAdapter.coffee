@@ -120,6 +120,8 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 				EventDispatcher.trigger 'audanism/influence', influenceData
 
+		influenceDataList = influenceDataList.filter (x) => x.node.valueModifier
+
 		if influenceDataList.length > 0
 			EventDispatcher.trigger 'audanism/influence/node/done', [influenceDataList]
 

@@ -109,7 +109,7 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 
 		# Trigger influence
-		if townWeather
+		if townWeather and influenceData.factor.valueModifier
 			EventDispatcher.trigger 'audanism/influence', influenceData
 			EventDispatcher.trigger 'audanism/influence/factor/done', [[influenceData]]
 
