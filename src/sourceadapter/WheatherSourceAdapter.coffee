@@ -109,8 +109,9 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 
 		# Trigger influence
-		EventDispatcher.trigger 'audanism/influence', influenceData
-		EventDispatcher.trigger 'audanism/influence/factor/done', [[influenceData]]
+		if townWeather
+			EventDispatcher.trigger 'audanism/influence', influenceData
+			EventDispatcher.trigger 'audanism/influence/factor/done', [[influenceData]]
 
 
 window.Audanism.SourceAdapter.WheatherSourceAdapter = WheatherSourceAdapter
