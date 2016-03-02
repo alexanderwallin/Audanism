@@ -266,7 +266,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<?php if ($isProduction) : ?>
 
 		<!-- Data scripts -->
-		<script defer src="js/audanism.js?v=20140717-1"></script>
+		<script defer src="js/audanism.js?v=2016-03-02"></script>
 
 		<?php else : ?>
 
