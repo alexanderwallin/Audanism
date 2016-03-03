@@ -265,7 +265,7 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST'])
 		<script src="js/vendor/AudioContextMonkeyPatch.js"></script>
 
 		<!-- Data scripts -->
-		<script defer src="js/audanism.coffeeify.js?v=20160302-2"></script>
+		<script defer src="js/audanism.js?v=20160302-2"></script>
 
 	</body>
 </html>

@@ -2,5 +2,8 @@
 .DS_Store
 node_modules
 npm-debug.log*
+*.js.map
 
 !.gitkeep
+
+js/audanism.js
