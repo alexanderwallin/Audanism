@@ -6,6 +6,10 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+EventDispatcher = require '../event/EventDispatcher.coffee'
+randomInt = require('../util/utilities.coffee').randomInt
+
 class VisualOrganism
 
 	#
@@ -936,8 +940,7 @@ class VisualOrganism
 
 		tween.start()
 
-	
 
+#window.Audanism.Graphic.VisualOrganism = VisualOrganism
 
-
-window.Audanism.Graphic.VisualOrganism = VisualOrganism
+module.exports = VisualOrganism

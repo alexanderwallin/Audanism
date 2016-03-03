@@ -1,45 +1,51 @@
+
+AudioContext = require '../AudioContext.coffee'
+Voice = require './Voice.coffee'
+ASDR = require '../module/ASDR.coffee'
+Harmonizer = require '../module/Harmonizer.coffee'
+
 ###
 	MonoistEnvMulti synth - multiple oscillators with an envelope
 ###
-class MonoistEnvMod extends Audanism.Audio.Synthesizer.Voice
+class MonoistEnvMod extends Voice
 
 	# Constructor
 	constructor: (note) ->
 		super(note)
 
 		# Envelopes
-		@asdr = new Audanism.Audio.Module.ASDR( 0.03, 0.01, 100, 1.5 )
+		@asdr = new ASDR( 0.03, 0.01, 100, 1.5 )
 
-		@envelope1 = Audanism.Audio.audioContext.createGain()
+		@envelope1 = AudioContext.createGain()
 		@envelope1.gain.setValueAtTime( 0, 0 )
 		@envelope1.connect( @pan )
 
 		@envelopes.push( @envelope1 )
 
 		# Create, connect and start oscillators
-		@osc1                 = Audanism.Audio.audioContext.createOscillator()
+		@osc1                 = AudioContext.createOscillator()
 		@osc1.type            = @getRandomOscType() #'sine'
-		@osc1.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote( @note )
+		@osc1.frequency.value = Harmonizer.getFreqFromNote( @note )
 		@osc1.connect( @envelope1 )
 
 		@oscillators.push( @osc1 )
 
 		# Frequency modulator
-		@freqModGain1              = Audanism.Audio.audioContext.createGain()
+		@freqModGain1              = AudioContext.createGain()
 		@freqModGain1.gain.value   = 5
 		@freqModGain1.connect( @osc1.frequency )
 
-		@freqMod1                  = Audanism.Audio.audioContext.createOscillator()
+		@freqMod1                  = AudioContext.createOscillator()
 		@freqMod1.type             = @getRandomOscType() #'square'
 		@freqMod1.frequency.value  = 20
 		@freqMod1.connect( @freqModGain1 )
 		@freqMod1.start( 0 )
 
-		@freqModGain2              = Audanism.Audio.audioContext.createGain()
+		@freqModGain2              = AudioContext.createGain()
 		@freqModGain2.gain.value   = 7
 		@freqModGain2.connect( @osc1.frequency )
 
-		@freqMod2                  = Audanism.Audio.audioContext.createOscillator()
+		@freqMod2                  = AudioContext.createOscillator()
 		@freqMod2.type             = @getRandomOscType() #'triangle'
 		@freqMod2.frequency.value  = 6.234
 		@freqMod2.connect( @freqModGain2 )
@@ -51,7 +57,7 @@ class MonoistEnvMod extends Audanism.Audio.Synthesizer.Voice
 	###
 	# Play a note
 	noteOn: (note) ->
-		now           = Audanism.Audio.audioContext.currentTime
+		now           = AudioContext.currentTime
 		attackEndTime = now + @asdr.attack
 
 		# Attack
@@ -67,7 +73,7 @@ class MonoistEnvMod extends Audanism.Audio.Synthesizer.Voice
 
 	# Kill a note
 	noteOff: () ->
-		now         = Audanism.Audio.audioContext.currentTime
+		now         = AudioContext.currentTime
 		releaseTime = now + @asdr.release
 
 		console.log(now)
@@ -83,4 +89,4 @@ class MonoistEnvMod extends Audanism.Audio.Synthesizer.Voice
 
 
 
-window.Audanism.Audio.Synthesizer.MonoistEnvMod = MonoistEnvMod
+module.exports = MonoistEnvMod

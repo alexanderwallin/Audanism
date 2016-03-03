@@ -1,3 +1,6 @@
+
+AudioContext = require '../AudioContext.coffee'
+
 ###
 	Monoism synth
 ###
@@ -7,20 +10,20 @@ class Monoista
 	constructor: (@note) ->
 
 		# connection point for all voices
-		@effectChain        = Audanism.Audio.audioContext.createGain()
+		@effectChain        = AudioContext.createGain()
 
 		# convolver for a global reverb - just an example "global effect"
-		@revNode            = Audanism.Audio.audioContext.createGain() # createConvolver();
+		@revNode            = AudioContext.createGain() # createConvolver();
 
 		# gain for reverb
-		@revGain            = Audanism.Audio.audioContext.createGain()
+		@revGain            = AudioContext.createGain()
 		@revGain.gain.value = 0.3
 
 		# gain for reverb bypass.  Balance between this and the previous = effect mix.
-		@revBypassGain      = Audanism.Audio.audioContext.createGain()
+		@revBypassGain      = AudioContext.createGain()
 
 		# overall volume control node
-		@volNode            = Audanism.Audio.audioContext.createGain()
+		@volNode            = AudioContext.createGain()
 		@volNode.gain.value = 0.25
 
 		@effectChain.connect(   @revNode )
@@ -30,7 +33,7 @@ class Monoista
 		@revBypassGain.connect( @volNode )
 
 		# hook it up to the "speakers"
-		@volNode.connect( Audanism.Audio.audioContext.destination )
+		@volNode.connect( AudioContext.destination )
 
 
 
@@ -38,7 +41,7 @@ class Monoista
 		@freq = Audanism.Audio.Harmonizer.getFreqFromNote @note
 
 		# create oscillator
-		@osc = Audanism.Audio.audioContext.createOscillator()
+		@osc = AudioContext.createOscillator()
 		@osc.frequency.setValueAtTime @originalFrequency, 0
 
 		# create the volume envelope
@@ -48,7 +51,7 @@ class Monoista
 
 		# set up the volume ADSR envelope
 		@asdr        = new Audanism.Audio.ASDR 7, 15, 50, 20
-		now          = Audanism.Audio.audioContext.currentTime
+		now          = AudioContext.currentTime
 		envAttackEnd = now + (@asdr.attack / 10.0)
 
 		@envelope.gain.setValueAtTime 0.0, now
@@ -62,7 +65,7 @@ class Monoista
 
 	# Stop a note
 	noteOff: () ->
-		now     =  Audanism.Audio.audioContext.currentTime
+		now     =  AudioContext.currentTime
 		release = now + (@asdr.release / 10.0)
 
 		this.envelope.gain.cancelScheduledValues now
@@ -73,4 +76,4 @@ class Monoista
 
 
 
-window.Audanism.Audio.Synthesizer.Monoista = Monoista
+module.exports = Monoista

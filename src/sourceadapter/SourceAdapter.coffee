@@ -50,4 +50,6 @@ class SourceAdapter
 		#console.log "!!!  Trigger influence:", influenceData, "on", @listener
 		@listener.influence influenceData if @listener.influence?
 
-window.Audanism.SourceAdapter.SourceAdapter = SourceAdapter
+#window.Audanism.SourceAdapter.SourceAdapter = SourceAdapter
+
+module.exports = SourceAdapter

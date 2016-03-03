@@ -7,7 +7,8 @@
 $runLocal = @$_GET['local'] == 'yes';
 
 // Check environment
-$isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
+$isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST'])
+	|| (preg_match("/\.data/", $_SERVER['HTTP_HOST']) && @$_GET['prod'] == 'yes');
 
 ?><!DOCTYPE html>
 <!--[if lt IE 7]>	  <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -263,89 +264,8 @@ $isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST']);
 		<script src="js/vendor/sprintf.min.js"></script>
 		<script src="js/vendor/AudioContextMonkeyPatch.js"></script>
 
-		<?php if ($isProduction) : ?>
-
 		<!-- Data scripts -->
-		<script defer src="js/audanism.js?v=20160302-2"></script>
+		<script defer src="js/audanism.coffeeify.js?v=20160302-2"></script>
 
-		<?php else : ?>
-
-		<!-- Utility functions -->
-		<script defer src="js/src/utilities.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Audanism object initializer -->
-		<script defer src="js/src/Audanism.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Global extensions -->
-		<script defer src="js/src/Object.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Math.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Array.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Util -->
-		<script defer src="js/src/TextInterpreter.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Event -->
-		<script defer src="js/src/EventDispatcher.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Node -->
-		<script defer src="js/src/Node.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/NodeCell.js?v=<?php echo time(); ?>"></script>
-		
-		<!-- Environment -->
-		<script defer src="js/src/Organism.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Environment.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Interpreter.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Factor -->
-		<script defer src="js/src/Factor.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/AgreeablenessFactor.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/ConscientiousnessFactor.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/ExtraversionFactor.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/NeuroticismFactor.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/OpennessFactor.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Calculator -->
-		<script defer src="js/src/DisharmonyCalculator.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Source adapters -->
-		<script defer src="js/src/SourceAdapter.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/RandomSourceAdapter.js?v=<?php echo time(); ?>"></script>
-		<!-- <script defer src="js/src/TwitterSourceAdapter.js?v=<?php echo time(); ?>"></script> -->
-		<script defer src="js/src/InstagramSourceAdapter.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/WheatherSourceAdapter.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Sound -->
-		<script defer src="js/src/Harmonizer.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/ASDR.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Impulse.js?v=<?php echo time(); ?>"></script>
-		
-		<script defer src="js/src/FXChain.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/FX.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Reverb.js?v=<?php echo time(); ?>"></script>
-
-		<script defer src="js/src/Instrument.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/TestInstrument.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Drone.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Pad.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/PercArpeggiator.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/NoisePink.js?v=<?php echo time(); ?>"></script>
-
-		<script defer src="js/src/Voice.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Monoist.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistEnv.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistEnvMod.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistEnvModWide.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistEnvRev.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistEnvMulti.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/MonoistPerc.js?v=<?php echo time(); ?>"></script>
-		<script defer src="js/src/Conductor.js?v=<?php echo time(); ?>"></script>
-
-		<!-- GUI -->
-		<script defer src="js/src/GUI.js?v=<?php echo time(); ?>"></script>
-
-		<!-- Visual -->
-		<script defer src="js/src/VisualOrganism.js?v=<?php echo time(); ?>"></script>
-
-		<?php endif; ?>
 	</body>
 </html>

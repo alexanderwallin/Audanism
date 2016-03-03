@@ -13,17 +13,18 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+require '../extend/Math.coffee'
+
+Constants = require './Constants.coffee'
+Factor = require '../factor/Factor.coffee'
+Node = require '../node/Node.coffee'
+DisharmonyCalculator = require '../calculator/DisharmonyCalculator.coffee';
+EventDispatcher = require '../event/EventDispatcher.coffee'
+
+getRandomElements = require('../extend/Array.coffee').getRandomElements
+
 class Organism
-
-	# Options
-	@NUM_FACTORS: 5
-	@DEFAULT_NUM_NODES: 10
-	@DISTRIBUTE_FACTOR_VALUES: false
-
-	# Stress thresholds - the thresholds for when the organism enters
-	# and leaves stress mode
-	@STRESS_THRESHOLD_ENTER: 1
-	@STRESS_THRESHOLD_LEAVE: 2
 
 	# Constructor
 	constructor: (numNodes = -1) ->
@@ -46,18 +47,18 @@ class Organism
 
 
 		# Create factors
-		@_factors = (Audanism.Factor.Factor.createFactor i, 0 for i in [1..Audanism.Environment.Organism.NUM_FACTORS])
+		@_factors = (Factor.createFactor i, 0 for i in [1..Constants.NUM_FACTORS])
 		EventDispatcher.trigger 'audanism/init/factors', [@_factors]
 
 		# Create nodes
-		numNodes = Audanism.Environment.Organism.DEFAULT_NUM_NODES if numNodes <= 0
+		numNodes = Constants.DEFAULT_NUM_NODES if numNodes <= 0
 		@_createNodes numNodes
 		EventDispatcher.trigger 'audanism/init/nodes', [@_nodes]
 		EventDispatcher.listen 'audanism/node/add', @, (info) =>
 			@_createNodes info.numNodes
 
 		# Disharmony calculator
-		@disharmonyCalculator = new Audanism.Calculator.DisharmonyCalculator @
+		@disharmonyCalculator = new DisharmonyCalculator @
 
 		# Disharmony history
 		@disharmonyHistory = []
@@ -113,7 +114,7 @@ class Organism
 			nodes = @_getRandomNodes 2
 
 			# Trigger alteration of nodes
-			comparisonMode = if @_inStressMode and false then Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else Audanism.Calculator.DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
+			comparisonMode = if @_inStressMode and false then DisharmonyCalculator.NODE_COMPARISON_MODE_FACTOR_HARMONY else DisharmonyCalculator.NODE_COMPARISON_MODE_ORGANISM_HARMONY
 
 			# Notify observes
 			EventDispatcher.trigger 'audanism/compare/nodes', [{ 'nodes':nodes, 'comparisonMode':comparisonMode }]
@@ -225,16 +226,16 @@ class Organism
 		# Create nodes array with node IDs as key
 		if not @_nodes
 			@_nodes = []
-		nodes = (new Audanism.Node.Node() for i in [1..numNodes])
+		nodes = (new Node() for i in [1..numNodes])
 		@_nodes[node.nodeId] = node for node in nodes
-		
+
 		# Add nodes to indexes
 		for node in nodes
 			for cell in node.getCells()
 				@_nodeCellIndex[cell.factorType].push node
 
 		# Distribute the factor values amongst the nodes
-		if Organism.DISTRIBUTE_FACTOR_VALUES
+		if Constants.DISTRIBUTE_FACTOR_VALUES
 			for factor in @_factors
 				nodesWithFactorCells = @getNodesWithCellsOfFactorType factor.factorType
 				getRandomElements(nodesWithFactorCells, 1)[0].addCellValue(factor.factorType, 1) for i in [1..factor.factorValue]
@@ -263,5 +264,5 @@ class Organism
 		getRandomElements(@_nodeCellIndex[factorType], numNodes)
 
 
-
-window.Audanism.Environment.Organism = Organism
+#window.Organism = Organism
+module.exports = Organism

@@ -14,7 +14,7 @@ class FXChain
 
 		# The @wet gain provides a way of balancing different chains
 		# between each other
-		@wet = Audanism.Audio.audioContext.createGain()
+		@wet = AudioContext.createGain()
 		@wet.connect( @out )
 
 	addFx: (@fx) ->

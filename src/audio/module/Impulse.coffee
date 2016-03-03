@@ -1,3 +1,6 @@
+
+AudioContext = require '../AudioContext.coffee'
+
 ###
 	Impulse module
 ###
@@ -5,9 +8,9 @@ class Impulse
 
 	constructor: (@seconds, @decay, @reverse) ->
 		@reverse ?= false
-		rate      = Audanism.Audio.audioContext.sampleRate
+		rate      = AudioContext.sampleRate
 		length    = rate * @seconds
-		@impulse  = Audanism.Audio.audioContext.createBuffer( 2, length, rate )
+		@impulse  = AudioContext.createBuffer( 2, length, rate )
 		impulseL  = @impulse.getChannelData( 0 )
 		impulseR  = @impulse.getChannelData( 1 )
 		n
@@ -22,4 +25,4 @@ class Impulse
 		return @impulse
 
 
-window.Audanism.Audio.Module.Impulse = Impulse
+module.exports = Impulse

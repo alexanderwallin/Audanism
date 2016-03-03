@@ -1,7 +1,10 @@
+
+Instrument = require './Instrument.coffee'
+
 ###
 	Drone
 ###
-class Drone extends Audanism.Audio.Instrument.Instrument
+class Drone extends Instrument
 
 	constructor: (@instrumentsIn, @unison = true) ->
 		super(@instrumentsIn, 'MonoistEnvModWide', false)
@@ -111,4 +114,4 @@ class Drone extends Audanism.Audio.Instrument.Instrument
 				clearInterval( vibrate.interval )
 
 
-window.Audanism.Audio.Instrument.Drone = Drone
+module.exports = Drone

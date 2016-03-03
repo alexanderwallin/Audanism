@@ -1,9 +1,6 @@
-build/
-js/script-list*
-js/vendor-combined.js
-js/vendor.js
-js/src/_*
-places-to-json.php
-launch.php
-test/
-js/audanism-combined.js
+
+.DS_Store
+node_modules
+npm-debug.log*
+
+!.gitkeep

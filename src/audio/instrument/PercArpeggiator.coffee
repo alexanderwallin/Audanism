@@ -1,7 +1,12 @@
+
+Instrument = require './Instrument.coffee'
+randomInt = require('../../util/utilities.coffee').randomInt
+
 ###
 	PercArpeggiator
 ###
-class PercArpeggiator extends Audanism.Audio.Instrument.Instrument
+
+class PercArpeggiator extends Instrument
 
 	constructor: (@instrumentsIn, @frequency, @shuffleAmount) ->
 		super(@instrumentsIn, 'MonoistPerc', true)
@@ -109,4 +114,5 @@ class PercArpeggiator extends Audanism.Audio.Instrument.Instrument
 
 
 
-window.Audanism.Audio.Instrument.PercArpeggiator = PercArpeggiator
+module.exports = PercArpeggiator
+

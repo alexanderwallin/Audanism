@@ -1,7 +1,13 @@
+
+AudioContext = require '../AudioContext.coffee'
+Voice = require './Voice.coffee'
+ASDR = require '../module/ASDR.coffee'
+Harmonizer = require '../module/Harmonizer.coffee'
+
 ###
 	MonoistEnv synth - sine with an envelope
 ###
-class MonoistPerc extends Audanism.Audio.Synthesizer.Voice
+class MonoistPerc extends Voice
 
 	# Constructor
 	constructor: (note) ->
@@ -9,16 +15,16 @@ class MonoistPerc extends Audanism.Audio.Synthesizer.Voice
 		super( note )
 
 		# Delay
-		@delay               = Audanism.Audio.audioContext.createDelay()
+		@delay               = AudioContext.createDelay()
 		@delay.delayTime     = 4
 		@delay.connect( @pan )
 
 		# LPF and HPF
-		@lpf                 = Audanism.Audio.audioContext.createBiquadFilter()
+		@lpf                 = AudioContext.createBiquadFilter()
 		@lpf.type            = 'lowpass'
 		@lpf.frequency.value = 20000
 		
-		@hpf                 = Audanism.Audio.audioContext.createBiquadFilter()
+		@hpf                 = AudioContext.createBiquadFilter()
 		@hpf.type            = 'highpass'
 		@hpf.frequency.value = 0
 
@@ -26,43 +32,43 @@ class MonoistPerc extends Audanism.Audio.Synthesizer.Voice
 		@lpf.connect( @delay )
 
 		# Envelope
-		@asdr = new Audanism.Audio.Module.ASDR( 0.01, 0, 1, 0.2 )
-		@envelope = Audanism.Audio.audioContext.createGain()
+		@asdr = new ASDR( 0.01, 0, 1, 0.2 )
+		@envelope = AudioContext.createGain()
 		@envelope.gain.setValueAtTime( 0, 0 )
 		@envelope.connect( @hpf )
 
 		@envelopes.push( @envelope )
 
 		# Distortion
-		#@dist = Audanism.Audio.audioContext.createWaveShaper()
+		#@dist = AudioContext.createWaveShaper()
 		#@curve = (Math.sin(i ))
 
 		# Create, connect and start oscillator
-		@osc = Audanism.Audio.audioContext.createOscillator()
-		@osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote( @note )
+		@osc = AudioContext.createOscillator()
+		@osc.frequency.value = Harmonizer.getFreqFromNote( @note )
 		@osc.connect( @envelope )
 		@osc.start( 0 )
 
 		@oscillators.push( @osc )
 
 		# Modulation
-		@mod = Audanism.Audio.audioContext.createOscillator()
+		@mod = AudioContext.createOscillator()
 		@mod.type = @getRandomOscType()
 		@mod.frequency = randomInt( 10, 20 )
 		@mod.start( 0 )
 
-		@modGain = Audanism.Audio.audioContext.createGain()
+		@modGain = AudioContext.createGain()
 		@modGain.gain.value = 20
 
 		@mod.connect( @modGain )
 		@modGain.connect( @osc.frequency )
 
-		@mod2 = Audanism.Audio.audioContext.createOscillator()
+		@mod2 = AudioContext.createOscillator()
 		@mod2.type = 'sawtooth' # @getRandomOscType()
 		@mod2.frequency = randomInt( 500, 1000 )
 		@mod2.start( 0 )
 
-		@modGain2 = Audanism.Audio.audioContext.createGain()
+		@modGain2 = AudioContext.createGain()
 		@modGain2.gain.value = 100
 
 		@mod2.connect( @modGain2 )
@@ -71,7 +77,7 @@ class MonoistPerc extends Audanism.Audio.Synthesizer.Voice
 	# Play a note
 	noteOn: () ->
 		#console.log('... wait for', @waitTime)
-		now            = Audanism.Audio.audioContext.currentTime + @waitTime
+		now            = AudioContext.currentTime + @waitTime
 		attackEndTime  = now + @asdr.attack
 		decayEndTime   = attackEndTime + @asdr.decay
 		releaseEndTime = attackEndTime + @asdr.release
@@ -95,4 +101,4 @@ class MonoistPerc extends Audanism.Audio.Synthesizer.Voice
 
 
 
-window.Audanism.Audio.Synthesizer.MonoistPerc = MonoistPerc
+module.exports = MonoistPerc

@@ -1,6 +1,6 @@
 
 
-window.randomInt = (lower, upper=0) ->
+randomInt = (lower, upper=0) ->
 	start = Math.random()
 	if not lower?
 		[lower, upper] = [0, lower]
@@ -9,7 +9,7 @@ window.randomInt = (lower, upper=0) ->
 	return Math.floor(start * (upper - lower + 1) + lower)
 
 
-window.logWithBase = (base, num) ->
+logWithBase = (base, num) ->
 	return Math.log( num ) / Math.log( base )
 
 
@@ -21,7 +21,7 @@ window.logWithBase = (base, num) ->
 	@param	{Integer}	exp		The exponent (the 10 logarithm of the adjustment base).
 	@returns	{Number}			The adjusted value.
 ###
-window.decimalAdjust = (type, value, exp) ->
+decimalAdjust = (type, value, exp) ->
 	
 	# If the exp is undefined or zero...
 	if typeof exp is 'undefined' or +exp is 0
@@ -58,7 +58,7 @@ if not Math.ceil10?
 		return decimalAdjust('ceil', value, exp)
 
 
-window.numberSuffixed = (number, decimalAdjust) ->
+numberSuffixed = (number, decimalAdjust) ->
 	suffix = ''
 
 	if number >= 1000000000
@@ -74,3 +74,11 @@ window.numberSuffixed = (number, decimalAdjust) ->
 	numAdjusted = Math.round10( number, decimalAdjust )
 
 	return numAdjusted + suffix
+
+
+module.exports = {
+	randomInt
+	logWithBase
+	decimalAdjust
+	numberSuffixed
+}

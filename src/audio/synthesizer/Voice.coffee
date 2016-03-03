@@ -1,3 +1,7 @@
+
+AudioContext = require '../AudioContext.coffee'
+randomInt = require('../../util/utilities.coffee').randomInt
+
 ###
 	Voice
 
@@ -30,22 +34,22 @@ class Voice
 		#@fxs        = []
 
 		# Create fx in and out (master wet) if not provided
-		#@fxIn      ?= Audanism.Audio.audioContext.createGain()
-		#@masterWet ?= Audanism.Audio.audioContext.createGain()
+		#@fxIn      ?= AudioContext.createGain()
+		#@masterWet ?= AudioContext.createGain()
 
 		# Create pre- and post-fx panners
-		#@panPreFx   = Audanism.Audio.audioContext.createPanner()
-		#@panPostFx  = Audanism.Audio.audioContext.createPanner()
-		@pan        = Audanism.Audio.audioContext.createPanner()
+		#@panPreFx   = AudioContext.createPanner()
+		#@panPostFx  = AudioContext.createPanner()
+		@pan        = AudioContext.createPanner()
 
 		# Create a dry controller
-		#@dry        = Audanism.Audio.audioContext.createGain()
+		#@dry        = AudioContext.createGain()
 
 		# Create a master compressor
-		#@masterComp = Audanism.Audio.audioContext.createDynamicsCompressor()
+		#@masterComp = AudioContext.createDynamicsCompressor()
 
 		# Create a master out volume controller
-		@masterVol  = Audanism.Audio.audioContext.createGain()
+		@masterVol  = AudioContext.createGain()
 		@masterVol.gain.value = 0.0005
 
 
@@ -65,14 +69,14 @@ class Voice
 
 		@pan.connect( @masterVol )
 		
-		#@masterVol.connect( Audanism.Audio.audioContext.destination )
+		#@masterVol.connect( AudioContext.destination )
 
 
 	noteOn: (length) ->
 		#console.log('#noteOn()', @note, @envelopes, @oscillators)
 		extraLength = if length > @asdr.attack + @asdr.decay then length - @asdr.attack - @asdr.decay else 0
 
-		now              = Audanism.Audio.audioContext.currentTime + @waitTime
+		now              = AudioContext.currentTime + @waitTime
 		attackEndTime    = now + @asdr.attack
 		decayEndTime     = attackEndTime + @asdr.decay
 		releaseStartTime = if length >= 0 then decayEndTime + extraLength else 0
@@ -106,7 +110,7 @@ class Voice
 
 	# Triggers the envelope to end
 	noteOff: () ->
-		now            = Audanism.Audio.audioContext.currentTime
+		now            = AudioContext.currentTime
 		releaseEndTime = now + @asdr.release
 
 		for i in [0..@envelopes.length-1]
@@ -193,4 +197,4 @@ class Voice
 		return oscTypes[randomInt( 0, 3 )]
 
 
-window.Audanism.Audio.Synthesizer.Voice = Voice
+module.exports = Voice

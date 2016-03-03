@@ -1,7 +1,12 @@
+
+AudioContext = require '../AudioContext.coffee'
+FX = require './FX.coffee'
+Impulse = require '../module/Impulse.coffee'
+
 ###
 	Reverb
 ###
-class Reverb extends Audanism.Audio.FX.FX
+class Reverb extends FX
 
 	constructor: (@seconds, @decay, @wetAmount) ->
 		@seconds   ?= 1
@@ -9,16 +14,16 @@ class Reverb extends Audanism.Audio.FX.FX
 		@wetAmount ?= 1
 
 		# Convolver
-		@impulse        = new Audanism.Audio.Module.Impulse( @seconds, @decay )
-		@rev            = Audanism.Audio.audioContext.createConvolver()
+		@impulse        = new Impulse( @seconds, @decay )
+		@rev            = AudioContext.createConvolver()
 		@rev.buffer     = @impulse.getBuffer()
 
 		# Wet gain out
-		@wet            = Audanism.Audio.audioContext.createGain()
+		@wet            = AudioContext.createGain()
 		@wet.gain.value = @wetAmount
 		@rev.connect( @wet )
 
 		super( @rev, @wet )
 
 
-window.Audanism.Audio.FX.Reverb = Reverb
+module.exports = Reverb

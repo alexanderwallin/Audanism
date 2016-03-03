@@ -56,4 +56,6 @@ class TextInterpreter
 
 		return if normalized then countRatios else counts
 
-window.Audanism.Util.TextInterpreter = TextInterpreter
+#window.Audanism.Util.TextInterpreter = TextInterpreter
+
+module.exports = TextInterpreter

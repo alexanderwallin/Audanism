@@ -1,3 +1,6 @@
+
+Environment = require './Environment.coffee'
+
 ###
 	The Audanism object hierarchy.
 ###
@@ -22,4 +25,4 @@ window.Audanism = {
 
 # Initialize environment
 $(window).ready =>
-	window.Audanism.appInstance = new Audanism.Environment.Environment
+	window.Audanism.appInstance = new Environment

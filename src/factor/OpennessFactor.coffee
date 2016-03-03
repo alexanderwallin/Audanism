@@ -1,7 +1,13 @@
-class OpennessFactor extends Audanism.Factor.Factor
+
+Factor = require './Factor.coffee'
+
+console.log Factor
+
+class OpennessFactor extends Factor
 
 	constructor: () ->
-		super(Audanism.Factor.Factor.TYPE_OPENNESS)
+		super(Factor.TYPE_OPENNESS)
 
 
-window.Audanism.Factor.OpennessFactor = OpennessFactor
+#window.Audanism.Factor.OpennessFactor = OpennessFactor
+module.exports = OpennessFactor

@@ -1,7 +1,11 @@
-class NeuroticismFactor extends Audanism.Factor.Factor
+
+Factor = require './Factor.coffee'
+
+class NeuroticismFactor extends Factor
 
 	constructor: () ->
-		super(Audanism.Factor.Factor.TYPE_NEUROTICISM)
+		super(Factor.TYPE_NEUROTICISM)
 
 
-window.Audanism.Factor.NeuroticismFactor = NeuroticismFactor
+#window.Audanism.Factor.NeuroticismFactor = NeuroticismFactor
+module.exports = NeuroticismFactor

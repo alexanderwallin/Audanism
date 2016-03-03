@@ -1,7 +1,11 @@
+
+AudioContext = require '../AudioContext.coffee'
+Instrument = require './Instrument.coffee'
+
 ###
 	Pink noise
 ###
-class NoisePink extends Audanism.Audio.Instrument.Instrument
+class NoisePink extends Instrument
 
 	constructor: (@instrumentsIn) ->
 		super( @instrumentsIn, null, false )
@@ -21,7 +25,7 @@ class NoisePink extends Audanism.Audio.Instrument.Instrument
 			b6
 			b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0
 			 
-			node = Audanism.Audio.audioContext.createScriptProcessor( bufferSize, 1, 1 )
+			node = AudioContext.createScriptProcessor( bufferSize, 1, 1 )
 			node.onaudioprocess = (e) =>
 				output = e.outputBuffer.getChannelData(0)
 
@@ -40,11 +44,11 @@ class NoisePink extends Audanism.Audio.Instrument.Instrument
 			return node
 
 		# Noise volume
-		@noiseVol            = Audanism.Audio.audioContext.createGain()
+		@noiseVol            = AudioContext.createGain()
 		@noiseVol.gain.value = 0.1
 
 		# Noise LPF
-		@noiseLpf                 = Audanism.Audio.audioContext.createBiquadFilter()
+		@noiseLpf                 = AudioContext.createBiquadFilter()
 		@noiseLpf.type            = 'lowpass'
 		@noiseLpf.frequency.value = 10000
 
@@ -66,6 +70,4 @@ class NoisePink extends Audanism.Audio.Instrument.Instrument
 		@noiseLpf.frequency.value = frequency
 
 
-
-
-window.Audanism.Audio.Instrument.NoisePink = NoisePink
+module.exports = NoisePink

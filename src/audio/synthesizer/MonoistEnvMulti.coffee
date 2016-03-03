@@ -1,3 +1,9 @@
+
+AudioContext = require '../AudioContext.coffee'
+Voice = require './Voice.coffee'
+ASDR = require '../module/ASDR.coffee'
+Harmonizer = require '../module/Harmonizer.coffee'
+
 ###
 	MonoistEnvMulti synth - multiple oscillators with an envelope
 ###
@@ -11,60 +17,60 @@ class MonoistEnvMulti
 		@noteIsOn = false;
 
 		# Chain end + volume control
-		@volNode            = Audanism.Audio.audioContext.createGain()
+		@volNode            = AudioContext.createGain()
 		@volNode.gain.value = 0.25
-		@volNode.connect( Audanism.Audio.audioContext.destination )
+		@volNode.connect( AudioContext.destination )
 
 		# Compressor
-		@compressor         = Audanism.Audio.audioContext.createDynamicsCompressor()
+		@compressor         = AudioContext.createDynamicsCompressor()
 		@compressor.connect( @volNode )
 
 		# Panners
-		@panner1            = Audanism.Audio.audioContext.createPanner()
+		@panner1            = AudioContext.createPanner()
 		@panner1.setPosition( -1, 0, 0 )
 		@panner1.connect( @compressor )
 
-		@panner2            = Audanism.Audio.audioContext.createPanner()
+		@panner2            = AudioContext.createPanner()
 		@panner2.setPosition( 1, 0, 0 )
 		@panner2.connect( @compressor )
 
-		@panner3            = Audanism.Audio.audioContext.createPanner()
+		@panner3            = AudioContext.createPanner()
 		@panner3.setPosition( 0, 0, 0 )
 		@panner3.connect( @compressor )
 
 		# Envelopes
-		@asdr = new Audanism.Audio.Module.ASDR( 0.1, 0.1, 100, 0.1 )
+		@asdr = new ASDR( 0.1, 0.1, 100, 0.1 )
 
-		@envelope1 = Audanism.Audio.audioContext.createGain()
+		@envelope1 = AudioContext.createGain()
 		@envelope1.gain.setValueAtTime( 0, 0 )
 		@envelope1.connect( @panner1 )
 
-		@envelope2 = Audanism.Audio.audioContext.createGain()
+		@envelope2 = AudioContext.createGain()
 		@envelope2.gain.setValueAtTime( 0, 0 )
 		@envelope2.connect( @panner2 )
 
-		@envelope3 = Audanism.Audio.audioContext.createGain()
+		@envelope3 = AudioContext.createGain()
 		@envelope3.gain.setValueAtTime( 0, 0 )
 		@envelope3.connect( @panner3 )
 
 		# Create, connect and start oscillators
 		
 
-		@osc1                 = Audanism.Audio.audioContext.createOscillator()
+		@osc1                 = AudioContext.createOscillator()
 		@osc1.type            = 'sine'
-		@osc1.frequency.value = Audanism.Audio.Harmonizer.getFreqFromNote( @note )
+		@osc1.frequency.value = Harmonizer.getFreqFromNote( @note )
 		@osc1.connect( @envelope1 )
 		@osc1.start( 0 )
 		
-		@osc2                 = Audanism.Audio.audioContext.createOscillator()
+		@osc2                 = AudioContext.createOscillator()
 		@osc2.type            = 'triangle'
-		@osc2.frequency.value = Audanism.Audio.Harmonizer.getFreqFromNote( @note * 1 )
+		@osc2.frequency.value = Harmonizer.getFreqFromNote( @note * 1 )
 		@osc2.connect( @envelope2 )
 		@osc2.start( 0 )
 		###
-		@osc3                 = Audanism.Audio.audioContext.createOscillator()
+		@osc3                 = AudioContext.createOscillator()
 		@osc3.type            = 'square'
-		@osc3.frequency.value = Audanism.Audio.Harmonizer.getFreqFromNote( @note / 2 )
+		@osc3.frequency.value = Harmonizer.getFreqFromNote( @note / 2 )
 		@osc3.connect( @envelope3 )
 		@osc3.start( 0 )
 		###
@@ -72,11 +78,11 @@ class MonoistEnvMulti
 
 	# Play a note
 	noteOn: (note) ->
-		now           = Audanism.Audio.audioContext.currentTime
+		now           = AudioContext.currentTime
 		attackEndTime = now + @asdr.attack
 
 		# Frequency
-		#@osc.frequency.value = Audanism.Audio.Harmonizer.getFreqFromNote( note )
+		#@osc.frequency.value = Harmonizer.getFreqFromNote( note )
 
 		# Attack
 		@envelope1.gain.cancelScheduledValues( now )
@@ -101,7 +107,7 @@ class MonoistEnvMulti
 
 	# Kill a note
 	noteOff: () ->
-		now         = Audanism.Audio.audioContext.currentTime
+		now         = AudioContext.currentTime
 		releaseTime = now + @asdr.release
 
 		console.log(now)
@@ -125,4 +131,4 @@ class MonoistEnvMulti
 
 
 
-window.Audanism.Audio.Synthesizer.MonoistEnvMulti = MonoistEnvMulti
+module.exports = MonoistEnvMulti

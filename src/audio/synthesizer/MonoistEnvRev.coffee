@@ -1,3 +1,6 @@
+
+AudioContext = require '../AudioContext.coffee'
+
 ###
 	MonoistEnvRev synth - sine with an envelope and reverb
 ###
@@ -11,42 +14,42 @@ class MonoistEnvRev
 		@noteIsOn = false;
 
 		# Chain end + volume control
-		@volNode            = Audanism.Audio.audioContext.createGain()
+		@volNode            = AudioContext.createGain()
 		@volNode.gain.value = 0.25
-		@volNode.connect( Audanism.Audio.audioContext.destination )
+		@volNode.connect( AudioContext.destination )
 
 		# Compressor
-		@compressor         = Audanism.Audio.audioContext.createDynamicsCompressor()
+		@compressor         = AudioContext.createDynamicsCompressor()
 		@compressor.connect( @volNode )
 
 		# Dry/wet
-		@dry                = Audanism.Audio.audioContext.createGain()
+		@dry                = AudioContext.createGain()
 		@dry.gain.value     = 0.8
 		@dry.connect( @compressor )
-		@wet                = Audanism.Audio.audioContext.createGain()
+		@wet                = AudioContext.createGain()
 		@wet.gain.value     = 0.5
 		@wet.connect( @compressor )
 
 		# Reverbs
 		@impulse            = new Audanism.Audio.Module.Impulse( 0.2, 50 )
-		@rev1               = Audanism.Audio.audioContext.createConvolver()
+		@rev1               = AudioContext.createConvolver()
 		@rev1.buffer        = @impulse.getBuffer()
 		@rev1.connect( @wet )
 
 		# Panners
-		@panner1            = Audanism.Audio.audioContext.createPanner()
+		@panner1            = AudioContext.createPanner()
 		@panner1.setPosition( 1 - Math.random() * 2, 0, 0 )
 		@panner1.connect( @dry )
 		@panner1.connect( @rev1 )
 
 		# Envelope
 		@asdr = new Audanism.Audio.Module.ASDR( 0.5, 0.1, 10, 0.1 )
-		@envelope = Audanism.Audio.audioContext.createGain()
+		@envelope = AudioContext.createGain()
 		@envelope.gain.setValueAtTime( 0, 0 )
 		@envelope.connect( @panner1 )
 
 		# Create, connect and start oscillator
-		@osc = Audanism.Audio.audioContext.createOscillator()
+		@osc = AudioContext.createOscillator()
 		@osc.frequency.value = Audanism.Audio.Harmonizer.getFreqFromNote( @note )
 		@osc.connect( @envelope )
 		@osc.start( 0 )
@@ -54,7 +57,7 @@ class MonoistEnvRev
 
 	# Play a note
 	noteOn: (note) ->
-		now           = Audanism.Audio.audioContext.currentTime
+		now           = AudioContext.currentTime
 		attackEndTime = now + @asdr.attack
 
 		# Frequency
@@ -73,7 +76,7 @@ class MonoistEnvRev
 
 	# Kill a note
 	noteOff: () ->
-		now         = Audanism.Audio.audioContext.currentTime
+		now         = AudioContext.currentTime
 		releaseTime = now + @asdr.release
 
 		console.log(now)
@@ -90,4 +93,4 @@ class MonoistEnvRev
 
 
 
-window.Audanism.Audio.Synthesizer.MonoistEnvRev = MonoistEnvRev
+module.exports = MonoistEnvRev

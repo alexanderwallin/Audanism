@@ -8,6 +8,19 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+Constants = require './Constants.coffee'
+Organism = require './Organism.coffee'
+VisualOrganism = require '../graphic/VisualOrganism.coffee'
+Conductor = require '../audio/Conductor.coffee'
+GUI = require '../gui/GUI.coffee'
+InstagramSourceAdapter = require '../sourceadapter/InstagramSourceAdapter.coffee'
+WheatherSourceAdapter = require '../sourceadapter/WheatherSourceAdapter.coffee'
+EventDispatcher = require '../event/EventDispatcher.coffee'
+
+randomInt = require('../util/utilities.coffee').randomInt
+getRandomElements = require('../extend/Array.coffee').getRandomElements
+
 class Environment
 
 	# The total number of organisms to create
@@ -30,14 +43,14 @@ class Environment
 		@_isSingleStep   = false
 		
 		# Visualizer
-		@visualOrganism  = new Audanism.Graphic.VisualOrganism()
+		@visualOrganism  = new VisualOrganism()
 		
 		# Create organisms
-		@_organisms      = (new Audanism.Environment.Organism for i in [1..Environment.NUM_ORGANISMS])
+		@_organisms      = (new Organism for i in [1..Environment.NUM_ORGANISMS])
 		EventDispatcher.trigger 'audanism/init/organism', [@_organisms[0]]
 
 		# GUI
-		@_gui = new Audanism.GUI.GUI
+		@_gui = new GUI
 
 		# Controls
 		@listenToControls()
@@ -141,9 +154,9 @@ class Environment
 		# Add sources
 		#@_influenceSources.push new RandomSourceAdapter(@)
 		#@_influenceSources.push new TwitterSourceAdapter(@)
-		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(6000, 'art')
-		@_influenceSources.push new Audanism.SourceAdapter.InstagramSourceAdapter(3000, 'audanism')
-		@_influenceSources.push new Audanism.SourceAdapter.WheatherSourceAdapter(4000)
+		@_influenceSources.push new InstagramSourceAdapter(6000, 'art')
+		@_influenceSources.push new InstagramSourceAdapter(3000, 'audanism')
+		@_influenceSources.push new WheatherSourceAdapter(4000)
 
 	#
 	# Handles an influence
@@ -175,7 +188,7 @@ class Environment
 
 				# Random factor
 				if influenceData.factor.factor is 'rand'
-					factorType = randomInt( 1, Audanism.Environment.Organism.NUM_FACTORS )
+					factorType = randomInt( 1, Constants.NUM_FACTORS )
 					factor = organism.getFactorOfType( factorType )
 
 				if factor
@@ -245,11 +258,9 @@ class Environment
 	# Let there be music.
 	#
 	initConductor: () ->
-		@conductor = new Audanism.Audio.Conductor()
+		@conductor = new Conductor()
 		@conductor.setOrganism @_organisms[0]
 		#@conductor.mute()
 
 
-window.Audanism.Environment.Environment = Environment
-
-
+module.exports = Environment

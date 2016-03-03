@@ -14,4 +14,4 @@ class ASDR
 		return @attack + @decay + @release
 
 
-window.Audanism.Audio.Module.ASDR = ASDR
+module.exports = ASDR

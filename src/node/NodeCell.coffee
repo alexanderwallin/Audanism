@@ -12,7 +12,7 @@ class NodeCell
 	# Returns a copy of this cell
 	#
 	clone: () ->
-		new Audanism.Node.NodeCell @factorType, @factorValue
+		new NodeCell @factorType, @factorValue
 
 	#
 	# Constructor
@@ -28,4 +28,5 @@ class NodeCell
 		@factorValue = 100 if @factorValue > 100
 
 
-window.Audanism.Node.NodeCell = NodeCell
+#window.Audanism.Node.NodeCell = NodeCell
+module.exports = NodeCell

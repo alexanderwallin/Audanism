@@ -1,0 +1,28 @@
+{
+  "name": "audanism",
+  "version": "1.0.0",
+  "description": "An online art piece and experiment striving to create an, in some way, alive and self-aware online audiovisual organism.",
+  "main": "index.js",
+  "scripts": {
+    "build": "browserify src/environment/Audanism.coffee -t [ coffeeify ] -t [ babelify ] -t [ uglifyify ] -o js/audanism.js --debug",
+    "dev": "watchify src/environment/Audanism.coffee -t [ coffeeify ] -t [ babelify ] -p [ sourcemapify] -o js/audanism.js --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexanderwallin/Audanism.git"
+  },
+  "author": "Alexander Wallin <office@alexanderwallin.com> (http://alexanderwallin.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexanderwallin/Audanism/issues"
+  },
+  "homepage": "https://github.com/alexanderwallin/Audanism#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.6.0",
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
+    "coffeeify": "^2.0.1",
+    "sourcemapify": "^1.0.4",
+    "uglifyify": "^3.0.1"
+  }
+}

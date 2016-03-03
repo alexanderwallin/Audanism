@@ -1,7 +1,10 @@
+
+Instrument = require './Instrument.coffee'
+
 ###
 	Pad
 ###
-class Pad extends Audanism.Audio.Instrument.Instrument
+class Pad extends Instrument
 
 	constructor: (@instrumentsIn) ->
 		super( @instrumentsIn, 'MonoistEnvMod' )
@@ -38,4 +41,4 @@ class Pad extends Audanism.Audio.Instrument.Instrument
 			@noteOn( note )
 
 
-window.Audanism.Audio.Instrument.Pad = Pad
+module.exports = Pad

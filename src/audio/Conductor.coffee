@@ -1,16 +1,28 @@
 ###
 	Conductor
 ###
+
+Constants = require '../environment/Constants.coffee'
+EventDispatcher = require '../event/EventDispatcher.coffee'
+
+AudioContext = require './AudioContext.coffee'
+NoisePink = require './instrument/NoisePink.coffee'
+Drone = require './instrument/Drone.coffee'
+TestInstrument = require './instrument/TestInstrument.coffee'
+Pad = require './instrument/Pad.coffee'
+PercArpeggiator = require './instrument/PercArpeggiator.coffee'
+
+Reverb = require './fx/Reverb.coffee'
+
+Harmonizer = require './module/Harmonizer.coffee'
+
 class Conductor
 
 	# Constructor
 	constructor: () ->
 
 		# Create an audio context
-		try
-			AudioContext = window.AudioContext || window.webkitAudioContext
-			Audanism.Audio.audioContext = new AudioContext
-		catch e
+		if not AudioContext
 			alert('Sorry, your browser does not support AudioContext, try Chrome!')
 
 		# State
@@ -24,16 +36,16 @@ class Conductor
 		#
 
 		# Noise
-		@noise = new Audanism.Audio.Instrument.NoisePink( @instrumentsIn )
+		@noise = new NoisePink( @instrumentsIn )
 		@noise.setLpfFrequency( 1000 )
 
 		# Factor drones
-		@factorDrones = (new Audanism.Audio.Instrument.Drone( @instrumentsIn ) for i in [0..Audanism.Environment.Organism.NUM_FACTORS-1])
+		@factorDrones = (new Drone( @instrumentsIn ) for i in [0..Constants.NUM_FACTORS-1])
 
-		@compareInstr = new Audanism.Audio.Instrument.TestInstrument( @instrumentsIn )
-		@influencePad = new Audanism.Audio.Instrument.Pad( @instrumentsIn )
+		@compareInstr = new TestInstrument( @instrumentsIn )
+		@influencePad = new Pad( @instrumentsIn )
 
-		@arpeggiator = new Audanism.Audio.Instrument.PercArpeggiator( @instrumentsIn, 4, 0 )
+		@arpeggiator = new PercArpeggiator( @instrumentsIn, 4, 0 )
 
 		# Listenings
 		EventDispatcher.listen 'audanism/controls/togglesound', @, @toggleMute
@@ -46,25 +58,25 @@ class Conductor
 	createEndChain: () ->
 
 		# Create a void oscillator to keep the end chain alive
-		@void                 = Audanism.Audio.audioContext.createOscillator()
+		@void                 = AudioContext.createOscillator()
 		@void.frequency.value = 440
-		@voidGain             = Audanism.Audio.audioContext.createGain()
+		@voidGain             = AudioContext.createGain()
 		@voidGain.gain.value  = 0.0
 
 		# Output connection for all instruments
-		@instrumentsIn            = Audanism.Audio.audioContext.createGain()
+		@instrumentsIn            = AudioContext.createGain()
 		@instrumentsIn.gain.value = 0.2
 
 		# Master reverb
-		@masterRev     = new Audanism.Audio.FX.Reverb(2, 50, 1)
+		@masterRev     = new Reverb(2, 50, 1)
 
 		# Master compressor
-		@compressor    = Audanism.Audio.audioContext.createDynamicsCompressor()
+		@compressor    = AudioContext.createDynamicsCompressor()
 		@compressor.threshold.value = -24
 		@compressor.ratio.value = 6
 
 		# Analyser
-		@analyser = Audanism.Audio.audioContext.createAnalyser()
+		@analyser = AudioContext.createAnalyser()
 		@analyser.fftSize = 512
 
 		# Connect
@@ -77,7 +89,7 @@ class Conductor
 		@instrumentsIn.connect( @compressor )
 
 		@compressor.connect( @analyser )
-		@analyser.connect( Audanism.Audio.audioContext.destination )
+		@analyser.connect( AudioContext.destination )
 
 	getFrequencyData: () ->
 		frequencyData = new Uint8Array( @analyser.frequencyBinCount )
@@ -118,7 +130,7 @@ class Conductor
 		# Drones
 		fd = 0
 		for drone in @factorDrones
-			note = Audanism.Audio.Module.Harmonizer.getNoteFromFreq( factors[fd].disharmony / 10 )
+			note = Harmonizer.getNoteFromFreq( factors[fd].disharmony / 10 )
 			if iterationInfo.count is 1 then drone.noteOn( note ) else drone.setNote( note )
 			fd++
 
@@ -159,7 +171,7 @@ class Conductor
 		for i in [0..comparisonData.nodes.length-1]
 			node   = comparisonData.nodes[i]
 			freq   = 90 + Math.pow(node.getCell(comparisonData.factorType).factorValue, 1.3)
-			note   = Audanism.Audio.Module.Harmonizer.getNoteFromFreq( freq )
+			note   = Harmonizer.getNoteFromFreq( freq )
 
 			@compareInstr.noteOn( note )
 
@@ -176,7 +188,7 @@ class Conductor
 		nodeFreq = 80 + (nodeId * 40)
 		nodePan = nodeId / @organism.getNodes().length
 
-		@influencePad.noteOn( Audanism.Audio.Module.Harmonizer.getNoteFromFreq( nodeFreq ) )
+		@influencePad.noteOn( Harmonizer.getNoteFromFreq( nodeFreq ) )
 
 		# Influence action sound
 		#if influenceData.meta.source is 'instagram' and influenceData.meta.current is influenceData.meta.total and @influenceActionSounds.length < 3
@@ -208,4 +220,4 @@ class Conductor
 			@arpeggiator.setFrequency( arpFreq )
 		, 10000
 
-window.Audanism.Audio.Conductor = Conductor
+module.exports = Conductor

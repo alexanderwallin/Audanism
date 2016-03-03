@@ -1,3 +1,13 @@
+
+synthesizers = {
+	Monoist: require '../synthesizer/Monoist.coffee'
+	MonoistEnv: require '../synthesizer/MonoistEnv.coffee'
+	MonoistEnvMod: require '../synthesizer/MonoistEnvMod.coffee'
+	MonoistEnvModWide: require '../synthesizer/MonoistEnvModWide.coffee'
+	MonoistEnvMulti: require '../synthesizer/MonoistEnvMulti.coffee'
+	MonoistPerc: require '../synthesizer/MonoistPerc.coffee'
+}
+
 ###
 	Instrument super-class
 ###
@@ -24,7 +34,7 @@ class Instrument
 			@beforeCreateVoice(note)
 
 		if not @voices[note]
-			@voices[note] = new Audanism.Audio.Synthesizer[@synthesizer](note)
+			@voices[note] = new synthesizers[@synthesizer](note)
 
 			if (@setupVoice)
 				@setupVoice( @voices[note] )
@@ -108,4 +118,5 @@ class Instrument
 			, voice.asdr.release + 1
 
 
-window.Audanism.Audio.Instrument.Instrument = Instrument
+module.exports = Instrument
+

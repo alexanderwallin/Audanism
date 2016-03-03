@@ -1,7 +1,13 @@
+
+AudioContext = require '../AudioContext.coffee'
+Voice = require './Voice.coffee'
+ASDR = require '../module/ASDR.coffee'
+Harmonizer = require '../module/Harmonizer.coffee'
+
 ###
 	MonoistEnv synth - sine with an envelope
 ###
-class MonoistEnv extends Audanism.Audio.Synthesizer.Voice
+class MonoistEnv extends Voice
 
 	# Constructor
 	constructor: (note) ->
@@ -9,16 +15,16 @@ class MonoistEnv extends Audanism.Audio.Synthesizer.Voice
 		super(note)
 
 		# Envelope
-		@asdr = new Audanism.Audio.Module.ASDR( 0.2, 0.1, 0.7, 0.2 )
-		@envelope = Audanism.Audio.audioContext.createGain()
+		@asdr = new ASDR( 0.2, 0.1, 0.7, 0.2 )
+		@envelope = AudioContext.createGain()
 		@envelope.gain.setValueAtTime( 0, 0 )
 
 		@envelopes.push( @envelope )
 
 		# Create, connect and start oscillator
-		@osc                 = Audanism.Audio.audioContext.createOscillator()
+		@osc                 = AudioContext.createOscillator()
 		@osc.type            = 'sine' #@getRandomOscType()
-		@osc.frequency.value = Audanism.Audio.Module.Harmonizer.getFreqFromNote( @note )
+		@osc.frequency.value = Harmonizer.getFreqFromNote( @note )
 		
 		@oscillators.push( @osc )
 
@@ -29,4 +35,4 @@ class MonoistEnv extends Audanism.Audio.Synthesizer.Voice
 
 
 
-window.Audanism.Audio.Synthesizer.MonoistEnv = MonoistEnv
+module.exports = MonoistEnv

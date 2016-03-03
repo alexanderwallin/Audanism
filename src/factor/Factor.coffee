@@ -7,6 +7,15 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+Utils = require '../util/utilities.coffee'
+
+#OpennessFactor = require './OpennessFactor.coffee'
+#ConscientiousnessFactor = require './ConscientiousnessFactor.coffee'
+#ExtraversionFactor = require './ExtraversionFactor.coffee'
+#AgreeablenessFactor = require './AgreeablenessFactor.coffee'
+#NeuroticismFactor = require './NeuroticismFactor.coffee'
+
 class Factor
 
 	# Factor types
@@ -40,11 +49,11 @@ class Factor
 	#
 	@createFactor: (factorType, factorValue = 0) ->
 		switch factorType
-			when Factor.TYPE_OPENNESS then new Audanism.Factor.OpennessFactor()
-			when Factor.TYPE_CONSCIENTIOUSNESS then new Audanism.Factor.ConscientiousnessFactor()
-			when Factor.TYPE_EXTRAVERSION then new Audanism.Factor.ExtraversionFactor()
-			when Factor.TYPE_AGREEABLENESS then new Audanism.Factor.AgreeablenessFactor()
-			when Factor.TYPE_NEUROTICISM then new Audanism.Factor.NeuroticismFactor()
+			when Factor.TYPE_OPENNESS then new OpennessFactor()
+			when Factor.TYPE_CONSCIENTIOUSNESS then new ConscientiousnessFactor()
+			when Factor.TYPE_EXTRAVERSION then new ExtraversionFactor()
+			when Factor.TYPE_AGREEABLENESS then new AgreeablenessFactor()
+			when Factor.TYPE_NEUROTICISM then new NeuroticismFactor()
 			else null
 
 	#
@@ -52,7 +61,7 @@ class Factor
 	#
 	constructor: (@factorType, @factorValue) ->
 
-		@factorValue = randomInt(10, 90) if not @factorValue
+		@factorValue = Utils.randomInt(10, 90) if not @factorValue
 
 		# Meta
 		@name = @constructor.name.replace /^(\w+)Factor$/, "$1"
@@ -83,4 +92,26 @@ class Factor
 	toString: () ->
 		"<Factor ##{ @factorType } (#{ @name }); factorValue = #{ @factorValue }>"
 
-window.Audanism.Factor.Factor = Factor;
+#window.Audanism.Factor.Factor = Factor;
+module.exports = Factor
+
+class AgreeablenessFactor extends Factor
+	constructor: () ->
+		super(Factor.TYPE_AGREEABLENESS)
+
+class ConscientiousnessFactor extends Factor
+	constructor: () ->
+		super(Factor.TYPE_CONSCIENTIOUSNESS)
+
+class OpennessFactor extends Factor
+	constructor: () ->
+		super(Factor.TYPE_OPENNESS)
+
+class ExtraversionFactor extends Factor
+	constructor: () ->
+		super(Factor.TYPE_EXTRAVERSION)
+
+class NeuroticismFactor extends Factor
+	constructor: () ->
+		super(Factor.TYPE_NEUROTICISM)
+

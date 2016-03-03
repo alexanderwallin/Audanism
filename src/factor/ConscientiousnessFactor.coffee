@@ -1,7 +1,11 @@
-class ConscientiousnessFactor extends Audanism.Factor.Factor
+
+Factor = require './Factor.coffee'
+
+class ConscientiousnessFactor extends Factor
 
 	constructor: () ->
-		super(Audanism.Factor.Factor.TYPE_CONSCIENTIOUSNESS)
+		super(Factor.TYPE_CONSCIENTIOUSNESS)
 
 
-window.Audanism.Factor.ConscientiousnessFactor = ConscientiousnessFactor
+#window.Audanism.Factor.ConscientiousnessFactor = ConscientiousnessFactor
+module.exports = ConscientiousnessFactor

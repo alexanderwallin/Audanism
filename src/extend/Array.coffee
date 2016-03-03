@@ -31,3 +31,9 @@ Array.prototype.shuffle = () ->
 		@[index] = temp
 
 	return @
+
+
+module.exports = {
+	pushMany
+	getRandomElements
+}

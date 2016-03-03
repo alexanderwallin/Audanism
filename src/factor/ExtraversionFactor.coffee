@@ -1,7 +1,11 @@
-class ExtraversionFactor extends Audanism.Factor.Factor
+
+Factor = require './Factor.coffee'
+
+class ExtraversionFactor extends Factor
 
 	constructor: () ->
-		super(Audanism.Factor.Factor.TYPE_EXTRAVERSION)
+		super(Factor.TYPE_EXTRAVERSION)
 
 
-window.Audanism.Factor.ExtraversionFactor = ExtraversionFactor
+#window.Audanism.Factor.ExtraversionFactor = ExtraversionFactor
+module.exports = ExtraversionFactor

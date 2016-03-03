@@ -8,7 +8,12 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
-class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
+
+EventDispatcher = require '../event/EventDispatcher.coffee'
+SourceAdapter = require './SourceAdapter.coffee'
+TextInterpreter = require '../util/TextInterpreter.coffee'
+
+class InstagramSourceAdapter extends SourceAdapter
 
 	#
 	# Constructor
@@ -72,7 +77,7 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 	# Processes a set of photos
 	#
 	processPhotos: (photos) ->
-		interpreter = new Audanism.Util.TextInterpreter
+		interpreter = new TextInterpreter
 
 		influenceDataList = []
 
@@ -129,4 +134,6 @@ class InstagramSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 
 
 
-window.Audanism.SourceAdapter.InstagramSourceAdapter = InstagramSourceAdapter 
+#window.Audanism.SourceAdapter.InstagramSourceAdapter = InstagramSourceAdapter 
+
+module.exports = InstagramSourceAdapter

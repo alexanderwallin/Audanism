@@ -33,7 +33,8 @@ class EventDispatcher
 
 
 
-window.Audanism.Event.EventDispatcher = EventDispatcher
+#window.Audanism.Event.EventDispatcher = EventDispatcher
 
 # Global "singleton"
-window.EventDispatcher = new EventDispatcher()
+#window.EventDispatcher = new EventDispatcher()
+module.exports = new EventDispatcher()

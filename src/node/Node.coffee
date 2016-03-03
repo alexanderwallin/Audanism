@@ -7,6 +7,10 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+Constants = require '../environment/Constants.coffee'
+NodeCell = require './NodeCell.coffee'
+
 class Node
 
 	# An incrementing node ID
@@ -19,7 +23,7 @@ class Node
 	# Node clone method
 	#
 	clone: () ->
-		newNode = new Audanism.Node.Node
+		newNode = new Node
 		Node._idCounter--
 
 		for key of @
@@ -35,10 +39,10 @@ class Node
 		@nodeId = Node._idCounter++
 
 		# Create a list of factor indexes
-		factorIndexes = [1..Audanism.Environment.Organism.NUM_FACTORS]
+		factorIndexes = [1..Constants.NUM_FACTORS]
 
 		# Create cells
-		@_cells = (new Audanism.Node.NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0 for i in [1..Audanism.Node.Node.NUM_CELLS])
+		@_cells = (new NodeCell factorIndexes.splice(Math.floor(Math.random() * factorIndexes.length), 1)[0], 0 for i in [1..Node.NUM_CELLS])
 
 		# Sort cells on factor type
 		@_cells.sort (a, b) ->
@@ -123,4 +127,5 @@ class Node
 		@getString()
 
 
-window.Audanism.Node.Node = Node
+#window.Audanism.Node.Node = Node
+module.exports = Node

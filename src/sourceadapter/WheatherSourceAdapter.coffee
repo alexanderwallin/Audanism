@@ -7,7 +7,12 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
-class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
+
+EventDispatcher = require '../event/EventDispatcher.coffee'
+SourceAdapter = require './SourceAdapter.coffee'
+randomInt = require('../util/utilities.coffee').randomInt
+
+class WheatherSourceAdapter extends SourceAdapter
 
 	#
 	# Constructor
@@ -114,4 +119,5 @@ class WheatherSourceAdapter extends Audanism.SourceAdapter.SourceAdapter
 			EventDispatcher.trigger 'audanism/influence/factor/done', [[influenceData]]
 
 
-window.Audanism.SourceAdapter.WheatherSourceAdapter = WheatherSourceAdapter
+#window.Audanism.SourceAdapter.WheatherSourceAdapter = WheatherSourceAdapter
+module.exports = WheatherSourceAdapter

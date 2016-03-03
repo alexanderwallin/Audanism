@@ -7,6 +7,10 @@
 	@author Alexander Wallin
 	@url    http://alexanderwallin.com
 ###
+
+EventDispatcher = require '../event/EventDispatcher.coffee'
+Utils = require '../util/utilities.coffee'
+
 class GUI
 
 	# Constructor
@@ -148,8 +152,8 @@ class GUI
 		$factorValues = @$factorStats.find('#factor-values')
 		$factorDish   = @$factorStats.find('#factor-disharmonies')
 		for factor in organism.getFactors()
-			$factorValues.find('[data-factor="' + factor.factorType + '"]').html(decimalAdjust('round', factor.factorValue, -1))
-			$factorDish.find('[data-factor="' + factor.factorType + '"]').html(numberSuffixed(factor.disharmony, -1))
+			$factorValues.find('[data-factor="' + factor.factorType + '"]').html(Utils.decimalAdjust('round', factor.factorValue, -1))
+			$factorDish.find('[data-factor="' + factor.factorType + '"]').html(Utils.numberSuffixed(factor.disharmony, -1))
 
 	#
 	# Display information about a node influence
@@ -226,4 +230,6 @@ class GUI
 		@$organismStats.find('.stress-mode-indicator').toggleClass('stressed', stressMode)
 
 
-window.Audanism.GUI.GUI = GUI
+#window.Audanism.GUI.GUI = GUI
+
+module.exports = GUI

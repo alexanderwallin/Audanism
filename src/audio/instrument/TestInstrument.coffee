@@ -1,7 +1,10 @@
+
+Instrument = require './Instrument.coffee'
+
 ###
 	Test instrument
 ###
-class TestInstrument extends Audanism.Audio.Instrument.Instrument
+class TestInstrument extends Instrument
 
 	constructor: (@instrumentsIn) ->
 		super( @instrumentsIn, 'MonoistEnv', true )
@@ -11,4 +14,4 @@ class TestInstrument extends Audanism.Audio.Instrument.Instrument
 		voice.pan.setPosition( 1 - Math.random() * 2, 0, 1 - Math.random() * 2 )
 
 
-window.Audanism.Audio.Instrument.TestInstrument = TestInstrument
+module.exports = TestInstrument

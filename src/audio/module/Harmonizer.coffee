@@ -1,3 +1,6 @@
+
+Utils = require '../../util/utilities.coffee'
+
 ###
 	Harmonizer - utility for getting notes, scale notes, frequeceies
 	and more.
@@ -16,7 +19,7 @@ class Harmonizer
 			note = Math.round(note)
 
 			closestNoteInOctave = Math.abs(note - 69) % 12
-			for n in window.Audanism.Audio.Module.Harmonizer.SCALE_MINOR
+			for n in Harmonizer.SCALE_MINOR
 				if note is n
 					break
 				note = note + 1
@@ -28,8 +31,8 @@ class Harmonizer
 		return note
 
 	@getNoteFromFreq: (freq) ->
-		return Math.round( logWithBase( 2, freq / 440 ) * 12 + 69 )
+		return Math.round( Utils.logWithBase( 2, freq / 440 ) * 12 + 69 )
 
 
 
-window.Audanism.Audio.Module.Harmonizer = Harmonizer;
+module.exports = Harmonizer;

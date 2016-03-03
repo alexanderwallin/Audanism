@@ -1,3 +1,6 @@
+
+AudioContext = require '../AudioContext.coffee'
+
 ###
 	Monoist synth - just a sine
 ###
@@ -7,15 +10,15 @@ class Monoist
 	constructor: (@note) ->
 
 		# Connection point for all voices
-		@effectChain        = Audanism.Audio.audioContext.createGain()
+		@effectChain        = AudioContext.createGain()
 
 		# Overall volume control node
-		@volNode            = Audanism.Audio.audioContext.createGain()
+		@volNode            = AudioContext.createGain()
 		@volNode.gain.value = 0.25
 
 		# Hook it up to the "speakers"
 		@effectChain.connect( @volNode )
-		@volNode.connect( Audanism.Audio.audioContext.destination )
+		@volNode.connect( AudioContext.destination )
 
 
 		# --- #
@@ -25,7 +28,7 @@ class Monoist
 		@freq = Audanism.Audio.Harmonizer.getFreqFromNote @note
 
 		# Create, connect and start oscillator
-		@osc = Audanism.Audio.audioContext.createOscillator()
+		@osc = AudioContext.createOscillator()
 		@osc.frequency.setValueAtTime @freq, 0
 		@osc.connect @effectChain
 		@osc.start 0
@@ -38,8 +41,8 @@ class Monoist
 
 	# Stop a note
 	noteOff: () ->
-		this.osc.stop (Audanism.Audio.audioContext.currentTime + 0.1)
+		this.osc.stop (AudioContext.currentTime + 0.1)
 
 
 
-window.Audanism.Audio.Synthesizer.Monoist = Monoist
+module.exports = Monoist
