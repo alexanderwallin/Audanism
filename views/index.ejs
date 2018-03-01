@@ -1,16 +1,4 @@
-<?php
-/**
- * Audanism index.php.
- */
-
-// Fake localhost
-$runLocal = @$_GET['local'] == 'yes';
-
-// Check environment
-$isProduction = preg_match("/\.com/", $_SERVER['HTTP_HOST'])
-	|| (preg_match("/\.data/", $_SERVER['HTTP_HOST']) && @$_GET['prod'] == 'yes');
-
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <!--[if lt IE 7]>	  <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>		 <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>		 <html class="no-js lt-ie9"> <![endif]-->

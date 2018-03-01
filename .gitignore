@@ -6,4 +6,4 @@ npm-debug.log*
 
 !.gitkeep
 
-js/audanism.js
+public/js/audanism.js

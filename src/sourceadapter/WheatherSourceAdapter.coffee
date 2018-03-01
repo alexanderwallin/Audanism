@@ -61,7 +61,7 @@ class WheatherSourceAdapter extends SourceAdapter
 		@jqxhr = $.ajax {
 			dataType: 'xml'
 			type:     'get'
-			url:      '/ajax/town-weather.php' #townInfo.slice( -1 )
+			url:      '/api/town-weather' #townInfo.slice( -1 )
 			data:     {}
 			success: (response) =>
 				@processWeather response
